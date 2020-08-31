@@ -8,6 +8,7 @@ const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
   const server = express()
+  server.disable('x-powered-by');
 
   // server.get('/a', (req, res) => {
   //   return app.render(req, res, '/a', req.query)
