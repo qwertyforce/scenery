@@ -2,6 +2,7 @@ import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/core/styles';
 import theme from '../components/theme';
+import config from "../config/config";
 
 export default class MyDocument extends Document {
   render() {
@@ -14,7 +15,7 @@ export default class MyDocument extends Document {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
-            <script src="https://www.google.com/recaptcha/api.js?render=6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb"></script>
+            <script src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
         </Head>
         <body>
           <Main />
