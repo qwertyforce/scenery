@@ -1,10 +1,11 @@
-const OAUTH = require('./../oauth_keys.js')
-const db_ops = require('./../helpers/db_ops.js')
-const mail_ops = require('./../helpers/mail_ops.js')
-const {validationResult} = require('express-validator')
-const crypto_ops = require('./../helpers/crypto_ops.js')
-async function login(req, res) {
-    if (req.recaptcha.error) {
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import db_ops from './../helpers/db_ops'
+import { validationResult } from 'express-validator'
+import crypto_ops from './../helpers/crypto_ops'
+import {Request, Response} from 'express';
+
+async function login(req:Request,res:Response) {
+    if (req.recaptcha?.error) {
         return res.status(403).json({
             message: "Captcha error"
         });
@@ -17,11 +18,11 @@ async function login(req, res) {
         });
     }
 
-    let email = req.body.email;
-    let password = req.body.password
-    let users = await db_ops.activated_user.find_user_by_email(email);
+    const email = req.body.email;
+    const password = req.body.password
+    const users = await db_ops.activated_user.find_user_by_email(email);
     if (users.length === 0) {
-        const fake_match = await crypto_ops.check_password("Random_text_qwfqwfg", "$2b$10$xKgSc736RxzT76ZMGyXMLe1Dge99d4PLyUOv60jpywAWJwftYcgjK"); // PROTECTION AGAINST TIMING ATTACK
+        await crypto_ops.check_password("Random_text_qwfqwfg", "$2b$10$xKgSc736RxzT76ZMGyXMLe1Dge99d4PLyUOv60jpywAWJwftYcgjK"); // PROTECTION AGAINST TIMING ATTACK
         res.json({
             message: MESSAGE_FOR_AUTH_ERROR
         })
@@ -29,8 +30,8 @@ async function login(req, res) {
         const match = await crypto_ops.check_password(password, users[0].password);
         if (match) {
             if (users[0].activated === true) {
-                req.session.authed = true;
-                req.session.user_id = users[0].id;
+                req.session!.authed = true;
+                req.session!.user_id = users[0].id;
                 res.json({
                     message: "success"
                 })
@@ -47,4 +48,4 @@ async function login(req, res) {
     }
 }
 
-module.exports = login;
+export default login;

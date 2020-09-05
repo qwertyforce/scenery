@@ -1,9 +1,11 @@
-const db_ops = require('./../helpers/db_ops.js')
-const mail_ops = require('./../helpers/mail_ops.js')
-const {validationResult} = require('express-validator')
-const crypto_ops = require('./../helpers/crypto_ops.js')
-async function forgot_password(req, res) {
-    if (req.recaptcha.error) {
+import db_ops from './../helpers/db_ops';
+import mail_ops from './../helpers/mail_ops';
+import crypto_ops from './../helpers/crypto_ops';
+import { validationResult } from 'express-validator';
+import {Request, Response} from 'express';
+import config from "../../config/config"
+async function forgot_password(req:Request, res:Response) {
+    if (req.recaptcha?.error) {
         return res.status(403).json({
             message: "Captcha error"
         });
@@ -15,13 +17,13 @@ async function forgot_password(req, res) {
         });
     }
     const MESSAGE_SUCCESS = "Link for password recovery has been sent, check your email.";
-    let email = req.body.email;
-    let users = await db_ops.activated_user.find_user_by_email(email);
+    const email = req.body.email;
+    const users = await db_ops.activated_user.find_user_by_email(email);
     if (users.length === 1) {
-        let token = await crypto_ops.generate_password_recovery_token()
-        let user_id = users[0].id
+        const token = await crypto_ops.generate_password_recovery_token()
+        const user_id = users[0].id
         db_ops.password_recovery.save_password_recovery_token(token, user_id)
-        let link = `http://localhost:3000/change_pw/${token}`
+        const link = `${config.domain}/change_pw?token=${token}`
         mail_ops.send_forgot_password_letter(email, link)
     }
     return res.json({
@@ -29,4 +31,4 @@ async function forgot_password(req, res) {
     }) //Always returns success even if email doesn`t exist
 }
 
-module.exports = forgot_password;
+export default forgot_password;

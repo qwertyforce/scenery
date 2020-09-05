@@ -7,5 +7,7 @@ export default {
     GOOGLE_REDIRECT_URI: "http://localhost/auth/google/callback",
     GITHUB_CLIENT_ID: "d4f2879aafb5bfac8dec",
     GITHUB_CLIENT_SECRET: "a2b8462d6cefb17339f4b730578db280b65e84ad",
-    GITHUB_REDIRECT_URI: "http://localhost/auth/github/callback"
+    GITHUB_REDIRECT_URI: "http://localhost/auth/github/callback",
+    gmail_user:"auth.test.reg.email@gmail.com",
+    gmail_password:"sbuLBh9rAV8XD2"
 }

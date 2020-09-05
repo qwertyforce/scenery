@@ -1,19 +1,20 @@
-const nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport({
+import nodemailer from 'nodemailer';
+import config from '../../config/config'
+const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-           user: 'auth.test.reg.email@gmail.com',
-           pass: 'sbuLBh9rAV8XD2'
-       }
-   });
-function send_activation_letter(email, link) {
+        user: config.gmail_user,
+        pass: config.gmail_password
+    }
+});
+function send_activation_letter(email: string, link: string): void {
     const mailOptions = {
-        from: 'auth.test.reg.email@gmail.com', // sender address
+        from: config.gmail_user, // sender address
         to: email, // list of receivers
         subject: 'Confirmation link', // Subject line
         html: `<p>Your confirmation link ${link} If it was not you, ignore this email.</p>` // plain text body
     };
-    transporter.sendMail(mailOptions, function(err, info) {
+    transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log(err)
         } else {
@@ -22,14 +23,14 @@ function send_activation_letter(email, link) {
     });
 }
 
-function send_forgot_password_letter(email, link) {
+function send_forgot_password_letter(email: string, link: string): void {
     const mailOptions = {
-        from: 'auth.test.reg.email@gmail.com', // sender address
+        from: config.gmail_user, // sender address
         to: email, // list of receivers
         subject: 'Restore password link', // Subject line
         html: `<p>Your link to restore your password ${link} If it was not you, ignore this email.</p>` // plain text body
     };
-    transporter.sendMail(mailOptions, function(err, info) {
+    transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log(err)
         } else {
@@ -38,4 +39,4 @@ function send_forgot_password_letter(email, link) {
     });
 }
 
-module.exports =  {send_activation_letter,send_forgot_password_letter}
+export default { send_activation_letter, send_forgot_password_letter }

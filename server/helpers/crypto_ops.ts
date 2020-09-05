@@ -3,8 +3,8 @@ import crypto from "crypto"
 import db_ops from "./db_ops"
 const SALTROUNDS = 10
 
-export async function generate_activation_token() {
-    const token = new Promise((resolve, reject) => {
+async function generate_activation_token(): Promise<string> {
+    return new Promise((resolve, reject) => {
         crypto.randomBytes(16, async function (ex, buffer) {
             if (ex) {
                 reject("error");
@@ -19,11 +19,10 @@ export async function generate_activation_token() {
             }
         });
     });
-    return token;
 }
 
-export async function generate_password_recovery_token() {
-    const token = new Promise((resolve, reject) => {
+async function generate_password_recovery_token(): Promise<string> {
+    return new Promise((resolve, reject) => {
         crypto.randomBytes(16, async function (ex, buffer) {
             if (ex) {
                 reject("error");
@@ -38,16 +37,16 @@ export async function generate_password_recovery_token() {
             }
         });
     });
-    return token;
 }
 
-export async function hash_password(password: string) {
+async function hash_password(password: string): Promise<string> {
     const hashed_pass = bcrypt.hash(password, SALTROUNDS);
     return hashed_pass
 }
 
-export async function check_password(password: string, hash: string) {
+async function check_password(password: string, hash: string): Promise<boolean> {
     const result = bcrypt.compare(password, hash);
     return result
 }
 
+export default {generate_activation_token,generate_password_recovery_token,hash_password,check_password}

@@ -1,7 +1,8 @@
-const OAUTH=require('./../oauth_keys.js')
-function github_oauth_redirect (req,res){
-	const authorizeUrl = `https://github.com/login/oauth/authorize?client_id=${OAUTH.GITHUB_CLIENT_ID}`;
+import config from '../../config/config';
+import {Request,Response} from 'express';
+function github_oauth_redirect (_req:Request,res:Response){
+	const authorizeUrl = `https://github.com/login/oauth/authorize?client_id=${config.GITHUB_CLIENT_ID}`;
     res.redirect(authorizeUrl);
 }
 
-module.exports = github_oauth_redirect;
+export default github_oauth_redirect;

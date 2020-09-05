@@ -1,10 +1,11 @@
-const OAUTH = require('./../oauth_keys.js')
-const db_ops = require('./../helpers/db_ops.js')
-const mail_ops = require('./../helpers/mail_ops.js')
-const crypto_ops = require('./../helpers/crypto_ops.js')
-const {validationResult} = require('express-validator');
-async function signup(req, res) {
-    if (req.recaptcha.error) {
+import db_ops from './../helpers/db_ops';
+import mail_ops from './../helpers/mail_ops';
+import crypto_ops from './../helpers/crypto_ops';
+import config from '../../config/config'
+import { validationResult } from 'express-validator';
+import {Request, Response} from 'express';
+async function signup(req:Request,res:Response) {
+    if (req.recaptcha?.error) {
         return res.status(403).json({
             message: "Captcha error"
         })
@@ -15,14 +16,14 @@ async function signup(req, res) {
             message: "email or password validation error"
         });
     }
-    let email = req.body.email;
-    let password = req.body.password
-    let users = await db_ops.activated_user.find_user_by_email(email);
+    const email = req.body.email;
+    const password = req.body.password
+    const users = await db_ops.activated_user.find_user_by_email(email);
     if (users.length === 0) { //if no user with this email is registered
-        let token = await crypto_ops.generate_activation_token() //always unique
-        let hashed_pass = await crypto_ops.hash_password(password);
+        const token = await crypto_ops.generate_activation_token() //always unique
+        const hashed_pass = await crypto_ops.hash_password(password);
         db_ops.not_activated_user.create_new_user_not_activated(email, hashed_pass, token)
-        let link = `http://localhost/activate?token=${token}`
+        const link = `${config.domain}/activate?token=${token}`
         console.log(link)
         mail_ops.send_activation_letter(email, link)
         res.json({
@@ -36,4 +37,4 @@ async function signup(req, res) {
     }
 }
 
-module.exports = signup;
+export default signup;

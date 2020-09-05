@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb'
-const url = 'mongodb://localhost/';
 import crypto from "crypto"
+const url = 'mongodb://localhost/';
 const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -38,12 +38,12 @@ client.db(db_main).listCollections({
     }
 });
 
-async function findDocuments(collection_name:string, selector:object) {
+async function findDocuments(collection_name:string, selector:Record<string,unknown>) {
     const collection = client.db(db_main).collection(collection_name);
     const result = collection.find(selector).toArray()
     return result
 }
-async function removeDocument(collection_name:string, selector:object) {
+async function removeDocument(collection_name:string, selector:Record<string,unknown>) {
     const collection = client.db(db_main).collection(collection_name);
     collection.deleteOne(selector)
 }
@@ -54,22 +54,22 @@ async function insertDocuments(collection_name:string, documents:Array<any>) {
     // const result = await collection.insertMany(documents);
     // return result
 }
-async function updateDocument(collection_name:string,selector:object,update:object) {
+async function updateDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
   const collection = client.db(db_main).collection(collection_name);
   collection.updateOne(selector, { $set: update })
   // const result= await collection.updateOne(selector, { $set: update })
 }
-async function addToArrayInDocument(collection_name:string,selector:object,update:object) {
-    const collection = client.db(db_main).collection(collection_name);
-    const result = collection.updateOne(selector, { $push: update })
-    return result
-}
+// async function addToArrayInDocument(collection_name:string,selector:object,update:object) {
+//     const collection = client.db(db_main).collection(collection_name);
+//     const result = collection.updateOne(selector, { $push: update })
+//     return result
+// }
 
-async function removeFromArrayInDocument(collection_name:string,selector:object,update:object) {
-    const collection = client.db(db_main).collection(collection_name);
-    const result = collection.updateOne(selector, { $pull: update })
-    return result
-}
+// async function removeFromArrayInDocument(collection_name:string,selector:object,update:object) {
+//     const collection = client.db(db_main).collection(collection_name);
+//     const result = collection.updateOne(selector, { $pull: update })
+//     return result
+// }
 
 
 async function generate_id() {
@@ -78,7 +78,7 @@ async function generate_id() {
             if (ex) {
                 reject("error");
             }
-            const id = buffer.toString("base64")
+            const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const users = await find_user_by_id(id) //check if id exists
             if (users.length === 0) {
                 resolve(id);
@@ -137,7 +137,7 @@ async function add_link(user_id:string,link:string) {
     }])
     return short_id
 }
-async function remove_link(link:string_short_id:string) {
+async function remove_link(link_short_id:string) {
     return removeDocument("links",{short_id: link_short_id})
 }
 
@@ -153,17 +153,17 @@ async function increase_view_count(link_short_id:string) {
 
 
 ////////////////////////////////////////PASSWORD RECOVERY
-async function update_user_password_by_id(id:string,password:string):void {
+async function update_user_password_by_id(id:string,password:string):Promise<void> {
     updateDocument("users", {id: id},{password:password})
 }
 
-async function delete_password_recovery_token(token:string):void {
+async function delete_password_recovery_token(token:string):Promise<void> {
     removeDocument("password_recovery", {
         token: token
     })
 }
 
-async function save_password_recovery_token(token:string, user_id:string):void {
+async function save_password_recovery_token(token:string, user_id:string):Promise<void> {
     insertDocuments("password_recovery", [{
         "createdAt": new Date(),
         token: token,
@@ -208,6 +208,7 @@ async function create_new_user_activated(email:string, pass:string) {
         email: email,
         id: id,
         password: pass,
+        username:"",
         links:0,
         activated: true
     }])
@@ -219,6 +220,7 @@ async function create_new_user_activated_github(oauth_id:string) {
     insertDocuments("users", [{
         oauth_id: oauth_id,
         id: id,
+        username:"",
         links:0,
         activated: true
     }])
@@ -231,6 +233,7 @@ async function create_new_user_activated_google(oauth_id:string,email:string) {
         oauth_id: oauth_id,
         email_google:email,
         id: id,
+        username:"",
         links:0,
         activated: true
     }])

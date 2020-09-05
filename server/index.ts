@@ -7,22 +7,21 @@ import connectMongo from 'connect-mongo';
 const MongoStore = connectMongo(session);
 import rateLimit from "express-rate-limit";
 import cors from 'cors';
-import https from 'https';
-import path from 'path';
+//import https from 'https';
+//import path from 'path';
 import { check } from 'express-validator';
 import { RecaptchaV3 } from 'express-recaptcha'
-import fs from 'fs';
+//import fs from 'fs';
 import config from '../config/config'
 
 const PASS_MIN = 8;
 const PASS_MAX = 128;
 
-const port = parseInt((process.env.PORT as string), 10) || 3000
+const port = 80
 const dev = process.env.NODE_ENV !== 'production'
 const next_app = next({ dev })
 const handle = next_app.getRequestHandler()
 //////////////////ROUTE HANDLERS
-import get_user_links from "./routes/get_user_links"
 import google_oauth_redirect from './routes/google_oauth_redirect';
 import github_oauth_redirect from './routes/github_oauth_redirect';
 import github_oauth_callback from './routes/github_oauth_callback';
@@ -32,18 +31,17 @@ import login from './routes/login';
 import change_password from './routes/change_password';
 import forgot_password from './routes/forgot_password';
 import activate_account_email from './routes/activate_account_email';
-import shorten_link from './routes/shorten_link';
-import process_shortened_link from './routes/process_shortened_link';
+
 next_app.prepare().then(() => {
   const app = express()
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    max: 1000000 // limit each IP to 100 requests per windowMs
   });
   const recaptcha = new RecaptchaV3(config.recaptcha_site_key, config.recaptcha_secret_key);
   ////////////////
   app.use(limiter);
-  app.use(function (req, res, next) {
+  app.use(function (_req, res, next) {
     res.setHeader('X-Content-Type-Options', "nosniff")
     res.setHeader('X-Frame-Options', "Deny")  //clickjacking protection
     next();
@@ -53,7 +51,7 @@ next_app.prepare().then(() => {
   }));
   app.use(bodyParser.json());
   const cors_options = {
-    "origin": "http://localhost:3000",
+    "origin": config.domain,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "credentials": true,
     "preflightContinue": false,
@@ -79,7 +77,6 @@ next_app.prepare().then(() => {
   ///////////////
 
 
-  app.get('/get_user_links', get_user_links)
   app.get('/auth/google', google_oauth_redirect)
   app.get('/auth/github', github_oauth_redirect)
   app.get('/auth/github/callback', github_oauth_callback)
