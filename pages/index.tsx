@@ -69,7 +69,27 @@ export async function getStaticProps(context) {
         src: `${config.domain}/images/201.png`,
         width: 1400,
         height: 811
-      }
+      },
+      {
+        src: `${config.domain}/images/1000857.png`,
+        width: 876,
+        height: 900
+      },
+      {
+        src: `${config.domain}/images/1001023.png`,
+        width: 4590,
+        height: 2970
+      },
+      {
+        src: `${config.domain}/images/1002657.png`,
+        width: 1280,
+        height: 720
+      },
+      {
+        src: `${config.domain}/images/1003044.jpeg`,
+        width: 1920,
+        height: 1080
+      },
       
     ]}, // will be passed to the page component as props
   }

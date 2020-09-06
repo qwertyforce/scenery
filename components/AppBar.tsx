@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
   },
   root: {
     flexGrow: 1,
+    marginBottom:'10px'
   },
   tool_bar:{
    minHeight:"36px!"
