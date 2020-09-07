@@ -91,6 +91,46 @@ async function generate_id() {
     return id;
 }
 
+/////////////////////////////////////////////////IMAGES OPS
+async function find_image_by_sha512(hash:string){
+    const img = findDocuments("images", {
+        sha512: hash
+    })
+    return img
+}
+
+async function find_image_by_phash(hash:string){
+    const img = findDocuments("images", {
+        phash: hash
+    })
+    return img
+}
+
+async function add_image(id:number,width:number,height:number,author:string,
+    size:string,derpi_link:string,
+    derpi_likes:number,derpi_dislikes:number,
+    derpi_id:number,derpi_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string){
+    insertDocuments("images", [{
+        id:id,
+        created_at: new Date(),
+        width:width,
+        height:height,
+        author: author,
+        size:size,
+        phash:phash,
+        sha512:sha512,
+        tags:tags,
+        derpi_id:derpi_id,
+        derpi_likes:derpi_likes,
+        derpi_dislikes:derpi_dislikes,
+        derpi_link:derpi_link,
+        derpi_date:derpi_date,
+        source_url:source_url,
+        wilson_score:wilson_score
+    }])
+}
+/////////////////////////////////////////////////////////
+
 /////////////////////////////////////////////////LINK OPS
 async function find_link_by_id(id:string) {
     const link = findDocuments("links", {
@@ -268,6 +308,11 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 /////////////////////////////////////////////////////////
 
 export default {
+    image_ops:{
+    add_image,
+    find_image_by_phash,
+    find_image_by_sha512
+    },
     link_ops:{
         add_link,
         remove_link,

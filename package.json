@@ -26,6 +26,7 @@
     "express-recaptcha": "^5.0.2",
     "express-session": "^1.17.1",
     "express-validator": "^6.6.1",
+    "image-hash": "^4.0.1",
     "mongodb": "^3.6.1",
     "next": "latest",
     "nodemailer": "^6.4.11",
