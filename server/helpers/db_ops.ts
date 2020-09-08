@@ -106,12 +106,19 @@ async function find_image_by_phash(hash:string){
     return img
 }
 
-async function add_image(id:number,width:number,height:number,author:string,
+async function find_max_image_id(){
+    const collection = client.db(db_main).collection("images");
+    const result = await collection.find({}).sort({id:-1}).limit(1).toArray()
+    return result[0]?.id
+}
+
+async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
     size:string,derpi_link:string,
     derpi_likes:number,derpi_dislikes:number,
     derpi_id:number,derpi_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string){
     insertDocuments("images", [{
         id:id,
+        file_ext:file_ext,
         created_at: new Date(),
         width:width,
         height:height,
@@ -310,8 +317,9 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 export default {
     image_ops:{
     add_image,
+    find_max_image_id,
     find_image_by_phash,
-    find_image_by_sha512
+    find_image_by_sha512,
     },
     link_ops:{
         add_link,
