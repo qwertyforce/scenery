@@ -7,11 +7,10 @@ import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import config from '../../config/config'
 // import FavoriteIcon from '@material-ui/icons/Favorite';
-
 import { GetStaticProps } from 'next'
 import path from 'path'
-
 import fs from 'fs'
+import db_ops from '../../server/helpers/db_ops'
 
 import { GetStaticPaths } from 'next'
 import CreateIcon from '@material-ui/icons/Create';
@@ -94,7 +93,6 @@ export default function Image(props: {filename: string; }) {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   if(context.params){
-    console.log(context)
     const postsDirectory = path.join(process.cwd(), 'public','images')
     const filenames = fs.readdirSync(postsDirectory)
     for(const filename of filenames){
@@ -116,10 +114,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const postsDirectory = path.join(process.cwd(), 'public','images')
-  const filenames = fs.readdirSync(postsDirectory)
-  const paths = filenames.map((filename) => ({ params: { id: path.parse(filename).name}} ))
-  // console.log(paths)
+  const images=await db_ops.image_ops.get_all_images()
+  const paths = images.map((image) => ({ params: { id: image.id.toString()}} ))
   return {
     paths: paths,
     fallback: true

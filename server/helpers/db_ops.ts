@@ -6,6 +6,8 @@ const options = {
     useUnifiedTopology: true
 };
 const db_main = 'Scenery';
+let x = Math.random()
+console.log(x)
 const client = new MongoClient(url, options);
 client.connect(function(err) {
     if (err) {
@@ -92,6 +94,10 @@ async function generate_id() {
 }
 
 /////////////////////////////////////////////////IMAGES OPS
+async function get_all_images(){
+    const imgs = findDocuments("images", {})
+    return imgs
+}
 async function find_image_by_sha512(hash:string){
     const img = findDocuments("images", {
         sha512: hash
@@ -115,7 +121,7 @@ async function find_max_image_id(){
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
     size:string,derpi_link:string,
     derpi_likes:number,derpi_dislikes:number,
-    derpi_id:number,derpi_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string){
+    derpi_id:number,derpi_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string,description:string){
     insertDocuments("images", [{
         id:id,
         file_ext:file_ext,
@@ -123,6 +129,7 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
         width:width,
         height:height,
         author: author,
+        description:description,
         size:size,
         phash:phash,
         sha512:sha512,
@@ -137,67 +144,6 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
     }])
 }
 /////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////LINK OPS
-async function find_link_by_id(id:string) {
-    const link = findDocuments("links", {
-        short_id: id
-    })
-    return link
-}
-async function find_all_links_by_user_id(user_id:string) {
-    if(user_id){
-        const links = findDocuments("links", {
-            author_id: user_id
-        })
-        return links
-    }
-}
-
-async function generate_link_id() {
-    const id = new Promise((resolve, reject) => {
-        crypto.randomBytes(16, async function(ex, buffer) {
-            if (ex) {
-                reject("error");
-            }
-            const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
-            const links = await find_link_by_id(id) //check if id exists
-            if (links.length === 0) {
-                resolve(id);
-            } else {
-                const id_1 = await generate_link_id()
-                resolve(id_1)
-            }
-        });
-    });
-    return id;
-}
-
-async function add_link(user_id:string,link:string) {
-    const short_id=await generate_link_id()
-    insertDocuments("links", [{
-        created_at: new Date(),
-        original_link:link,
-        short_id: short_id,
-        views:0,
-        author_id: user_id,
-    }])
-    return short_id
-}
-async function remove_link(link_short_id:string) {
-    return removeDocument("links",{short_id: link_short_id})
-}
-
-async function increase_view_count(link_short_id:string) {
-    const collection = client.db(db_main).collection("links");
-    const result= collection.updateOne({short_id: link_short_id}, { $inc: {"views":1} })
-    return result
-}
-
-/////////////////////////////////////////////////////////
-
-
-
 
 ////////////////////////////////////////PASSWORD RECOVERY
 async function update_user_password_by_id(id:string,password:string):Promise<void> {
@@ -242,7 +188,7 @@ async function find_user_by_oauth_id(oauth_id:string) {
     return user
 }
 
-async function find_user_by_id(id:string) {
+ async function find_user_by_id(id:string) {
     const user = findDocuments("users", {
         id: id
     })
@@ -317,16 +263,11 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 export default {
     image_ops:{
     add_image,
+    get_all_images,
     find_max_image_id,
     find_image_by_phash,
     find_image_by_sha512,
-    },
-    link_ops:{
-        add_link,
-        remove_link,
-        find_link_by_id,
-        increase_view_count,
-        find_all_links_by_user_id
+    
     },
     password_recovery:{
         update_user_password_by_id,
@@ -335,9 +276,6 @@ export default {
         find_user_id_by_password_recovery_token
     },
     activated_user:{
-        add_link,
-        increase_view_count,
-        remove_link,
         find_user_by_email,
         find_user_by_oauth_id,
         find_user_by_id,

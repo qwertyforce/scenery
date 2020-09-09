@@ -2,16 +2,15 @@ import React from "react";
 import Gallery from "react-photo-gallery";
 import config from '../config/config'
 import AppBar from '../components/AppBar'
-import fs from 'fs'
 import { Tab, Tabs } from "@material-ui/core";
 /* popout the browser and maximize to see more rows! -> */
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-const NoSsr = (props) => (
+const NoSsr = (props: { photos: { src: string; srcSet?: string | string[] | undefined; sizes?: string | string[] | undefined; width: number; height: number; alt?: string | undefined; key?: string | undefined; }[]; }) => (
   <div><AppBar/>
   <Tabs 
           value={0}
@@ -27,7 +26,7 @@ const NoSsr = (props) => (
   <Gallery targetRowHeight={250} photos={props.photos} /></div>
 
 )
-export async function getStaticProps(context) {
+export async function getStaticProps() {
   return {
     props: {photos:[
       {

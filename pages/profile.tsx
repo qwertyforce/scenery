@@ -1,12 +1,6 @@
 import React from 'react';
-import Container from '@material-ui/core/Container';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import ProTip from '../components/ProTip';
-import Link from '../components/Link';
-import Copyright from '../components/Copyright';
 import db_ops from '../server/helpers/db_ops'
-export default function Index(props) {
+export default function Index(props: { user_data: React.ReactNode; }) {
   return (
     // <Container maxWidth="sm">
     //   <Box my={4}>
@@ -24,7 +18,7 @@ export default function Index(props) {
   );
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: { req: { session: { authed: any; user_id: string; }; }; }) {
   let authed=false;
   let user_data;
   if(context.req.session.authed&&context.req.session.user_id){

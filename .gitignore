@@ -2,6 +2,7 @@
 
 /dist
 /public
+/import_from_derpi
 # dependencies
 /node_modules
 /.pnp
