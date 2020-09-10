@@ -7,12 +7,11 @@ import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import config from '../../config/config'
 // import FavoriteIcon from '@material-ui/icons/Favorite';
-import { GetStaticProps } from 'next'
+import { GetStaticProps,GetStaticPaths } from 'next'
 import path from 'path'
 import fs from 'fs'
 import db_ops from '../../server/helpers/db_ops'
 
-import { GetStaticPaths } from 'next'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
 const useStyles = makeStyles((theme) => ({

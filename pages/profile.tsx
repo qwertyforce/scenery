@@ -1,5 +1,6 @@
 import React from 'react';
 import db_ops from '../server/helpers/db_ops'
+
 export default function Index(props: { user_data: React.ReactNode; }) {
   return (
     // <Container maxWidth="sm">
@@ -18,7 +19,7 @@ export default function Index(props: { user_data: React.ReactNode; }) {
   );
 }
 
-export async function getServerSideProps(context: { req: { session: { authed: any; user_id: string; }; }; }) {
+export async function getServerSideProps(context) {
   let authed=false;
   let user_data;
   if(context.req.session.authed&&context.req.session.user_id){

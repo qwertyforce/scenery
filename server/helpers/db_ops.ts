@@ -92,6 +92,10 @@ async function generate_id() {
 }
 
 /////////////////////////////////////////////////IMAGES OPS
+async function update_image_data_by_id(id:number,update:Record<string,unknown>){
+    updateDocument("images", {id: id},update)
+}
+
 async function get_all_images(){
     const imgs = findDocuments("images", {})
     return imgs
@@ -102,7 +106,12 @@ async function find_image_by_sha512(hash:string){
     })
     return img
 }
-
+async function find_image_by_id(id:number){
+    const img = findDocuments("images", {
+        id: id
+    })
+    return img
+}
 async function find_image_by_phash(hash:string){
     const img = findDocuments("images", {
         phash: hash
@@ -262,10 +271,11 @@ export default {
     image_ops:{
     add_image,
     get_all_images,
+    find_image_by_id,
     find_max_image_id,
     find_image_by_phash,
     find_image_by_sha512,
-    
+    update_image_data_by_id
     },
     password_recovery:{
         update_user_password_by_id,

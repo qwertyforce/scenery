@@ -31,7 +31,7 @@ import login from './routes/login';
 import change_password from './routes/change_password';
 import forgot_password from './routes/forgot_password';
 import activate_account_email from './routes/activate_account_email';
-
+import update_image_data from './routes/update_image_data'
 next_app.prepare().then(() => {
   const app = express()
   const limiter = rateLimit({
@@ -70,7 +70,7 @@ next_app.prepare().then(() => {
       sameSite: 'lax'
     },
     store: new MongoStore({
-      url: 'mongodb://localhost/url_shortener',
+      url: 'mongodb://localhost/Scenery',
       ttl: 14 * 24 * 60 * 60
     }) // = 14 days. Default
   }))
@@ -81,6 +81,9 @@ next_app.prepare().then(() => {
   app.get('/auth/github', github_oauth_redirect)
   app.get('/auth/github/callback', github_oauth_callback)
   app.get('/auth/google/callback', google_oauth_callback)
+
+
+  app.post('/update_image_data', update_image_data)
 
   app.post('/signup', [
     recaptcha.middleware.verify,
