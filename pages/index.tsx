@@ -1,100 +1,65 @@
 import React from "react";
 import Gallery from "react-photo-gallery";
+import { makeStyles } from '@material-ui/core/styles';
 import config from '../config/config'
 import AppBar from '../components/AppBar'
 import { Tab, Tabs } from "@material-ui/core";
-/* popout the browser and maximize to see more rows! -> */
+import db_ops from '../server/helpers/db_ops'
+import Pagination from '@material-ui/lab/Pagination';
+
+const useStyles = makeStyles((theme) => ({
+  pagination:{
+    display:"flex",
+    justifyContent:'center'
+  }
+}));
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-const NoSsr = (props: { photos: { src: string; srcSet?: string | string[] | undefined; sizes?: string | string[] | undefined; width: number; height: number; alt?: string | undefined; key?: string | undefined; }[]; }) => (
-  <div><AppBar/>
-  <Tabs 
-          value={0}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="fullWidth"
-          aria-label="full width tabs example"
-        >
-          <Tab label="Last Added" {...a11yProps(0)}  />
-          <Tab label="Top Rated"  {...a11yProps(1)} />
-          <Tab label="Item Three" {...a11yProps(2)} />
-        </Tabs>
-  <Gallery targetRowHeight={250} photos={props.photos} /></div>
-
-)
+const MainPage = (props: { photos: { src: string; srcSet?: string | string[] | undefined; sizes?: string | string[] | undefined; width: number; height: number; alt?: string | undefined; key?: string | undefined; }[]; }) =>{
+  const classes = useStyles();
+  return (
+    <div>
+      <AppBar/>
+    <Tabs 
+            value={0}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="full width tabs example"
+          >
+            <Tab label="Last Added" {...a11yProps(0)}  />
+            <Tab label="Top Rated"  {...a11yProps(1)} />
+            </Tabs>
+    <Gallery targetRowHeight={250} photos={props.photos} onClick={(e,photos)=>window.open(photos.photo.key, '_blank')}/>
+    <div className={classes.pagination}><Pagination count={10} color="primary" size="large" /></div>
+</div>
+  
+  )
+} 
 export async function getStaticProps() {
+  const photos = []
+  let images = await db_ops.image_ops.get_all_images()
+  images.length = 30
+  for (const image of images) {
+    photos.push({
+      src: `${config.domain}/images/${image.id}.${image.file_ext}`,
+      key:`${config.domain}/image/${image.id}`,
+      width: image.width,
+      height: image.height
+    })
+  }
   return {
-    props: {photos:[
-      {
-        src: `${config.domain}/images/3.png`,
-        width: 1680,
-        height: 1050
-      },
-      {
-        src: `${config.domain}/images/23.png`,
-        width: 1680,
-        height: 1050
-      },
-      {
-        src: `${config.domain}/images/25.png`,
-        width: 1980,
-        height: 1238
-      },
-      {
-        src: `${config.domain}/images/27.png`,
-        width: 1900,
-        height: 1200
-      },
-      {
-        src: `${config.domain}/images/28.jpg`,
-        width: 1600,
-        height: 2244
-      },
-      {
-        src: `${config.domain}/images/29.jpg`,
-        width: 1920,
-        height: 1080
-      },
-      {
-        src: `${config.domain}/images/147.jpg`,
-        width: 720,
-        height: 960
-      },
-      {
-        src: `${config.domain}/images/201.png`,
-        width: 1400,
-        height: 811
-      },
-      {
-        src: `${config.domain}/images/1000857.png`,
-        width: 876,
-        height: 900
-      },
-      {
-        src: `${config.domain}/images/1001023.png`,
-        width: 4590,
-        height: 2970
-      },
-      {
-        src: `${config.domain}/images/1002657.png`,
-        width: 1280,
-        height: 720
-      },
-      {
-        src: `${config.domain}/images/1003044.jpeg`,
-        width: 1920,
-        height: 1080
-      },
-      
-    ]}, // will be passed to the page component as props
+    props: {
+      photos: photos
+    }
   }
 }
 // import dynamic from 'next/dynamic'
 // export default dynamic(() => Promise.resolve(NoSsr), {
 //   ssr: false
 // })
-export default NoSsr
+export default MainPage

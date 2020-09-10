@@ -6,8 +6,6 @@ const options = {
     useUnifiedTopology: true
 };
 const db_main = 'Scenery';
-let x = Math.random()
-console.log(x)
 const client = new MongoClient(url, options);
 client.connect(function(err) {
     if (err) {
