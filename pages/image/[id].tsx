@@ -7,11 +7,10 @@ import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import config from '../../config/config'
 // import FavoriteIcon from '@material-ui/icons/Favorite';
+import LinkIcon from '@material-ui/icons/Link';
 import { GetStaticProps,GetStaticPaths } from 'next'
-import path from 'path'
-import fs from 'fs'
 import db_ops from '../../server/helpers/db_ops'
-
+import ErrorPage from 'next/error'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
 const useStyles = makeStyles((theme) => ({
@@ -35,8 +34,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 //https://dummyimage.com/600x400/000/fff
-export default function Image(props: {filename: string; }) {
+export default function Image(props) {
   const classes = useStyles();
+  if(props.err){
+    return <ErrorPage statusCode={404} />
+  }
+  const Tags = props.tags.map((tag) =><Chip label={tag} key={tag} className={classes.chip} component="a" href="#chip" clickable />);
   return (
     <div className={classes.root}>
       <AppBar />
@@ -52,14 +55,14 @@ export default function Image(props: {filename: string; }) {
               alignItems: 'center'
             }}>
               <CreateIcon />
-              <p>&nbsp;Author: Qwerryt</p>
+              <p>&nbsp;Author: {props.author}</p>
             </div>
             <div style={{
               display: 'flex',
               alignItems: 'center'
             }}>
               <AspectRatioIcon />
-              <p>&nbsp;Resoltuion: 5000x5000 5MB</p>
+          <p>&nbsp;Resoltuion:{props.width }x{props.height} {props.size}MB</p>
             </div>
             <div style={{
               display: 'flex',
@@ -70,15 +73,19 @@ export default function Image(props: {filename: string; }) {
             </div>
             <div style={{
               display: 'flex',
+              alignItems: 'center'
+            }}>
+              <LinkIcon />
+              &nbsp;<a href={props.derpi_link} target="_blank" rel="noreferrer">Depri Link</a>
+            </div>
+            <div style={{
+              display: 'flex',
               alignItems: 'center',
               flexWrap:'wrap'
             }}>
               <LabelIcon />
               <p>&nbsp;Tags:</p>
-              <Chip label="Clickable Link" className={classes.chip} component="a" href="#chip" clickable />
-            <Chip label="Clickable Link" className={classes.chip} component="a" href="#chip" clickable />
-            <Chip label="Clickable Link" className={classes.chip} component="a" href="#chip" clickable />
-            <Chip label="Clickable Link" className={classes.chip} component="a" href="#chip" clickable />
+             {Tags}
             </div>
            
           </Paper>
@@ -92,21 +99,24 @@ export default function Image(props: {filename: string; }) {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   if(context.params){
-    const postsDirectory = path.join(process.cwd(), 'public','images')
-    const filenames = fs.readdirSync(postsDirectory)
-    for(const filename of filenames){
-      if(filename.includes((context.params.id as string))){
-        return {
-          props: {
-            filename:filename
-          },
-        }
+    const img=await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
+    if(img.length===1){
+      return {
+        props: {
+          filename:`${img[0].id}.${img[0].file_ext}`,
+          width:img[0].width,
+          height:img[0].height,
+          size: (img[0].size/(10**6)).toFixed(2),
+          author:img[0].author,
+          tags:img[0].tags,
+          derpi_link:img[0].derpi_link
+        },
       }
     }
   }
   return {
     props: {
-      filename:"123"
+      err:true
     },
   }
  
