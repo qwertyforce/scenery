@@ -57,7 +57,8 @@ async function insertDocuments(collection_name:string, documents:Array<any>) {
 async function updateDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
   const collection = client.db(db_main).collection(collection_name);
   collection.updateOne(selector, { $set: update })
-  // const result= await collection.updateOne(selector, { $set: update })
+  //const result= await collection.updateOne(selector, { $set: update })
+ // console.log(result)
 }
 // async function addToArrayInDocument(collection_name:string,selector:object,update:object) {
 //     const collection = client.db(db_main).collection(collection_name);

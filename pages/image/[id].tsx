@@ -41,18 +41,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 //https://dummyimage.com/600x400/000/fff
-export default function Image(props) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function Image(props:any) {
   const router = useRouter()
 
   if(router.isFallback) {
     return <ErrorPage statusCode={404} />
   }
-  const classes = useStyles();
- 
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
-  const Tags = props.tags.map((tag) => <Chip label={tag} key={tag} className={classes.chip} component="a" href="#chip" clickable />);
+  const classes = useStyles();
+ 
+  
+  const Tags = props.tags.map((tag:string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href="#chip" clickable />);
   return (
     <div className={classes.root}>
       <AppBar />
@@ -99,7 +101,6 @@ export default function Image(props) {
 
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  console.log(context)
   if (context.params) {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
     if (img.length === 1) {
@@ -117,14 +118,15 @@ export const getStaticProps: GetStaticProps = async (context) => {
           source_link: img[0].source_url,
           date:date_str
         },
+      revalidate:1
       }
     }
   }
-  console.log("eerror")
   return {
     props: {
       err: true
     },
+    revalidate:1
   }
 
 }

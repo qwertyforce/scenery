@@ -7,14 +7,15 @@ import config from '../../config/config'
 import { useEffect } from 'react';
 import ErrorPage from 'next/error'
 
-export default function Image(props) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function Image(props:any) {
   if(props.err){
     return <ErrorPage statusCode={404} />
   }
   const send_image_data=(image_data: Record<string,unknown>)=>{
     axios(`${config.domain}/update_image_data`, {
       method: "post",
-      data: {image_data},
+      data: {id:props.id,image_data},
       withCredentials: true
     }).then((resp)=>{
       alert(JSON.stringify(resp.data))
@@ -43,7 +44,8 @@ export default function Image(props) {
   );
 }
 
-export async function getServerSideProps(context) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getServerSideProps(context:any) {
   if(context.req.session.authed&&context.req.session.user_id){
     const user=await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
     if(!user[0].isAdmin){
@@ -51,7 +53,7 @@ export async function getServerSideProps(context) {
     }
     const img=await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
     return {
-      props: {img_data:JSON.stringify(img[0]),err:false}, // will be passed to the page component as props
+      props: {id:img[0].id,img_data:JSON.stringify(img[0]),err:false}, // will be passed to the page component as props
     }
   }
   return {

@@ -3,7 +3,8 @@ import db_ops from '../server/helpers/db_ops'
 import AppBar from '../components/AppBar'
 import {GetStaticProps} from 'next'
 
-export default function Index(props) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function Index(props:any) {
   return (
     <div>
       <AppBar/>
@@ -14,7 +15,7 @@ export default function Index(props) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async () => {
    const imgs=await db_ops.image_ops.get_all_images()
    const authors=new Set()
    const tags=new Set()

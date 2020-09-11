@@ -19,7 +19,8 @@ export default function Index(props: { user_data: React.ReactNode; }) {
   );
 }
 
-export async function getServerSideProps(context) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getServerSideProps(context:any) {
   let authed=false;
   let user_data;
   if(context.req.session.authed&&context.req.session.user_id){

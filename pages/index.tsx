@@ -7,7 +7,7 @@ import { Tab, Tabs } from "@material-ui/core";
 import db_ops from '../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   pagination:{
     display:"flex",
     justifyContent:'center'
@@ -34,7 +34,7 @@ const MainPage = (props: { photos: { src: string; srcSet?: string | string[] | u
             <Tab label="Last Added" {...a11yProps(0)}  />
             <Tab label="Top Rated"  {...a11yProps(1)} />
             </Tabs>
-    <Gallery targetRowHeight={250} photos={props.photos} onClick={(e,photos)=>window.open(photos.photo.key, '_blank')}/>
+    <Gallery targetRowHeight={250} photos={props.photos} onClick={(_e,photos)=>window.open(photos.photo.key, '_blank')}/>
     <div className={classes.pagination}><Pagination count={10} color="primary" size="large" /></div>
 </div>
   
