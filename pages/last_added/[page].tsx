@@ -9,10 +9,15 @@ import Pagination from '@material-ui/lab/Pagination';
 import {GetStaticPaths} from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
+import Link from '../../components/Link'
 const useStyles = makeStyles(() => ({
   pagination:{
     display:"flex",
     justifyContent:'center'
+  },
+  footer:{
+    display: "flex",
+    justifyContent: "center"
   }
 }));
 function a11yProps(index: number) {
@@ -44,6 +49,11 @@ const MainPage = (props:any) =>{
     <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
     <div className={classes.pagination}>
       <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e,p)=>router.push(`/last_added/${p}`)} siblingCount={3} color="primary" size="large"/>
+      </div>
+      <div className={classes.footer}> 
+       <Link href='/about'>About&nbsp;</Link>
+       <Link href='/stats'>Stats&nbsp;</Link>
+       <Link href='/tags'>Tags</Link>
       </div>
 </div>
   
