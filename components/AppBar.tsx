@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { fade,makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
-
+import Link from './Link'
+import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
   app_bar:{
@@ -62,20 +63,30 @@ const useStyles = makeStyles((theme) => ({
 
 export default function DenseAppBar() {
   const classes = useStyles();
-
+  const router = useRouter()
+  const [tags, setTags] = useState('');
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode === 13 || e.which === 13) {
+       router.push(`/search?q=${tags}`)
+    }
+  };
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.app_bar}>
         <Toolbar variant="dense" className={classes.tool_bar}>
           <Typography variant="h6" color="inherit">
-            Scenery
+          <Link href="/" color="inherit" underline="none">
+             Scenery
+           </Link>
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>
               <SearchIcon />
             </div>
             <InputBase
-              placeholder="Search…"
+              placeholder="tag1,tag2,tagN"
+              onChange={(e)=>setTags(e.target.value)}
+              onKeyPress={(e)=>handleKeyPress(e)}
               classes={{
                 root: classes.inputRoot,
                 input: classes.inputInput,
