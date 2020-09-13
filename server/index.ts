@@ -32,6 +32,7 @@ import change_password from './routes/change_password';
 import forgot_password from './routes/forgot_password';
 import activate_account_email from './routes/activate_account_email';
 import update_image_data from './routes/update_image_data'
+import import_from_derpi from './routes/import_from_derpi'
 next_app.prepare().then(() => {
   const app = express()
   const limiter = rateLimit({
@@ -84,6 +85,7 @@ next_app.prepare().then(() => {
 
 
   app.post('/update_image_data', update_image_data)
+  app.post('/import_from_derpi', import_from_derpi)
 
   app.post('/signup', [
     recaptcha.middleware.verify,
