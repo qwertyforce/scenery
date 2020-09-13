@@ -101,6 +101,11 @@ async function get_all_images(){
     const imgs = findDocuments("images", {})
     return imgs
 }
+
+async function find_images_by_tags(tags:Array<string>){
+    const imgs = findDocuments("images", {tags:{$all:tags}})
+    return imgs
+}
 async function find_image_by_sha512(hash:string){
     const img = findDocuments("images", {
         sha512: hash
@@ -274,6 +279,7 @@ export default {
     get_all_images,
     find_image_by_id,
     find_max_image_id,
+    find_images_by_tags,
     find_image_by_phash,
     find_image_by_sha512,
     update_image_data_by_id
