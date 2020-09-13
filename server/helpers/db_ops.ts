@@ -125,7 +125,7 @@ async function find_image_by_phash(hash:string){
     return img
 }
 
-async function find_max_image_id(){
+async function get_max_image_id(){
     const collection = client.db(db_main).collection("images");
     const result = await collection.find({}).sort({id:-1}).limit(1).toArray()
     return result[0]?.id
@@ -278,7 +278,7 @@ export default {
     add_image,
     get_all_images,
     find_image_by_id,
-    find_max_image_id,
+    get_max_image_id,
     find_images_by_tags,
     find_image_by_phash,
     find_image_by_sha512,
