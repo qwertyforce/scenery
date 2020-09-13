@@ -39,7 +39,7 @@ export default function Search(props:any){
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
   if (context.query.q) {
-    const tags = context.query.q.split(',')
+    const tags = (context.query.q.split(',')).map((tag:string)=>tag.trim())
     const images = await db_ops.image_ops.find_images_by_tags(tags)
     const images_on_page = 30
     const photos = []
