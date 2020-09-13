@@ -18,9 +18,8 @@ const Photo = ({ index, onClick, photo, margin, direction, top, left, key }) => 
   };
 
   return (
-      <a href={key}>
+      <a key={key} href={key}>
     <img
-      key={key}
       style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
       {...photo}
       onClick={onClick ? handleClick : null}
