@@ -54,7 +54,7 @@ export default function Image(props:any) {
   const classes = useStyles();
  
   
-  const Tags = props.tags.map((tag:string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href="#chip" clickable />);
+  const Tags = props.tags.map((tag:string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}`} clickable />);
   return (
     <div className={classes.root}>
       <AppBar />
@@ -105,7 +105,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
     if (img.length === 1) {
       const date = new Date(img[0].created_at)
-      const date_str=`${date.getDay()}.${date.getMonth()+1}.${date.getFullYear()}`
+      const date_str=`${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`
       return {
         props: {
           filename: `${img[0].id}.${img[0].file_ext}`,
