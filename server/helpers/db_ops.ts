@@ -91,8 +91,36 @@ async function generate_id() {
     });
     return id;
 }
+/////////////////////////////////////////////////IMAGE SEARCH OPS
+async function get_all_phash_distances(){
+    const phash_distances = findDocuments("img_search", {})
+    return phash_distances
+}
+async function get_phash_distances_by_image_id(id:number){
+    const phash_distances = findDocuments("img_search", {id:id})
+    return phash_distances
+}
+
+async function add_image_to_image_search(id:number, phash_dist:Array<Record<string,unknown>>){
+    insertDocuments("img_search", [{
+        id:id,
+        phash_dist:phash_dist
+    }])
+}
+async function update_phash_dist_by_id(id:number, phash_dist:Array<Record<string,unknown>>){
+    updateDocument("images", {id: id},{phash_dist:phash_dist})
+}
+
+////////////////////////////////////////////////
+
 
 /////////////////////////////////////////////////IMAGES OPS
+async function get_ids_and_phashes(){
+    const collection = client.db(db_main).collection("images");
+    const data = collection.aggregate([{ $project : { id : 1, phash : 1,_id : 0} }]).toArray()
+    return data
+}
+
 async function update_image_data_by_id(id:number,update:Record<string,unknown>){
     updateDocument("images", {id: id},update)
 }
@@ -274,15 +302,22 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 /////////////////////////////////////////////////////////
 
 export default {
-    image_ops:{
-    add_image,
-    get_all_images,
-    find_image_by_id,
-    get_max_image_id,
-    find_images_by_tags,
-    find_image_by_phash,
-    find_image_by_sha512,
-    update_image_data_by_id
+    image_ops: {
+        add_image,
+        get_all_images,
+        find_image_by_id,
+        get_max_image_id,
+        find_images_by_tags,
+        get_ids_and_phashes,
+        find_image_by_phash,
+        find_image_by_sha512,
+        update_image_data_by_id
+    },
+    image_search:{
+        get_all_phash_distances,
+        update_phash_dist_by_id,
+        add_image_to_image_search,
+        get_phash_distances_by_image_id,  
     },
     password_recovery:{
         update_user_password_by_id,

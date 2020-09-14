@@ -6,6 +6,9 @@ import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import Link from './Link'
+import ImageSearchIcon from '@material-ui/icons/ImageSearch';
+import { IconButton } from '@material-ui/core';
+
 import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
@@ -94,6 +97,9 @@ export default function DenseAppBar() {
               inputProps={{ 'aria-label': 'search' }}
             />
           </div>
+          <IconButton  color="inherit"  aria-label="image_search" href="/reverse_search">
+            <ImageSearchIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
     </div>

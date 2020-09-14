@@ -7,6 +7,7 @@ import connectMongo from 'connect-mongo';
 const MongoStore = connectMongo(session);
 import rateLimit from "express-rate-limit";
 import cors from 'cors';
+import multer from 'multer'
 //import https from 'https';
 //import path from 'path';
 import { check } from 'express-validator';
@@ -32,9 +33,12 @@ import forgot_password from './routes/forgot_password';
 import activate_account_email from './routes/activate_account_email';
 import update_image_data from './routes/update_image_data'
 import import_from_derpi from './routes/import_from_derpi'
+import reverse_search from './routes/reverse_search'
 next_app.prepare().then(() => {
   const app = express()
   const api_router=express.Router()
+  const storage = multer.memoryStorage()
+  const upload = multer({ storage: storage,limits:{files:1,fileSize:50000000}})  //50MB
   const limiter = rateLimit({
     windowMs: 15 * 60,  // 15 minutes
     max: 200 // limit each IP to w00 requests per windowMs
@@ -84,7 +88,7 @@ next_app.prepare().then(() => {
   api_router.get('/auth/github/callback', github_oauth_callback)
   api_router.get('/auth/google/callback', google_oauth_callback)
 
-
+  api_router.post('/reverse_search', [upload.single('image'),recaptcha.middleware.verify], reverse_search)
   api_router.post('/update_image_data', update_image_data)
   api_router.post('/import_from_derpi', import_from_derpi)
 

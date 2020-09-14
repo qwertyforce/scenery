@@ -44,7 +44,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 });           
                 const parsed_author = await parse_author(derpi_data.tags)
                 const derpi_link = "https://derpibooru.org/images/" + derpi_data.id
-                const phash = await imghash.hash(`${PATH_TO_IMAGES}/${image_id}.${derpi_data.format.toLowerCase()}`, 16);
+                const phash = await imghash.hash(image, 16);
                 await db_ops.image_ops.add_image(image_id, derpi_data.format.toLowerCase(), derpi_data.width, derpi_data.height, parsed_author, derpi_data.size,
                     derpi_link, derpi_data.upvotes, derpi_data.downvotes, derpi_data.id, derpi_data.created_at,
                     derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash, derpi_data.description)
