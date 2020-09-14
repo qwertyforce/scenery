@@ -25,7 +25,6 @@ async function import_from_derpi(req: Request, res: Response) {
         if (user[0].isAdmin) {
             try {
                 const imgs = await db_ops.image_ops.find_image_by_id(id)
-                console.log(imgs.length)
                 if (imgs.length !== 0) {
                     res.json({ message: "Already in the DB" })
                     return

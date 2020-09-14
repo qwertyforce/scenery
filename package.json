@@ -30,6 +30,7 @@
     "mongodb": "^3.6.1",
     "next": "latest",
     "nodemailer": "^6.4.11",
+    "pm2": "^4.4.1",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

@@ -16,8 +16,7 @@ import config from '../config/config'
 
 const PASS_MIN = 8;
 const PASS_MAX = 128;
-
-const port = 80
+const port = parseInt(process.env.NODE_PORT||"80")
 const dev = process.env.NODE_ENV !== 'production'
 const next_app = next({ dev })
 const handle = next_app.getRequestHandler()
@@ -35,13 +34,13 @@ import update_image_data from './routes/update_image_data'
 import import_from_derpi from './routes/import_from_derpi'
 next_app.prepare().then(() => {
   const app = express()
+  const api_router=express.Router()
   const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000000 // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60,  // 15 minutes
+    max: 200 // limit each IP to w00 requests per windowMs
   });
   const recaptcha = new RecaptchaV3(config.recaptcha_site_key, config.recaptcha_secret_key);
   ////////////////
-  app.use(limiter);
   app.use(function (_req, res, next) {
     res.setHeader('X-Content-Type-Options', "nosniff")
     res.setHeader('X-Frame-Options', "Deny")  //clickjacking protection
@@ -75,19 +74,21 @@ next_app.prepare().then(() => {
       ttl: 14 * 24 * 60 * 60
     }) // = 14 days. Default
   }))
+  api_router.use(limiter);
+  app.use(api_router)
   ///////////////
 
 
-  app.get('/auth/google', google_oauth_redirect)
-  app.get('/auth/github', github_oauth_redirect)
-  app.get('/auth/github/callback', github_oauth_callback)
-  app.get('/auth/google/callback', google_oauth_callback)
+  api_router.get('/auth/google', google_oauth_redirect)
+  api_router.get('/auth/github', github_oauth_redirect)
+  api_router.get('/auth/github/callback', github_oauth_callback)
+  api_router.get('/auth/google/callback', google_oauth_callback)
 
 
-  app.post('/update_image_data', update_image_data)
-  app.post('/import_from_derpi', import_from_derpi)
+  api_router.post('/update_image_data', update_image_data)
+  api_router.post('/import_from_derpi', import_from_derpi)
 
-  app.post('/signup', [
+  api_router.post('/signup', [
     recaptcha.middleware.verify,
     check('email').isEmail(),
     check('password').isLength({
@@ -96,7 +97,7 @@ next_app.prepare().then(() => {
     })
   ], signup)
 
-  app.post('/login', [
+  api_router.post('/login', [
     recaptcha.middleware.verify,
     check('email').isEmail(),
     check('password').isLength({
@@ -105,7 +106,7 @@ next_app.prepare().then(() => {
     }),
   ], login)
 
-  app.post('/change_pw', [
+  api_router.post('/change_pw', [
     recaptcha.middleware.verify,
     check('password').isLength({
       min: PASS_MIN,
@@ -113,13 +114,13 @@ next_app.prepare().then(() => {
     }),
   ], change_password)
 
-  app.post('/forgot_pw', [
+  api_router.post('/forgot_pw', [
     recaptcha.middleware.verify,
     check('email').isEmail(),
   ], forgot_password)
 
-  app.get('/activate', activate_account_email)
-  app.get('/logout', (req, res) => {
+  api_router.get('/activate', activate_account_email)
+  api_router.get('/logout', (req, res) => {
     if (req.session) {
       req.session.destroy(function (err) {
         if (err) {
