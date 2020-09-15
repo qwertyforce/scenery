@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "center",
     margin: `${theme.spacing(0)} auto`
   },
-  loginBtn: {
+  change_password: {
     marginBottom: theme.spacing(2),
     flexGrow: 1
   },
@@ -123,7 +123,7 @@ function ChangePassword() {
             variant="contained"
             size="large"
             color="primary"
-            className={classes.loginBtn}
+            className={classes.change_password}
             onClick={() => _handleChangePassword()}
             disabled={isButtonDisabled}>
             Change password

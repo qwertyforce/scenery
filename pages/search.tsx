@@ -8,14 +8,14 @@ import { useRouter } from 'next/router'
 import Photo from '../components/Photo'
 import ErrorPage from 'next/error'
 const useStyles = makeStyles(() => ({
-  pagination:{
-    display:"flex",
-    justifyContent:'center'
+  pagination: {
+    display: "flex",
+    justifyContent: 'center'
   }
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Search(props:any){
+export default function Search(props: any) {
   const classes = useStyles();
   const router = useRouter()
   if (props.err) {
@@ -23,22 +23,22 @@ export default function Search(props:any){
   }
   return (
     <div>
-      <AppBar/>
-            {/* 
-  // @ts-ignore */ } 
-    <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
-    <div className={classes.pagination}>
-      <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e,p)=>router.push(`/search?q=${props.search_query}&page=${p}`)} siblingCount={3} color="primary" size="large"/>
+      <AppBar />
+      {/* 
+  // @ts-ignore */ }
+      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
+      <div className={classes.pagination}>
+        <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e, p) => router.push(`/search?q=${props.search_query}&page=${p}`)} siblingCount={3} color="primary" size="large" />
       </div>
-</div>
-  
+    </div>
+
   )
-} 
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
   if (context.query.q) {
-    const tags = (context.query.q.split(',')).map((tag:string)=>tag.trim())
+    const tags = (context.query.q.split(',')).map((tag: string) => tag.trim())
     const images = await db_ops.image_ops.find_images_by_tags(tags)
     const images_on_page = 30
     const photos = []
@@ -59,7 +59,7 @@ export async function getServerSideProps(context: any) {
     return {
       props: {
         photos: photos,
-        search_query:context.query.q,
+        search_query: context.query.q,
         current_page: page,
         max_page: Math.ceil(images.length / images_on_page)
       }

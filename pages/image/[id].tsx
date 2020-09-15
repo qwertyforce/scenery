@@ -11,7 +11,7 @@ import db_ops from '../../server/helpers/db_ops'
 import ErrorPage from 'next/error'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
-import {useRouter} from 'next/router'
+import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   icon_container: {
     display: 'flex',
     alignItems: 'center',
-    flexWrap:'wrap'
+    flexWrap: 'wrap'
   },
   chip: {
     margin: 5
@@ -38,21 +38,20 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
 }));
-//https://dummyimage.com/600x400/000/fff
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Image(props:any) {
+export default function Image(props: any) {
   const router = useRouter()
 
-  if(router.isFallback) {
+  if (router.isFallback) {
     return <ErrorPage statusCode={404} />
   }
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
   const classes = useStyles();
- 
-  
-  const Tags = props.tags.map((tag:string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}`} clickable />);
+
+
+  const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}`} clickable />);
   return (
     <div className={classes.root}>
       <AppBar />
@@ -88,7 +87,6 @@ export default function Image(props:any) {
                 <p>&nbsp;Tags:</p>
                 {Tags}
               </div>
-
             </Paper>
           </Grid>
         </Grid>
@@ -103,7 +101,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
     if (img.length === 1) {
       const date = new Date(img[0].created_at)
-      const date_str=`${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`
+      const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
       return {
         props: {
           filename: `${img[0].id}.${img[0].file_ext}`,
@@ -114,9 +112,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
           tags: img[0].tags,
           derpi_link: img[0].derpi_link,
           source_link: img[0].source_url,
-          date:date_str
+          date: date_str
         },
-      revalidate:1
+        revalidate: 5*60 //5 min
       }
     }
   }
@@ -124,7 +122,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     props: {
       err: true
     },
-    revalidate:1
+    revalidate: 1
   }
 
 }

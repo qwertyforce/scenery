@@ -7,32 +7,31 @@ import ErrorPage from 'next/error'
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Show(props:any){
+export default function Show(props: any) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
   return (
     <div>
-      <AppBar/>
-            {/* 
-  // @ts-ignore */ } 
-    <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
-</div>
-  
+      <AppBar />
+      {/* 
+  // @ts-ignore */ }
+      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
+    </div>
   )
-} 
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
   if (context.query.ids) {
     const ids = context.query.ids.split(',')
-    const images:Array<Record<string,unknown>>=[]
-    for(const id of ids){
-      const img_data=await db_ops.image_ops.find_image_by_id(parseInt(id))
+    const images: Array<Record<string, unknown>> = []
+    for (const id of ids) {
+      const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
       images.push(img_data[0])
     }
-    const photos=[]
-    for (const image of images){
+    const photos = []
+    for (const image of images) {
       photos.push({
         src: `/images/${image.id}.${image.file_ext}`,
         key: `/image/${image.id}`,

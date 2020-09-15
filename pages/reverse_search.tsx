@@ -21,7 +21,7 @@ export default function ReverseSearch() {
         'Content-Type': 'multipart/form-data'
       }
     }).then((resp) => {
-      router.push("/show?ids="+resp.data.ids)
+      router.push("/show?ids=" + resp.data.ids)
     }).catch((err) => {
       console.log(err)
     })
