@@ -57,7 +57,7 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
 
   const handleLogin = (token:string) => {
     const login_data={email: email,password: password,'g-recaptcha-response': token}
-    axios(`${config.domain}/login`, {
+    axios(`/login`, {
       method: "post",
       data: login_data,
       withCredentials: true
@@ -153,7 +153,7 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
                   variant="contained"
                   color="secondary"
                   onClick={props.handleSync}
-                  href={`${config.domain}/auth/google`}
+                  href={`/auth/google`}
                   startIcon={
                     <SvgIcon>
                       <FontAwesomeIcon icon={faGoogle} size="lg" />
@@ -167,7 +167,7 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
                 <Button
                   variant="contained"
                   onClick={props.handleSync}
-                  href={`${config.domain}/auth/github`}
+                  href={`/auth/github`}
                   startIcon={
                     <SvgIcon>
                       <FontAwesomeIcon icon={faGithub} size="lg" />

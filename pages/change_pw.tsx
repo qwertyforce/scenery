@@ -49,7 +49,7 @@ function ChangePassword() {
 
   const handleChangePassword = (captcha_token: string) => {
     const data = { token: token, password: password, 'g-recaptcha-response': captcha_token }
-    axios(`${config.domain}/change_pw`, {
+    axios(`/change_pw`, {
       method: "post",
       data: data,
       withCredentials: true

@@ -3,7 +3,6 @@ import db_ops from '../../server/helpers/db_ops'
 import Head from 'next/head'
 import Button from '@material-ui/core/Button';
 import axios from 'axios'
-import config from '../../config/config'
 import { useEffect } from 'react';
 import ErrorPage from 'next/error'
 
@@ -13,7 +12,7 @@ export default function Image(props:any) {
     return <ErrorPage statusCode={404} />
   }
   const send_image_data=(image_data: Record<string,unknown>)=>{
-    axios(`${config.domain}/update_image_data`, {
+    axios(`/update_image_data`, {
       method: "post",
       data: {id:props.id,image_data},
       withCredentials: true

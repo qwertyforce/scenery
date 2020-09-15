@@ -42,6 +42,7 @@ export default function ReverseSearch() {
           acceptedFiles={['image/png', 'image/jpg', 'image/jpeg']}
           dropzoneText={"Drag and drop an image here or click"}
           filesLimit={1}
+          maxFileSize={49000000}
           onChange={(files) => setFiles((files as never))}
         />
       </Box>

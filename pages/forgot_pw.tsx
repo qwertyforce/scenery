@@ -49,7 +49,7 @@ function ForgotPassword() {
 
   const handleFP = (token: string) => {
     const data = { email: email, 'g-recaptcha-response': token }
-    axios(`${config.domain}/forgot_pw`, {
+    axios(`/forgot_pw`, {
       method: "post",
       data: data,
       withCredentials: true

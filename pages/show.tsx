@@ -1,22 +1,13 @@
 import React from "react";
 import Gallery from "react-photo-gallery";
-import { makeStyles } from '@material-ui/core/styles';
-import config from '../config/config'
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
-import { useRouter } from 'next/router'
 import Photo from '../components/Photo'
 import ErrorPage from 'next/error'
-const useStyles = makeStyles(() => ({
-  pagination:{
-    display:"flex",
-    justifyContent:'center'
-  }
-}));
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Show(props:any){
-  const classes = useStyles();
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
@@ -43,8 +34,8 @@ export async function getServerSideProps(context: any) {
     const photos=[]
     for (const image of images){
       photos.push({
-        src: `${config.domain}/images/${image.id}.${image.file_ext}`,
-        key: `${config.domain}/image/${image.id}`,
+        src: `/images/${image.id}.${image.file_ext}`,
+        key: `/image/${image.id}`,
         width: image.width,
         height: image.height
       })

@@ -50,7 +50,7 @@ function SignUpForm() {
 
   const handleSignUp = (token:string) => {
     const login_data={email: email,password: password,'g-recaptcha-response': token}
-    axios(`${config.domain}/signup`, {
+    axios(`/signup`, {
       method: "post",
       data: login_data,
       withCredentials: true

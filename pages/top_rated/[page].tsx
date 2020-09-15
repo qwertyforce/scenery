@@ -33,21 +33,21 @@ const MainPage = (props:any) =>{
     <div>
       <AppBar/>
     <Tabs 
-            value={0}
+            value={1}
             indicatorColor="primary"
             textColor="primary"
             variant="fullWidth"
             aria-label="full width tabs example"
           >
-            <Tab label="Last Added" {...a11yProps(0)}  />
-            <Tab label="Top Rated"  {...a11yProps(1)} />
+            <Tab href="/last_added/1" label="Last Added" {...a11yProps(0)}  />
+            <Tab href="/top_rated/1" label="Top Rated"  {...a11yProps(1)} />
             </Tabs>
            
             {/* 
   // @ts-ignore */ } 
     <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
     <div className={classes.pagination}>
-      <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e,p)=>router.push(`/last_added/${p}`)} siblingCount={3} color="primary" size="large"/>
+      <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e,p)=>router.push(`/top_rated/${p}`)} siblingCount={3} color="primary" size="large"/>
       </div>
       <div className={classes.footer}> 
        <Link href='/about'>About&nbsp;</Link>
@@ -62,7 +62,7 @@ const MainPage = (props:any) =>{
 export async function getStaticProps(context) {
   const images_on_page=30
   const photos = []
-  const images = (await db_ops.image_ops.get_all_images()).reverse()
+  const images = (await db_ops.image_ops.get_all_images()).sort((a,b)=>b.wilson_score-a.wilson_score)
   const page = parseInt(context.params.page)
   for (let i=(page-1)*images_on_page;(i<(page)*images_on_page)&&(i<images.length);i++) {
     photos.push({

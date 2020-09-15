@@ -1,7 +1,6 @@
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
-import config from '../config/config'
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
@@ -51,8 +50,8 @@ export async function getServerSideProps(context: any) {
     }
     for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
       photos.push({
-        src: `${config.domain}/images/${images[i].id}.${images[i].file_ext}`,
-        key: `${config.domain}/image/${images[i].id}`,
+        src: `/images/${images[i].id}.${images[i].file_ext}`,
+        key: `/image/${images[i].id}`,
         width: images[i].width,
         height: images[i].height
       })

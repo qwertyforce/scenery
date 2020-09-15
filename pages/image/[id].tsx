@@ -5,8 +5,6 @@ import Grid from '@material-ui/core/Grid';
 import LabelIcon from '@material-ui/icons/Label';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
-import config from '../../config/config'
-// import FavoriteIcon from '@material-ui/icons/Favorite';
 import LinkIcon from '@material-ui/icons/Link';
 import { GetStaticProps, GetStaticPaths } from 'next'
 import db_ops from '../../server/helpers/db_ops'
@@ -61,7 +59,7 @@ export default function Image(props:any) {
       <div className={classes.grid_container}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Paper className={classes.paper}> <img className={classes.responsive} src={`${config.domain}/images/${props.filename}`} /></Paper>
+            <Paper className={classes.paper}> <img className={classes.responsive} src={`/images/${props.filename}`} /></Paper>
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper className={classes.paper}>

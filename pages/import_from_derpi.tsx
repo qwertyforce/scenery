@@ -2,7 +2,6 @@ import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Button from '@material-ui/core/Button';
 import axios from 'axios'
-import config from '../config/config'
 import TextField from '@material-ui/core/TextField';
 
 import ErrorPage from 'next/error'
@@ -21,7 +20,7 @@ export default function Import_from_derpi(props:any) {
     }
   };
   const add_image=()=>{
-    axios(`${config.domain}/import_from_derpi`, {
+    axios(`/import_from_derpi`, {
       method: "post",
       data: {id:ImageID},
       withCredentials: true
