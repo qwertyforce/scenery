@@ -48,8 +48,8 @@ const MainPage = (props: any) => {
         variant="fullWidth"
         aria-label="full width tabs example"
       >
-        <Tab label="Last Added" {...a11yProps(0)} />
-        <Tab label="Top Rated"  {...a11yProps(1)} />
+       <Tab href="/last_added/1" label="Last Added" {...a11yProps(0)} />
+       <Tab href="/top_rated/1" label="Top Rated"  {...a11yProps(1)} />
       </Tabs>
 
       {/* 
