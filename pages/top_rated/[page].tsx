@@ -10,6 +10,8 @@ import { GetStaticPaths } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
+import ErrorPage from 'next/error'
+
 const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
@@ -30,6 +32,12 @@ function a11yProps(index: number) {
 const MainPage = (props: any) => {
   const classes = useStyles();
   const router = useRouter()
+  if (router.isFallback) {
+    return <ErrorPage statusCode={404} />
+  }
+  if (props.err) {
+    return <ErrorPage statusCode={404} />
+  }
   return (
     <div>
       <AppBar />
@@ -60,26 +68,34 @@ const MainPage = (props: any) => {
   )
 }
 
-export async function getStaticProps(context:any) {
+export async function getStaticProps(context: any) {
   const images_on_page = 30
   const photos = []
-  const images = (await db_ops.image_ops.get_all_images()).sort((a, b) => b.wilson_score - a.wilson_score)
-  const page = parseInt(context.params.page)
-  for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
-    photos.push({
-      src: `/images/${images[i].id}.${images[i].file_ext}`,
-      key: `/image/${images[i].id}`,
-      width: images[i].width,
-      height: images[i].height
-    })
+  if (context.params.page) {
+    const images = (await db_ops.image_ops.get_all_images()).sort((a, b) => b.wilson_score - a.wilson_score)
+    const page = parseInt(context.params.page)
+    if (page <= Math.ceil(images.length / images_on_page)) {
+      for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
+        photos.push({
+          src: `/images/${images[i].id}.${images[i].file_ext}`,
+          key: `/image/${images[i].id}`,
+          width: images[i].width,
+          height: images[i].height
+        })
+      }
+      return {
+        props: {
+          photos: photos,
+          current_page: page,
+          max_page: Math.ceil(images.length / images_on_page)
+        },
+        revalidate: 5 * 60 //5 min
+      }
+    }
   }
   return {
-    props: {
-      photos: photos,
-      current_page: page,
-      max_page: Math.ceil(images.length / images_on_page)
-    },
-    revalidate:5*60 //5 min
+    props: {err: true},
+    revalidate: 5*60 //5 min
   }
 }
 

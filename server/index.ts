@@ -139,7 +139,7 @@ next_app.prepare().then(() => {
     return handle(req, res)
   })
 
-  app.listen(port, (err) => {
+  app.listen(port,'localhost', (err) => {
     if (err) throw err
     console.log(`> Ready on ${config.domain}:${port}`)
   })

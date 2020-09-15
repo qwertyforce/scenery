@@ -58,7 +58,6 @@ export async function getServerSideProps(context: any) {
         props: { id: img[0].id, img_data: JSON.stringify(img[0]), err: false }, // will be passed to the page component as props
       }
     }
-
   }
   return {
     props: { err: true },

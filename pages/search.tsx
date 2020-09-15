@@ -48,24 +48,26 @@ export async function getServerSideProps(context: any) {
     } else {
       page = 1
     }
-    for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
-      photos.push({
-        src: `/images/${images[i].id}.${images[i].file_ext}`,
-        key: `/image/${images[i].id}`,
-        width: images[i].width,
-        height: images[i].height
-      })
-    }
-    return {
-      props: {
-        photos: photos,
-        search_query: context.query.q,
-        current_page: page,
-        max_page: Math.ceil(images.length / images_on_page)
+    if (page <= Math.ceil(images.length / images_on_page)) {
+      for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
+        photos.push({
+          src: `/images/${images[i].id}.${images[i].file_ext}`,
+          key: `/image/${images[i].id}`,
+          width: images[i].width,
+          height: images[i].height
+        })
+      }
+      return {
+        props: {
+          photos: photos,
+          search_query: context.query.q,
+          current_page: page,
+          max_page: Math.ceil(images.length / images_on_page)
+        }
       }
     }
-  }
-  return {
-    props: { err: true }, // will be passed to the page component as props
+    return {
+      props: { err: true }, // will be passed to the page component as props
+    }
   }
 }
