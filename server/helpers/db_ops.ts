@@ -60,11 +60,11 @@ async function updateDocument(collection_name:string,selector:Record<string,unkn
   //const result= await collection.updateOne(selector, { $set: update })
  // console.log(result)
 }
-// async function addToArrayInDocument(collection_name:string,selector:object,update:object) {
-//     const collection = client.db(db_main).collection(collection_name);
-//     const result = collection.updateOne(selector, { $push: update })
-//     return result
-// }
+async function addToArrayInDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
+    const collection = client.db(db_main).collection(collection_name);
+    const result = collection.updateOne(selector, { $push: update })
+    return result
+}
 
 // async function removeFromArrayInDocument(collection_name:string,selector:object,update:object) {
 //     const collection = client.db(db_main).collection(collection_name);
@@ -115,6 +115,11 @@ async function update_phash_dist_by_id(id:number, phash_dist:Array<Record<string
 
 
 /////////////////////////////////////////////////IMAGES OPS
+
+async function add_tags_to_image_by_id(id:number,tags:string[]){
+    await addToArrayInDocument("images",{id:id},{tags:{ $each:tags}})
+}
+
 async function get_ids_and_phashes(){
     const collection = client.db(db_main).collection("images");
     const data = collection.aggregate([{ $project : { id : 1, phash : 1,_id : 0} }]).toArray()
@@ -311,6 +316,7 @@ export default {
         get_ids_and_phashes,
         find_image_by_phash,
         find_image_by_sha512,
+        add_tags_to_image_by_id,
         update_image_data_by_id
     },
     image_search:{
