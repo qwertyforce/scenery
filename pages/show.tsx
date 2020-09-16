@@ -28,7 +28,7 @@ export async function getServerSideProps(context: any) {
     const images: Array<Record<string, unknown>> = []
     for (const id of ids) {
       const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
-      images.push(img_data[0])
+      if(img_data[0]){images.push(img_data[0])}
     }
     const photos = []
     for (const image of images) {
@@ -39,11 +39,14 @@ export async function getServerSideProps(context: any) {
         height: image.height
       })
     }
-    return {
-      props: {
-        photos: photos
+    if(photos.length!==0){
+      return {
+        props: {
+          photos: photos
+        }
       }
     }
+    
   }
   return {
     props: { err: true }, // will be passed to the page component as props
