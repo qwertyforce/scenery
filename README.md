@@ -2,4 +2,6 @@ Next.js
 Express
 Material UI
 Typescript
-Jest
+Jest (i need to write some tests)
+https://onlycomfy.art
+ 
