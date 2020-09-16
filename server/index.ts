@@ -138,7 +138,7 @@ next_app.prepare().then(() => {
   app.all('*', (req, res) => {
     return handle(req, res)
   })
-
+  app.set('trust proxy','127.0.0.1')
   app.listen(port,'localhost', (err) => {
     if (err) throw err
     console.log(`> Ready on ${config.domain}:${port}`)
