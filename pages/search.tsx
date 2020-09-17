@@ -66,8 +66,8 @@ export async function getServerSideProps(context: any) {
         }
       }
     }
-    return {
-      props: { err: true }, // will be passed to the page component as props
-    }
+  }
+  return {
+    props: { err: true }, // will be passed to the page component as props
   }
 }
