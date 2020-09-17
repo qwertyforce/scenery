@@ -68,6 +68,7 @@ export default function DenseAppBar() {
   const classes = useStyles();
   const router = useRouter()
   const [tags, setTags] = useState('');
+  const search_query=router.query.q||''
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
        router.push(`/search?q=${tags}`)
@@ -95,6 +96,7 @@ export default function DenseAppBar() {
                 input: classes.inputInput,
               }}
               inputProps={{ 'aria-label': 'search' }}
+              value={search_query}
             />
           </div>
           <IconButton  color="inherit"  aria-label="image_search" href="/reverse_search">

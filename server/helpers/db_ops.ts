@@ -136,8 +136,6 @@ async function get_all_images(){
 }
 
 async function find_images_by_tags(include_tags:Array<string>,exclude_tags:Array<string>){
-    console.log(include_tags)
-    console.log(exclude_tags)
     const imgs = findDocuments("images", { $and: [
         { tags: { $all: include_tags } }, 
         { tags: { $not: { $all: exclude_tags }}}
