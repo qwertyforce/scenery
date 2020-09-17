@@ -3,6 +3,7 @@
 /dist
 /public
 /import_from_derpi
+/webp_images
 # dependencies
 /node_modules
 /.pnp
