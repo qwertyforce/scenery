@@ -39,7 +39,16 @@ export default function Search(props: any) {
 export async function getServerSideProps(context: any) {
   if (context.query.q) {
     const tags = (context.query.q.split(',')).map((tag: string) => tag.trim())
-    const images = await db_ops.image_ops.find_images_by_tags(tags)
+    const include_tags=[]
+    const exclude_tags=[]
+    for(const tag of tags){
+      if(tag[0]==='-'){
+       exclude_tags.push(tag.slice(1))
+      }else{
+       include_tags.push(tag)
+      }
+    }
+    const images = await db_ops.image_ops.find_images_by_tags(include_tags,exclude_tags)
     const images_on_page = 30
     const photos = []
     let page;
