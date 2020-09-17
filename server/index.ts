@@ -8,6 +8,7 @@ const MongoStore = connectMongo(session);
 import rateLimit from "express-rate-limit";
 import cors from 'cors';
 import multer from 'multer'
+import mongoSanitize  from 'express-mongo-sanitize'
 //import https from 'https';
 //import path from 'path';
 import { check } from 'express-validator';
@@ -80,7 +81,8 @@ next_app.prepare().then(() => {
   }))
   api_router.use(limiter);
   app.use(api_router)
-  ///////////////
+  app.use(mongoSanitize());
+   ///////////////
 
 
   api_router.get('/auth/google', google_oauth_redirect)
