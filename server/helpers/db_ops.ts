@@ -40,7 +40,8 @@ client.db(db_main).listCollections({
 
 async function findDocuments(collection_name:string, selector:Record<string,unknown>) {
     const collection = client.db(db_main).collection(collection_name);
-    const result = collection.find(selector).toArray()
+    // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
+    const result = collection.find(selector).project({_id:0}).toArray()
     return result
 }
 async function removeDocument(collection_name:string, selector:Record<string,unknown>) {
@@ -136,7 +137,7 @@ async function get_all_images(){
 }
 
 async function find_images_by_tags(include_tags:Array<string>,exclude_tags:Array<string>){
-    const imgs = findDocuments("images", { $and: [
+    const imgs = findDocuments("images", {$and: [
         { tags: { $all: include_tags } }, 
         { tags: { $not: { $all: exclude_tags }}}
     ] })
