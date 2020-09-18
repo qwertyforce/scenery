@@ -155,6 +155,12 @@ async function find_image_by_id(id:number){
     })
     return img
 }
+async function find_image_by_derpi_id(id:number){
+    const img = findDocuments("images", {
+        derpi_id: id
+    })
+    return img
+}
 async function find_image_by_phash(hash:string){
     const img = findDocuments("images", {
         phash: hash
@@ -320,8 +326,9 @@ export default {
         get_ids_and_phashes,
         find_image_by_phash,
         find_image_by_sha512,
-        add_tags_to_image_by_id,
-        update_image_data_by_id
+        find_image_by_derpi_id,
+        update_image_data_by_id,
+        add_tags_to_image_by_id
     },
     image_search:{
         get_all_phash_distances,

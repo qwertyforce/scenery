@@ -12,8 +12,7 @@ export default function Import_from_derpi(props: any) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
-  const [error, setError] = useState(false);
-  const [ImageID, setID] = useState('');
+  const [ImageID, setID] = useState(0);
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
       add_image();
@@ -26,9 +25,11 @@ export default function Import_from_derpi(props: any) {
       withCredentials: true
     }).then((resp) => {
       alert(JSON.stringify(resp.data))
+      setID(0)
     }).catch((err) => {
-      setError(err.resp.data)
+      alert('check console for error message')
       console.log(err)
+      setID(0)
     })
   }
 
@@ -37,13 +38,13 @@ export default function Import_from_derpi(props: any) {
     <div>
       <AppBar />
       <TextField
-        error={error}
+        value ={ImageID}
         fullWidth
         type="number"
         label="Derpi image id"
         placeholder="Derpi image id"
         margin="normal"
-        onChange={(e) => setID(e.target.value)}
+        onChange={(e) => setID(parseInt(e.target.value)||0)}
         onKeyPress={(e) => handleKeyPress(e)}
       />
       <Button onClick={() => { add_image() }} variant="contained" color="primary" >Add image</Button>

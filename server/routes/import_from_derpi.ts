@@ -5,8 +5,10 @@ import { Request, Response } from 'express';
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path';
+import sharp from 'sharp'
 const imghash: any = require('imghash');
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
+const PATH_TO_WEBP = path.join(process.cwd(),'webp_images')
 async function parse_author(tags: any) {
     for (const tag of tags) {
         const idx = tag.indexOf("artist:")
@@ -24,7 +26,7 @@ async function import_from_derpi(req: Request, res: Response) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
         if (user[0].isAdmin) {
             try {
-                const imgs = await db_ops.image_ops.find_image_by_id(id)
+                const imgs = await db_ops.image_ops.find_image_by_derpi_id(id)
                 if (imgs.length !== 0) {
                     res.json({ message: "Already in the DB" })
                     return
@@ -37,6 +39,9 @@ async function import_from_derpi(req: Request, res: Response) {
                 }
                 const image =await axios.get(derpi_data.representations.full, {responseType: 'arraybuffer'})
                 const image_id = (await db_ops.image_ops.get_max_image_id())+1
+                await sharp(image.data)
+                .webp({ quality: 80, reductionEffort: 6 })
+                .toFile(`${PATH_TO_WEBP}/${image_id}.webp`);
                 fs.writeFile(`${PATH_TO_IMAGES}/${image_id}.${derpi_data.format.toLowerCase()}`, image.data, 'binary', function (err) {
                     if (err) {
                         console.log(`There was an error writing the image: derpi_id: ${id} id: ${image_id}`)
