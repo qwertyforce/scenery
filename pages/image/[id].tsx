@@ -83,6 +83,14 @@ export default function Image(props: any) {
               &nbsp;<a href={props.source_link} target="_blank" rel="noreferrer">Source</a>
               </div>
               <div className={classes.icon_container}>
+                <LinkIcon />
+              &nbsp;<a href={props.similar_by_tags_link} target="_blank" rel="noreferrer">Similar by tags</a>
+              </div>
+              <div className={classes.icon_container}>
+                <LinkIcon />
+              &nbsp;<a href={props.similar_by_color_link} target="_blank" rel="noreferrer">Similar by color</a>
+              </div>
+              <div className={classes.icon_container}>
                 <LabelIcon />
                 <p>&nbsp;Tags:</p>
                 {Tags}
@@ -112,7 +120,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
           tags: img[0].tags,
           derpi_link: img[0].derpi_link,
           source_link: img[0].source_url,
-          date: date_str
+          date: date_str,
+          similar_by_tags_link:`/similar_by_tags/${img[0].id}`,
+          similar_by_color_link:`/similar_by_color/${img[0].id}`,
         },
         revalidate: 5*60 //5 min
       }
