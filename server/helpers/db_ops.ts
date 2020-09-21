@@ -93,24 +93,59 @@ async function generate_id() {
     return id;
 }
 /////////////////////////////////////////////////IMAGE SEARCH OPS
-async function get_all_phash_distances(){
-    const phash_distances = findDocuments("img_search", {})
-    return phash_distances
+
+async function get_color_similarities_by_id(id:number){
+const collection = client.db(db_main).collection("color_similarities");
+// collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
+const similarities_by_id = await collection.find({id:id}).project({_id:0,id:0}).toArray()
+const similarities=(similarities_by_id[0]?.similarities||[])
+const other_images_similar_by_id = await collection.find({similarities: { $elemMatch: { id: id} }}).project({_id:0,id:1,"similarities.$": 1,}).toArray()
+for(const x of other_images_similar_by_id){
+    similarities.push({id:x.id,similarity:x.similarities[0].similarity})
 }
-async function get_phash_distances_by_image_id(id:number){
-    const phash_distances = findDocuments("img_search", {id:id})
-    return phash_distances
+return similarities
 }
 
-async function add_image_to_image_search(id:number, phash_dist:Array<Record<string,unknown>>){
-    insertDocuments("img_search", [{
+async function add_color_similarities_by_id(id:number,similarities:Array<Record<string,unknown>>){
+    insertDocuments("color_similarities", [{
         id:id,
-        phash_dist:phash_dist
+        similarities:similarities
     }])
 }
-async function update_phash_dist_by_id(id:number, phash_dist:Array<Record<string,unknown>>){
-    updateDocument("images", {id: id},{phash_dist:phash_dist})
+ 
+async function get_color_hist_by_id(id:number){
+    const color_hists = findDocuments("color_hist", {id:id})
+    return color_hists
 }
+async function get_all_color_hists(){
+    const color_hists = findDocuments("color_hist", {})
+    return color_hists
+}
+
+async function add_color_hist_by_id(id:number, color_hist:number[][]){
+    insertDocuments("color_hist", [{
+        id:id,
+        color_hist:color_hist
+    }])
+}
+// async function get_all_phash_distances(){
+//     const phash_distances = findDocuments("img_search", {})
+//     return phash_distances
+// }
+// async function get_phash_distances_by_image_id(id:number){
+//     const phash_distances = findDocuments("img_search", {id:id})
+//     return phash_distances
+// }
+
+// async function add_image_to_image_search(id:number, phash_dist:Array<Record<string,unknown>>){
+//     insertDocuments("img_search", [{
+//         id:id,
+//         phash_dist:phash_dist
+//     }])
+// }
+// async function update_phash_dist_by_id(id:number, phash_dist:Array<Record<string,unknown>>){
+//     updateDocument("images", {id: id},{phash_dist:phash_dist})
+// }
 
 ////////////////////////////////////////////////
 
@@ -331,10 +366,15 @@ export default {
         add_tags_to_image_by_id
     },
     image_search:{
-        get_all_phash_distances,
-        update_phash_dist_by_id,
-        add_image_to_image_search,
-        get_phash_distances_by_image_id,  
+        get_all_color_hists,
+        get_color_hist_by_id,
+        add_color_hist_by_id,
+        // get_all_phash_distances,
+        // update_phash_dist_by_id,
+        // add_image_to_image_search,
+        get_color_similarities_by_id,
+        add_color_similarities_by_id,
+        // get_phash_distances_by_image_id,  
     },
     password_recovery:{
         update_user_password_by_id,
