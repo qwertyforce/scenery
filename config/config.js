@@ -9,5 +9,6 @@ export default {
     GITHUB_CLIENT_SECRET: "a2b8462d6cefb17339f4b730578db280b65e84ad",
     GITHUB_REDIRECT_URI: "http://localhost/auth/github/callback",
     gmail_user:"auth.test.reg.email@gmail.com",
-    gmail_password:"sbuLBh9rAV8XD2"
+    gmail_password:"sbuLBh9rAV8XD2",
+    mongodb_url:"mongodb://localhost/"
 }

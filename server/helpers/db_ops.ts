@@ -1,6 +1,7 @@
 import {MongoClient} from 'mongodb'
 import crypto from "crypto"
-const url = 'mongodb://localhost/';
+import config from '../../config/config'
+const url = config.mongodb_url;
 const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true

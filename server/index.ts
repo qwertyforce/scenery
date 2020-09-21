@@ -75,7 +75,7 @@ next_app.prepare().then(() => {
       sameSite: 'lax'
     },
     store: new MongoStore({
-      url: 'mongodb://localhost/Scenery',
+      url: config.mongodb_url+'Scenery',
       ttl: 14 * 24 * 60 * 60
     }) // = 14 days. Default
   }))
