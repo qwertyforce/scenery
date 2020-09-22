@@ -68,11 +68,7 @@ async function addToArrayInDocument(collection_name:string,selector:Record<strin
     return result
 }
 
-// async function removeFromArrayInDocument(collection_name:string,selector:object,update:object) {
-//     const collection = client.db(db_main).collection(collection_name);
-//     const result = collection.updateOne(selector, { $pull: update })
-//     return result
-// }
+ 
 
 
 async function generate_id() {
@@ -107,6 +103,21 @@ for(const x of other_images_similar_by_id){
 return similarities
 }
 
+async function delete_id_from_color_similarities(id:number){
+    const collection = client.db(db_main).collection("color_similarities");
+    collection.deleteOne({id:id})
+    collection.updateMany({}, { $pull: {similarities:{id:id}} })
+}
+
+async function get_image_ids_from_color_similarities(){
+    const collection = client.db(db_main).collection("color_similarities");
+    // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
+     const ids =  collection.find({}).project({_id:0,similarities: 0}).toArray()
+   return ids
+    }
+async function add_color_similarity_to_other_image(id:number,similarity:Record<string,unknown>){
+    addToArrayInDocument("color_similarities",{id:id},{similarities:similarity })
+}
 async function add_color_similarities_by_id(id:number,similarities:Array<Record<string,unknown>>){
     insertDocuments("color_similarities", [{
         id:id,
@@ -375,6 +386,9 @@ export default {
         // add_image_to_image_search,
         get_color_similarities_by_id,
         add_color_similarities_by_id,
+        delete_id_from_color_similarities,
+        add_color_similarity_to_other_image,
+        get_image_ids_from_color_similarities,
         // get_phash_distances_by_image_id,  
     },
     password_recovery:{
