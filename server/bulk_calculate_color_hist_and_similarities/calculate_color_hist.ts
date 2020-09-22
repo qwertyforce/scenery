@@ -38,10 +38,6 @@ async function calculate_color_hist(){
 }
 
 async function calc_similarities() {
-  const s= await db_ops.image_search.get_color_similarities_by_id(4)
-  for(const x of s){
-    console.log(x)
-  }
   const images = await db_ops.image_ops.get_all_images() 
   const get_all_hist=await db_ops.image_search.get_all_color_hists()
   console.time();
