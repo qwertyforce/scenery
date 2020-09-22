@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import ErrorPage from 'next/error'
+import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -48,15 +49,26 @@ const MainPage = (props: any) => {
         variant="fullWidth"
         aria-label="full width tabs example"
       >
-       <Tab href="/last_added/1" label="Last Added" {...a11yProps(0)} />
-       <Tab href="/top_rated/1" label="Top Rated"  {...a11yProps(1)} />
+        <Tab href="/last_added/1" label="Last Added" {...a11yProps(0)} />
+        <Tab href="/top_rated/1" label="Top Rated"  {...a11yProps(1)} />
       </Tabs>
 
       {/* 
   // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
       <div className={classes.pagination}>
-        <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e, p) => router.push(`/last_added/${p}`)} siblingCount={3} color="primary" size="large" />
+        {/* // @ts-ignore */}
+        <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
+          {/* 
+// @ts-ignore */ }
+          return (<PaginationItem
+            component={Link}
+            href={`/last_added/${item.page}`}
+            underline="none"
+            {...item}
+          />)
+        }
+        } siblingCount={3} color="primary" size="large" />
       </div>
       <div className={classes.footer}>
         <Link href='/about'>About&nbsp;</Link>
@@ -68,16 +80,16 @@ const MainPage = (props: any) => {
   )
 }
 
-export async function getStaticProps(context:any) {
+export async function getStaticProps(context: any) {
   const images_on_page = 30
   const photos = []
-  if(context.params.page){
+  if (context.params.page) {
     const images = (await db_ops.image_ops.get_all_images()).reverse()
     const page = parseInt(context.params.page)
-    if(page <= Math.ceil(images.length / images_on_page)){
+    if (page <= Math.ceil(images.length / images_on_page)) {
       for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
         photos.push({
-          src: `/images/${images[i].id}.${images[i].file_ext}`,
+          src: `/webp_images/${images[i].id}.webp`,
           key: `/image/${images[i].id}`,
           width: images[i].width,
           height: images[i].height
@@ -89,13 +101,13 @@ export async function getStaticProps(context:any) {
           current_page: page,
           max_page: Math.ceil(images.length / images_on_page)
         },
-        revalidate: 5*60 //5 min
+        revalidate: 5 * 60 //5 min
       }
     }
   }
   return {
-    props: {err: true},
-    revalidate: 5*60 //5 min
+    props: { err: true },
+    revalidate: 5 * 60 //5 min
   }
 }
 

@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import ErrorPage from 'next/error'
+import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -56,7 +57,18 @@ const MainPage = (props: any) => {
   // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
       <div className={classes.pagination}>
-        <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e, p) => router.push(`/top_rated/${p}`)} siblingCount={3} color="primary" size="large" />
+        {/* // @ts-ignore */}
+        <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
+          {/* 
+// @ts-ignore */ }
+          return (<PaginationItem
+            component={Link}
+            href={`/top_rated/${item.page}`}
+            underline="none"
+            {...item}
+          />)
+        }
+        } siblingCount={3} color="primary" size="large" />
       </div>
       <div className={classes.footer}>
         <Link href='/about'>About&nbsp;</Link>
@@ -77,7 +89,7 @@ export async function getStaticProps(context: any) {
     if (page <= Math.ceil(images.length / images_on_page)) {
       for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
         photos.push({
-          src: `/images/${images[i].id}.${images[i].file_ext}`,
+          src: `/webp_images/${images[i].id}.webp`,
           key: `/image/${images[i].id}`,
           width: images[i].width,
           height: images[i].height
