@@ -11,5 +11,6 @@ export default {
     gmail_user:"auth.test.reg.email@gmail.com",
     gmail_password:"sbuLBh9rAV8XD2",
     mongodb_url:"mongodb://localhost/",
-    server_port:"80"
+    server_port:"80",
+    session_secret:"ghuieorifigyfuu9u3i45jtr73490548t7ht"
 }

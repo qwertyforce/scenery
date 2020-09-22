@@ -66,7 +66,7 @@ next_app.prepare().then(() => {
   app.disable('x-powered-by');
   app.use(cookieParser());
   app.use(session({
-    secret: 'ghuieorifigyfuu9u3i45jtr73490548t7ht',
+    secret: config.session_secret,
     resave: false,
     saveUninitialized: true,
     name: "session",
