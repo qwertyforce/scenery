@@ -25,6 +25,10 @@ const PATH_TO_IMAGES = path.join("..", "..", "..", 'public', 'images')
 async function calculate_color_hist(){
     const images = await db_ops.image_ops.get_all_images()
     for(const image of images){
+        const check_if_already_calculated= await db_ops.image_search.get_color_hist_by_id(image.id)
+        if(check_if_already_calculated.length!==0){
+          continue
+        }
         console.log(image.id)
         const img = await cv.imreadAsync(`${PATH_TO_IMAGES}/${image.id}.${image.file_ext}`);
         let rgb_hist = await cv.calcHistAsync(img, histAxes)
@@ -42,6 +46,10 @@ async function calc_similarities() {
   const get_all_hist=await db_ops.image_search.get_all_color_hists()
   console.time();
   for (let i = 0; i < images.length - 1; i++) {
+    const check_if_already_calculated=await db_ops.image_search.get_color_similarities_by_id(images[i].id)
+    if(check_if_already_calculated.length!==0){
+      continue
+    }
     const target_image = get_all_hist.find((el)=>el.id===images[i].id)
     const target_hist = new cv.Mat(target_image.color_hist, cv.CV_32F)
     const similarities=[]
@@ -56,10 +64,10 @@ async function calc_similarities() {
     await db_ops.image_search.add_color_similarities_by_id(images[i].id,similarities)
   }
   console.timeEnd()
-  process.exit()
 }
 async function calc_color_hists_and_similarities() {
   await calculate_color_hist()
   await calc_similarities()
+  process.exit()
 }
 calc_color_hists_and_similarities()
