@@ -38,7 +38,6 @@ async function calculate_color_hist(){
         const arr=rgb_hist.getDataAsArray()          
         await db_ops.image_search.add_color_hist_by_id(image.id,arr)
     }
-    process.exit()
 }
 
 async function calc_similarities() {
