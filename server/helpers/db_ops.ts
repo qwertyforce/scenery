@@ -105,8 +105,8 @@ return similarities
 
 async function delete_id_from_color_similarities(id:number){
     const collection = client.db(db_main).collection("color_similarities");
-    collection.deleteOne({id:id})
-    collection.updateMany({}, { $pull: {similarities:{id:id}} })
+    await collection.deleteOne({id:id})
+    await collection.updateMany({}, { $pull: {similarities:{id:id}} })
 }
 
 async function get_image_ids_from_color_similarities(){
