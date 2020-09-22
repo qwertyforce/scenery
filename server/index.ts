@@ -18,7 +18,7 @@ import config from '../config/config'
 
 const PASS_MIN = 8;
 const PASS_MAX = 128;
-const port = parseInt(process.env.NODE_PORT||"80")
+const port = parseInt(process.env.NODE_PORT||config.server_port)
 const dev = process.env.NODE_ENV !== 'production'
 const next_app = next({ dev })
 const handle = next_app.getRequestHandler()
@@ -143,6 +143,6 @@ next_app.prepare().then(() => {
   app.set('trust proxy','127.0.0.1')
   app.listen(port,'localhost', (err) => {
     if (err) throw err
-    console.log(`> Ready on ${config.domain}:${port}`)
+    console.log(`> Ready on ${port}`)
   })
 })

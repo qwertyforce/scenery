@@ -10,5 +10,6 @@ export default {
     GITHUB_REDIRECT_URI: "http://localhost/auth/github/callback",
     gmail_user:"auth.test.reg.email@gmail.com",
     gmail_password:"sbuLBh9rAV8XD2",
-    mongodb_url:"mongodb://localhost/"
+    mongodb_url:"mongodb://localhost/",
+    server_port:"80"
 }
