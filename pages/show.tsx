@@ -33,7 +33,7 @@ export async function getServerSideProps(context: any) {
     const photos = []
     for (const image of images) {
       photos.push({
-        src: `/webp_images/${image.id}.${image.file_ext}`,
+        src: `/webp_images/${image.id}.webp`,
         key: `/image/${image.id}`,
         width: image.width,
         height: image.height
