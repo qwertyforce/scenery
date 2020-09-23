@@ -4,9 +4,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
-import { useRouter } from 'next/router'
 import Photo from '../components/Photo'
+import Link from '../components/Link'
 import ErrorPage from 'next/error'
+import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
+
 const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
@@ -17,7 +19,6 @@ const useStyles = makeStyles(() => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Search(props: any) {
   const classes = useStyles();
-  const router = useRouter()
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
@@ -28,7 +29,18 @@ export default function Search(props: any) {
   // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
       <div className={classes.pagination}>
-        <Pagination count={props.max_page} defaultPage={props.current_page} onChange={(_e, p) => router.push(`/search?q=${props.search_query}&page=${p}`)} siblingCount={3} color="primary" size="large" />
+        {/* // @ts-ignore */}
+        <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
+          {/* 
+// @ts-ignore */ }
+          return (<PaginationItem
+            component={Link}
+            href={`/search?q=${props.search_query}&page=${item.page}`}
+            underline="none"
+            {...item}
+          />)
+        }
+        } siblingCount={3} color="primary" size="large" />
       </div>
     </div>
 
