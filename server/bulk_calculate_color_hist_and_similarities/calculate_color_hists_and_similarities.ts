@@ -2,6 +2,7 @@ import * as cv from 'opencv4nodejs'
 import { HistAxes } from 'opencv4nodejs';
 import path from 'path';
 import db_ops from '../helpers/db_ops'
+import config from '../../config/config'
 const BIN_SIZE=16
 const histAxes:HistAxes[]= [
     new HistAxes({
@@ -20,9 +21,10 @@ const histAxes:HistAxes[]= [
         ranges: [0, 255]
       }),
   ]
-const PATH_TO_IMAGES = path.join("..", "..", "..", 'public', 'images')
+const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
 
 async function calculate_color_hist(){
+  return
     const images = await db_ops.image_ops.get_all_images()
     for(const image of images){
         const check_if_already_calculated= await db_ops.image_search.get_color_hist_by_id(image.id)
@@ -41,21 +43,35 @@ async function calculate_color_hist(){
 }
 
 async function calc_similarities() {
+  const cache=[]
   const images = await db_ops.image_ops.get_all_images() 
+  for(let i=0;i<images.length;i++){
+    cache[i]=Array(images.length).fill(-1)
+ } 
   const get_all_hist=await db_ops.image_search.get_all_color_hists()
   console.time();
   for (let i = 0; i < images.length - 1; i++) {
-    const check_if_already_calculated=await db_ops.image_search.get_color_similarities_by_id(images[i].id)
-    if(check_if_already_calculated.length!==0){
-      continue
-    }
+    // const check_if_already_calculated=await db_ops.image_search.get_color_similarities_by_id(images[i].id)
+    // if(check_if_already_calculated.length!==0){
+    //   continue
+    // }
+    
     const target_image = get_all_hist.find((el)=>el.id===images[i].id)
     const target_hist = new cv.Mat(target_image.color_hist, cv.CV_32F)
     const similarities=[]
-    for (let j = i + 1; j < images.length; j++) {
+    for (let j = 0; j < images.length; j++) {
+      if(i===j){
+        continue;
+      }
+      if(cache[j][i]!==-1){
+        console.log('cache hit')
+        similarities.push({id:images[j].id,similarity:cache[j][i]})
+        continue
+      }
       const _image = get_all_hist.find((el)=>el.id===images[j].id)
       const color_hist_mat = new cv.Mat(_image.color_hist, cv.CV_32F);
       const similarity = await target_hist.compareHistAsync(color_hist_mat, cv.HISTCMP_INTERSECT)
+      cache[i][j]=similarity
       similarities.push({id:images[j].id,similarity:similarity})
       color_hist_mat.release()
       console.log(`${i}->${j}`)
@@ -67,6 +83,6 @@ async function calc_similarities() {
 async function calc_color_hists_and_similarities() {
   await calculate_color_hist()
   await calc_similarities()
-  process.exit()
+  // process.exit()
 }
 calc_color_hists_and_similarities()

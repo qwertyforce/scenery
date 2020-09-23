@@ -94,12 +94,7 @@ async function generate_id() {
 async function get_color_similarities_by_id(id:number){
 const collection = client.db(db_main).collection("color_similarities");
 // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
-const similarities_by_id = await collection.find({id:id}).project({_id:0,id:0}).toArray()
-const similarities=(similarities_by_id[0]?.similarities||[])
-const other_images_similar_by_id = await collection.find({similarities: { $elemMatch: { id: id} }}).project({_id:0,id:1,"similarities.$": 1,}).toArray()
-for(const x of other_images_similar_by_id){
-    similarities.push({id:x.id,similarity:x.similarities[0].similarity})
-}
+const similarities = collection.find({id:id}).project({_id:0,id:0}).toArray()
 return similarities
 }
 

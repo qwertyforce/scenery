@@ -57,6 +57,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 await db_ops.image_ops.add_image(new_image_id, derpi_data.format.toLowerCase(), derpi_data.width, derpi_data.height, parsed_author, derpi_data.size,
                     derpi_link, derpi_data.upvotes, derpi_data.downvotes, derpi_data.id, derpi_data.created_at,
                     derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash, derpi_data.description)
+                console.log(`OK. New image_id: ${new_image_id}`)
                 res.json({ message: `OK. New image_id: ${new_image_id}`})
                 return
             } catch (error) {

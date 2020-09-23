@@ -51,7 +51,7 @@ export async function getStaticProps(context: any) {
   const photos = []
   if (context.params.id) {
     const id=parseInt(context.params.id)
-    let similar_by_color:Array<Record<string,any>>=(await db_ops.image_search.get_color_similarities_by_id(id)).filter((el:any)=>el.similarity>0.2)
+    let similar_by_color:Array<Record<string,any>>=((await db_ops.image_search.get_color_similarities_by_id(id))[0].similarities).filter((el:any)=>el.similarity>0.2)
     similar_by_color.sort((a,b)=>b.similarity-a.similarity)
     similar_by_color=similar_by_color.slice(0,images_on_page)
     for(const img of similar_by_color){
