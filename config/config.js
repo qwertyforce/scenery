@@ -1,3 +1,4 @@
+import path from "path"
 export default {
     recaptcha_site_key: "6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb",
     recaptcha_secret_key: "6LcqV9QUAAAAAOA18kbCEWRBhF4g4LjSTaFRVe9P",
@@ -12,5 +13,6 @@ export default {
     gmail_password:"sbuLBh9rAV8XD2",
     mongodb_url:"mongodb://localhost/",
     server_port:"80",
-    session_secret:"ghuieorifigyfuu9u3i45jtr73490548t7ht"
+    session_secret:"ghuieorifigyfuu9u3i45jtr73490548t7ht",
+    root_path: path.join("D:","scenery")
 }
