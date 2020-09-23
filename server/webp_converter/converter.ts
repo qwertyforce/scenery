@@ -1,8 +1,9 @@
-const sharp = require('sharp');
-const path = require('path')
-const fs = require('fs')
-const PATH_TO_IMAGES = path.join("..", 'public', 'images')
-const PATH_TO_WEBP_IMAGES = path.join("..",'webp_images')
+import sharp from 'sharp';
+import path from 'path';
+import fs from 'fs';
+import config from "../../config/config"
+const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
+const PATH_TO_WEBP_IMAGES = path.join(config.root_path,'public','webp_images')
 const WEBP_IMAGES = fs.readdirSync(PATH_TO_WEBP_IMAGES)
 const IMAGES = fs.readdirSync(PATH_TO_IMAGES)
 
