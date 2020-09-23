@@ -86,7 +86,7 @@ export async function getStaticProps(context: any) {
   if (context.params.page) {
     const images = (await db_ops.image_ops.get_all_images()).sort((a, b) => b.wilson_score - a.wilson_score)
     const page = parseInt(context.params.page)
-    if (page <= Math.ceil(images.length / images_on_page)) {
+    if (page >= 1 && page <= Math.ceil(images.length / images_on_page)) {
       for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
         photos.push({
           src: `/webp_images/${images[i].id}.webp`,
