@@ -9,7 +9,7 @@ import sharp from 'sharp'
 import image_ops from './../helpers/image_ops'
 const imghash: any = require('imghash');
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
-const PATH_TO_WEBP = path.join(process.cwd(),'webp_images')
+const PATH_TO_WEBP = path.join(process.cwd(),'public','webp_images')
 async function parse_author(tags: any) {
     for (const tag of tags) {
         const idx = tag.indexOf("artist:")

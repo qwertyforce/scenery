@@ -7,11 +7,11 @@ const { COPYFILE_EXCL } = fs.constants;
 
 const imghash: any = require('imghash');
 
+import config from "../../config/config"
 
-
-const PATH_TO_IMAGES = path.join("..", "..", "..", 'import_from_derpi', 'images')
-const PATH_TO_JSONS = path.join("..", "..", "..", 'import_from_derpi', 'jsons')
-const PATH_TO_IMPORTED_IMAGES = path.join("..", "..", "..", 'public', 'images')
+const PATH_TO_IMAGES = path.join(config.root_path, 'import_from_derpi', 'images')
+const PATH_TO_JSONS = path.join(config.root_path, 'import_from_derpi', 'jsons')
+const PATH_TO_IMPORTED_IMAGES = path.join(config.root_path, 'public', 'images')
 const IMAGES = fs.readdirSync(PATH_TO_IMAGES)
 
 const JSONS = fs.readdirSync(PATH_TO_JSONS).map(json_file_name => path.parse(json_file_name).name)
