@@ -60,27 +60,29 @@ export async function getStaticProps(context: any) {
   let similar_by_tags = []
   if (context.params.id) {
     const images = await db_ops.image_ops.get_all_images()
-    const orig_tags = (images.find((el) => el.id.toString() === context.params.id)).tags
-    for (const image of images) {
-      if (image.id.toString() !== context.params.id) {
-        similar_by_tags.push({ id: image.id, file_ext: image.file_ext, width: image.width, height: image.height, similarity: await get_similarity(orig_tags, image.tags) })
+    const orig_tags = (images.find((el) => el.id.toString() === context.params.id))?.tags
+    if (orig_tags) {
+      for (const image of images) {
+        if (image.id.toString() !== context.params.id) {
+          similar_by_tags.push({ id: image.id, file_ext: image.file_ext, width: image.width, height: image.height, similarity: await get_similarity(orig_tags, image.tags) })
+        }
       }
-    }
-    similar_by_tags.sort((a, b) => b.similarity - a.similarity)
-    similar_by_tags=similar_by_tags.slice(0,images_on_page)
-    for (const image of similar_by_tags) {
-      photos.push({
-        src: `/webp_images/${image.id}.webp`,
-        key: `/image/${image.id}`,
-        width: image.width,
-        height: image.height
-      })
-    }
-    return {
-      props: {
-        photos: photos
-      },
-      revalidate: 5 * 60 //5 min
+      similar_by_tags.sort((a, b) => b.similarity - a.similarity)
+      similar_by_tags = similar_by_tags.slice(0, images_on_page)
+      for (const image of similar_by_tags) {
+        photos.push({
+          src: `/webp_images/${image.id}.webp`,
+          key: `/image/${image.id}`,
+          width: image.width,
+          height: image.height
+        })
+      }
+      return {
+        props: {
+          photos: photos
+        },
+        revalidate: 5 * 60 //5 min
+      }
     }
   }
   return {

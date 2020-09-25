@@ -50,24 +50,27 @@ export async function getStaticProps(context: any) {
   const images_on_page = 120
   const photos = []
   if (context.params.id) {
-    const id=parseInt(context.params.id)
-    let similar_by_color:Array<Record<string,any>>=((await db_ops.image_search.get_color_similarities_by_id(id))[0].similarities).filter((el:any)=>el.similarity>0.2)
-    similar_by_color.sort((a,b)=>b.similarity-a.similarity)
-    similar_by_color=similar_by_color.slice(0,images_on_page)
-    for(const img of similar_by_color){
-      const image = (await db_ops.image_ops.find_image_by_id(img.id))[0]
-      photos.push({
-        src: `/webp_images/${image.id}.webp`,
-        key: `/image/${image.id}`,
-        width: image.width,
-        height: image.height
-      })
-    }
-    return {
-      props: {
-        photos: photos
-      },
-      revalidate: 5 * 60 //5 min
+    const id = parseInt(context.params.id)
+    let similar_by_color: Array<Record<string, any>> = await db_ops.image_search.get_color_similarities_by_id(id)
+    if (similar_by_color.length !== 0) {
+      similar_by_color = similar_by_color[0].similarities.filter((el: any) => el.similarity > 0.2)
+      similar_by_color.sort((a, b) => b.similarity - a.similarity)
+      similar_by_color = similar_by_color.slice(0, images_on_page)
+      for (const img of similar_by_color) {
+        const image = (await db_ops.image_ops.find_image_by_id(img.id))[0]
+        photos.push({
+          src: `/webp_images/${image.id}.webp`,
+          key: `/image/${image.id}`,
+          width: image.width,
+          height: image.height
+        })
+      }
+      return {
+        props: {
+          photos: photos
+        },
+        revalidate: 5 * 60 //5 min
+      }
     }
   }
   return {
