@@ -33,6 +33,7 @@ import change_password from './routes/change_password';
 import forgot_password from './routes/forgot_password';
 import activate_account_email from './routes/activate_account_email';
 import update_image_data from './routes/update_image_data'
+import delete_image from './routes/delete_image'
 import import_from_derpi from './routes/import_from_derpi'
 import reverse_search from './routes/reverse_search'
 next_app.prepare().then(() => {
@@ -91,7 +92,9 @@ next_app.prepare().then(() => {
   api_router.get('/auth/google/callback', google_oauth_callback)
 
   api_router.post('/reverse_search', [upload.single('image'),recaptcha.middleware.verify], reverse_search)
+
   api_router.post('/update_image_data', update_image_data)
+  api_router.post('/delete_image', delete_image)
   api_router.post('/import_from_derpi', import_from_derpi)
 
   api_router.post('/signup', [

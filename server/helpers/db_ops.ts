@@ -129,35 +129,22 @@ async function get_all_color_hists(){
     return color_hists
 }
 
+async function delete_color_hist_by_id(id:number){
+    removeDocument("color_hist",{id:id})
+}
+
 async function add_color_hist_by_id(id:number, color_hist:number[][]){
     insertDocuments("color_hist", [{
         id:id,
         color_hist:color_hist
     }])
 }
-// async function get_all_phash_distances(){
-//     const phash_distances = findDocuments("img_search", {})
-//     return phash_distances
-// }
-// async function get_phash_distances_by_image_id(id:number){
-//     const phash_distances = findDocuments("img_search", {id:id})
-//     return phash_distances
-// }
-
-// async function add_image_to_image_search(id:number, phash_dist:Array<Record<string,unknown>>){
-//     insertDocuments("img_search", [{
-//         id:id,
-//         phash_dist:phash_dist
-//     }])
-// }
-// async function update_phash_dist_by_id(id:number, phash_dist:Array<Record<string,unknown>>){
-//     updateDocument("images", {id: id},{phash_dist:phash_dist})
-// }
 
 ////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////IMAGES OPS
+
 
 async function add_tags_to_image_by_id(id:number,tags:string[]){
     await addToArrayInDocument("images",{id:id},{tags:{ $each:tags}})
@@ -214,6 +201,9 @@ async function get_max_image_id(){
     const collection = client.db(db_main).collection("images");
     const result = await collection.find({}).sort({id:-1}).limit(1).toArray()
     return result[0]?.id
+}
+async function delete_image_by_id(id:number){
+    removeDocument("images",{id:id})
 }
 
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
@@ -364,6 +354,7 @@ export default {
         get_all_images,
         find_image_by_id,
         get_max_image_id,
+        delete_image_by_id,
         find_images_by_tags,
         get_ids_and_phashes,
         find_image_by_phash,
@@ -376,15 +367,12 @@ export default {
         get_all_color_hists,
         get_color_hist_by_id,
         add_color_hist_by_id,
-        // get_all_phash_distances,
-        // update_phash_dist_by_id,
-        // add_image_to_image_search,
+        delete_color_hist_by_id,
         get_color_similarities_by_id,
         add_color_similarities_by_id,
         delete_id_from_color_similarities,
         add_color_similarity_to_other_image,
         get_image_ids_from_color_similarities,
-        // get_phash_distances_by_image_id,  
     },
     password_recovery:{
         update_user_password_by_id,
