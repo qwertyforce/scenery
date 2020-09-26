@@ -105,7 +105,7 @@ export default function Image(props: any) {
 
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  if (context.params.id) {
+  if (context.params?.id) {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
     if (img.length === 1) {
       const date = new Date(img[0].created_at)
