@@ -79,7 +79,7 @@ export default function DenseAppBar() {
         <Toolbar variant="dense" className={classes.tool_bar}>
           <Typography variant="h6" color="inherit">
           <Link href="/" color="inherit" underline="none">
-             Scenery
+             OnlyComfy
            </Link>
           </Typography>
           <div className={classes.search}>
