@@ -21,7 +21,7 @@ export default function ReverseSearch() {
   const classes = useStyles();
   const router = useRouter()
   const [Files, setFiles] = useState([]);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const send_image = (token: string) => {
     setOpen(true)
     const formData = new FormData();
