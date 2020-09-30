@@ -16,10 +16,11 @@ async function import_upscaled() {
     for (const image_file_name of UPSCALED) {
         const file_name=image_file_name.split('.')                           // image.png.png  (esrgan-ncnn-vulkan)
         if(!PUBLIC_UPSCALED.includes(`${file_name[0]}.png`)){
-            console.log(`converting ${image_file_name}`)
-            fs.copyFile(`${UPSCALED}/${image_file_name}`, `${PUBLIC_UPSCALED}/${file_name[0]}.png`, COPYFILE_EXCL,callback )
-            db_ops.image_ops.add_tags_to_image_by_id(parseInt(file_name[0]),['upscaled'])
+            console.log(`importing ${image_file_name}`)
+            fs.copyFile(`${PATH_TO_UPSCALED}/${image_file_name}`, `${PATH_TO_PUBLIC_UPSCALED}/${file_name[0]}.png`, COPYFILE_EXCL,callback )
+            await db_ops.image_ops.add_tags_to_image_by_id(parseInt(file_name[0]),['upscaled'])
             }
         }   
+        process.exit()
     }
 import_upscaled()
