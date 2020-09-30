@@ -90,6 +90,12 @@ export default function Image(props: any) {
                 <LinkIcon />
               &nbsp;<a href={props.similar_by_color_link} target="_blank" rel="noreferrer">Similar by color</a>
               </div>
+              {((props.upscaled)?(
+                <div className={classes.icon_container}>
+                <LinkIcon />
+              &nbsp;<a href={props.upscaled} target="_blank" rel="noreferrer">Upscaled version</a>
+              </div>
+                ):null)}
               <div className={classes.icon_container}>
                 <LabelIcon />
                 <p>&nbsp;Tags:</p>
@@ -110,6 +116,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     if (img.length === 1) {
       const date = new Date(img[0].created_at)
       const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
+      const upscaled = (img[0].tags.includes('upscaled')?(`/upscaled/${img[0].id}`):null)
       return {
         props: {
           filename: `${img[0].id}.${img[0].file_ext}`,
@@ -123,6 +130,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
           date: date_str,
           similar_by_tags_link:`/similar_by_tags/${img[0].id}`,
           similar_by_color_link:`/similar_by_color/${img[0].id}`,
+          is_upscaled:upscaled
         },
         revalidate: 5*60 //5 min
       }
