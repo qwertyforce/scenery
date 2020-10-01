@@ -5,11 +5,10 @@ import { Request, Response } from 'express';
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path';
-import sharp from 'sharp'
 import image_ops from './../helpers/image_ops'
+import thumbnail_ops from '../helpers/thumbnail_ops'
 const imghash: any = require('imghash');
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
-const PATH_TO_WEBP = path.join(process.cwd(),'public','webp_images')
 async function parse_author(tags: any) {
     for (const tag of tags) {
         const idx = tag.indexOf("artist:")
@@ -40,9 +39,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 }
                 const image =await axios.get(derpi_data.representations.full, {responseType: 'arraybuffer'})
                 const new_image_id = (await db_ops.image_ops.get_max_image_id())+1
-                await sharp(image.data)
-                .webp({ quality: 80, reductionEffort: 6 })
-                .toFile(`${PATH_TO_WEBP}/${new_image_id}.webp`);
+                await thumbnail_ops.generate_thumbnail(image.data,new_image_id)
                 fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${derpi_data.format.toLowerCase()}`, image.data, 'binary', function (err) {
                     if (err) {
                         console.log(`There was an error writing the image: derpi_id: ${derpy_import_id} id: ${new_image_id}`)
