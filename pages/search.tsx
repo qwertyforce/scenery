@@ -69,6 +69,7 @@ export async function getServerSideProps(context: any) {
     } else {
       page = 1
     }
+    page = Math.max(page,1)
     if (page <= Math.ceil(images.length / images_on_page)) {
       for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
         photos.push({

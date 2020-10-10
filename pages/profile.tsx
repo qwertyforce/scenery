@@ -11,7 +11,7 @@ export default function Index(props: { user_data: React.ReactNode; }) {
 export async function getServerSideProps(context: any) {
   let authed = false;
   let user_data;
-  if (context.req.session.authed && context.req.session.user_id) {
+  if (context.req.session?.authed && context.req.session?.user_id) {
     authed = true;
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
     console.log(user[0])
