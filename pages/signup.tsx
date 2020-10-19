@@ -71,7 +71,7 @@ function SignUpForm() {
 
   };
   const _handleSignUp = () => {
-    /*global grecaptcha*/ // defined in public/index.html
+    /*global grecaptcha*/ // defined in pages/_document.tsx
     if (validateEmail(email)) {
       if (password === password2) {
         if (password.length > 7 && password.length < 129) {

@@ -77,7 +77,7 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
     })
   };
   const _handleLogin = () => {
-    /*global grecaptcha*/ // defined in public/index.html
+    /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
       grecaptcha.execute(config.recaptcha_site_key, { action: 'login' }).then(function (token) {
         handleLogin(token)
