@@ -31,7 +31,7 @@ async function signup(req:Request,res:Response) {
         })
     } else {
         console.log(users)
-        res.json({
+        res.status(403).json({
             message: 'User with same email is already registered'
         })
     }

@@ -23,7 +23,7 @@ async function login(req:Request,res:Response) {
     const users = await db_ops.activated_user.find_user_by_email(email);
     if (users.length === 0) {
         await crypto_ops.check_password("Random_text_qwfqwfg", "$2b$10$xKgSc736RxzT76ZMGyXMLe1Dge99d4PLyUOv60jpywAWJwftYcgjK"); // PROTECTION AGAINST TIMING ATTACK
-        res.json({
+        res.status(403).json({
             message: MESSAGE_FOR_AUTH_ERROR
         })
     } else {
