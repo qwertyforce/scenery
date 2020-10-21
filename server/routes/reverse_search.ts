@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import db_ops from './../helpers/db_ops'
 import { Request, Response } from 'express';
+import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 import db_ops from '../helpers/db_ops'
 const imghash: any = require('imghash');
 function hamming_distance(str1: string, str2: string) {
@@ -14,10 +15,11 @@ function hamming_distance(str1: string, str2: string) {
     return distance;
 }
 async function reverse_search(req: Request, res: Response) {
-    if (req.recaptcha?.error) {
+    const recaptcha_score=(req.recaptcha as RecaptchaResponseV3)?.data?.score
+    if (req.recaptcha?.error|| (typeof recaptcha_score==="number" && recaptcha_score<0.5)) {
         return res.status(403).json({
             message: "Captcha error"
-        })
+        });
     }
     const phash= await imghash.hash(req.file.buffer,16)
     const images=await db_ops.image_ops.get_ids_and_phashes()

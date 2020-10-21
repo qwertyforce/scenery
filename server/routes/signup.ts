@@ -4,11 +4,13 @@ import crypto_ops from './../helpers/crypto_ops';
 import config from '../../config/config'
 import { validationResult } from 'express-validator';
 import {Request, Response} from 'express';
+import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 async function signup(req:Request,res:Response) {
-    if (req.recaptcha?.error) {
+    const recaptcha_score=(req.recaptcha as RecaptchaResponseV3)?.data?.score
+    if (req.recaptcha?.error|| (typeof recaptcha_score==="number" && recaptcha_score<0.5)) {
         return res.status(403).json({
             message: "Captcha error"
-        })
+        });
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

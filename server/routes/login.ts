@@ -3,9 +3,11 @@ import db_ops from './../helpers/db_ops'
 import { validationResult } from 'express-validator'
 import crypto_ops from './../helpers/crypto_ops'
 import {Request, Response} from 'express';
+import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 
 async function login(req:Request,res:Response) {
-    if (req.recaptcha?.error) {
+    const recaptcha_score=(req.recaptcha as RecaptchaResponseV3)?.data?.score
+    if (req.recaptcha?.error|| (typeof recaptcha_score==="number" && recaptcha_score<0.5)) {
         return res.status(403).json({
             message: "Captcha error"
         });
