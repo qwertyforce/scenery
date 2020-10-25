@@ -73,7 +73,7 @@ export async function getServerSideProps(context: any) {
     if (page <= Math.ceil(images.length / images_on_page)) {
       for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
         photos.push({
-          src: `/webp_images/${images[i].id}.webp`,
+          src: `/thumbnails/${images[i].id}.jpg`,
           key: `/image/${images[i].id}`,
           width: images[i].width,
           height: images[i].height

@@ -7,17 +7,17 @@ import AppBar from '../components/AppBar'
 export default function About() {
   return (
     <div>
-      <AppBar/>
+      <AppBar />
       <Container maxWidth="sm">
-      <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          OnlyComfy.art
+        <Box my={4}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            OnlyComfy.art
         </Typography>
-        Only high quality comfy pony scenery art.
-        <br/>
-        onlycomfyart@gmail.com
+      High quality comfy pony scenery art.
+        <br />
+        onlycomfy@gmail.com
       </Box>
-    </Container>
+      </Container>
     </div>
   );
 }

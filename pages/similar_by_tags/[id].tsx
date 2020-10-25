@@ -71,7 +71,7 @@ export async function getStaticProps(context: any) {
       similar_by_tags = similar_by_tags.slice(0, images_on_page)
       for (const image of similar_by_tags) {
         photos.push({
-          src: `/webp_images/${image.id}.webp`,
+          src: `/thumbnails/${image.id}.jpg`,
           key: `/image/${image.id}`,
           width: image.width,
           height: image.height

@@ -59,7 +59,7 @@ export async function getStaticProps(context: any) {
       for (const img of similar_by_color) {
         const image = (await db_ops.image_ops.find_image_by_id(img.id))[0]
         photos.push({
-          src: `/webp_images/${image.id}.webp`,
+          src: `/thumbnails/${image.id}.jpg`,
           key: `/image/${image.id}`,
           width: image.width,
           height: image.height
