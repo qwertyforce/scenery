@@ -87,7 +87,7 @@ export default function DenseAppBar() {
               <SearchIcon />
             </div>
             <InputBase
-              placeholder="tag1,tag2,tagN"
+              placeholder="tag1, -tag2, tagN"
               onChange={(e)=>setTags(e.target.value)}
               onKeyPress={(e)=>handleKeyPress(e)}
               classes={{

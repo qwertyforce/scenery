@@ -76,7 +76,7 @@ export default function Image(props: any) {
               </div>
               <div className={classes.icon_container}>
                 <LinkIcon />
-              &nbsp;<a href={props.derpi_link} target="_blank" rel="noreferrer">Depri Link</a>
+              &nbsp;<a href={props.derpi_link} target="_blank" rel="noreferrer">Derpi Link</a>
               </div>
               <div className={classes.icon_container}>
                 <LinkIcon />
