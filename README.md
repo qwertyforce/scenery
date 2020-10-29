@@ -1,7 +1,11 @@
-Next.js
-Express
-Material UI
-Typescript
-Jest (i need to write some tests)
+Next.js <br>
+Express <br>
+Material UI <br>
+Typescript <br>
 https://onlycomfy.art
  
+ 
+Features: <br>
+Search by tags <br>
+You can find images with similar tags. <br>
+You can find images with similar color palette. <br>
