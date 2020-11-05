@@ -34,7 +34,8 @@ export default function Import_from_derpi(props: any) {
     axios(`/import_from_derpi`, {
       method: "post",
       data: { id: ImageID },
-      withCredentials: true
+      withCredentials: true,
+      timeout:5*60*1000
     }).then((resp) => {
       setOpen(false)
       alert(JSON.stringify(resp.data))

@@ -25,6 +25,7 @@ async function import_from_derpi(req: Request, res: Response) {
     if (req.session?.user_id) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
         if (user[0].isAdmin) {
+            req.setTimeout(5*60*1000)
             try {
                 const imgs = await db_ops.image_ops.find_image_by_derpi_id(derpy_import_id)
                 if (imgs.length !== 0) {
