@@ -47,7 +47,7 @@ export default function ReverseSearch() {
   const _send_image = (mode:string) => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'login' }).then(function (token) {
+      grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
         send_image(token,mode)
       });
     })
@@ -67,7 +67,7 @@ export default function ReverseSearch() {
           onChange={(files) => setFiles((files as never))}
         />
       </Box>
-      <Button onClick={() => { _send_image("1") }} variant="contained" color="primary" >Reverse Search (fast, less accureate)</Button>
+      <Button onClick={() => { _send_image("1") }} variant="contained" color="primary" >Reverse Search (fast, less accurate)</Button>
       <div style={{marginTop:"10px"}}><Button onClick={() => { _send_image("2") }} variant="contained" color="primary" >Reverse Search (slow, more accurate)</Button></div>
       
     </div>
