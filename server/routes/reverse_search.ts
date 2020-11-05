@@ -18,11 +18,11 @@ async function reverse_search(req: Request, res: Response) {
         req.setTimeout(120000)//2min
         if(Mode===1){
             const ids=await image_ops.get_similar_images_by_phash(req.file.buffer)
-            console.log(ids)
+            // console.log(ids)
             res.json({ids:ids.join(',')})
         }else if(Mode===2){
             const ids=await image_ops.get_similar_images_by_orb(req.file.buffer)
-            console.log(ids)
+            // console.log(ids)
             res.json({ids:ids.join(',')})
         }
        

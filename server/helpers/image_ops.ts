@@ -53,7 +53,6 @@ async function get_similar_images_by_orb(image:Buffer) {
   const number_of_images = await db_ops.image_search.get_number_of_images_orb_reverse_search()
   const batch = 500;
   const similar_images=[]
-  console.time()
   for (let i = 0; i < number_of_images; i += batch) {
     const descriptors = await db_ops.image_search.get_orb_features_batch(i, batch) 
     for (const img of descriptors) {
@@ -70,7 +69,6 @@ async function get_similar_images_by_orb(image:Buffer) {
       similar_images.push({id:img.id,avg_distance:sum / matches.length})
     }
   }
-  console.timeEnd()
   similar_images.sort((a,b)=>a.avg_distance-b.avg_distance)
   similar_images.length=30
   const ids=similar_images.map((el)=>el.id)
