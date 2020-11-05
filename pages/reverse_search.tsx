@@ -22,30 +22,33 @@ export default function ReverseSearch() {
   const router = useRouter()
   const [Files, setFiles] = useState([]);
   const [open, setOpen] = useState(false);
-  const send_image = (token: string) => {
+  const send_image = (token: string,mode:string) => {
     setOpen(true)
     const formData = new FormData();
     formData.append("image", Files[0]);
     formData.append("g-recaptcha-response", token);
+    formData.append("mode", mode);
     axios(`/reverse_search`, {
       method: "post",
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      timeout:120000   //2min
     }).then((resp) => {
       setOpen(false)
+      console.log(resp.data.ids)
       router.push("/show?ids=" + resp.data.ids)
     }).catch((err) => {
       setOpen(false)
       console.log(err)
     })
   }
-  const _send_image = () => {
+  const _send_image = (mode:string) => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
       grecaptcha.execute(config.recaptcha_site_key, { action: 'login' }).then(function (token) {
-        send_image(token)
+        send_image(token,mode)
       });
     })
   }
@@ -64,7 +67,9 @@ export default function ReverseSearch() {
           onChange={(files) => setFiles((files as never))}
         />
       </Box>
-      <Button onClick={() => { _send_image() }} variant="contained" color="primary" >Reverse Search</Button>
+      <Button onClick={() => { _send_image("1") }} variant="contained" color="primary" >Reverse Search (fast, less accureate)</Button>
+      <div style={{marginTop:"10px"}}><Button onClick={() => { _send_image("2") }} variant="contained" color="primary" >Reverse Search (slow, more accurate)</Button></div>
+      
     </div>
   );
 }
