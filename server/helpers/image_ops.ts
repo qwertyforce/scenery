@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as cv from 'opencv4nodejs'
 import { HistAxes } from 'opencv4nodejs';
 import db_ops from './db_ops';
+import sharp from 'sharp'
 
-const detector = new cv.ORBDetector()
-const matchFunc = cv.matchBruteForceHammingAsync
+const detector=new cv.SIFTDetector({nFeatures:500})
+const matchFunc = cv.matchKnnBruteForceAsync
 const imghash = require('imghash');
 
 const BIN_SIZE = 16
@@ -26,6 +28,22 @@ const histAxes: HistAxes[] = [
   }),
 ]
 
+function normalize(descriptor:any){
+  for(let i=0;i<descriptor.length;i++){
+    const arr=descriptor[i]
+    const arr2=[]
+    let sum=10**(-7)
+    for (const x of arr){
+      sum+=x
+    }
+    for (const x of arr){
+      arr2.push(Math.sqrt((x/sum)))
+    }
+    descriptor[i]=arr2
+  }
+  return descriptor
+}
+
 async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
   const img_mat = await cv.imdecodeAsync(image)
   let rgb_hist = await cv.calcHistAsync(img_mat, histAxes)
@@ -46,40 +64,83 @@ async function calculate_color_hist_and_similarities(new_image_id: number, image
   }
   await db_ops.image_search.add_color_similarities_by_id(new_image_id, similarities)
 }
-async function calculate_orb_features(image_id:number,image: Buffer) {
+async function calculate_sift_features(image_id:number,image: Buffer) {
+  const metadata = await sharp(image).metadata()
+  if(metadata && metadata.height && metadata.width){
+    if(metadata.height*metadata.width>2000*2000){
+      const k=Math.sqrt(metadata.height*metadata.width/(2000*2000))
+      image = await sharp(image).resize({height:Math.round(metadata.height/k),width:Math.round(metadata.width/k)}).toBuffer()
+    }
+  }
   const img=await cv.imdecodeAsync(image)
   const keyPoints = await detector.detectAsync(img);
   const descriptors = await detector.computeAsync(img, keyPoints);
-  const descriptors_as_array=descriptors.getDataAsArray()
+  const desc1_normalized=normalize(descriptors.getDataAsArray())
   descriptors.release()
   img.release()
-  await db_ops.image_search.add_orb_features_by_id(image_id,descriptors_as_array)
+  await db_ops.image_search.add_sift_features_by_id(image_id,desc1_normalized)
 }
-async function get_similar_images_by_orb(image: Buffer) {
-  const img_mat = await cv.imdecodeAsync(image)
-  const keyPoints = await detector.detectAsync(img_mat);
-  const img_descriptors = await detector.computeAsync(img_mat, keyPoints);
-  const number_of_images = await db_ops.image_search.get_number_of_images_orb_reverse_search()
-  const batch = 500;
-  const similar_images = []
-  for (let i = 0; i < number_of_images; i += batch) {
-    const descriptors = await db_ops.image_search.get_orb_features_batch(i, batch)
-    for (const img of descriptors) {
-      const descriptors2 = new cv.Mat(img.orb_features, cv.CV_8UC1)
-      const matches = await matchFunc(img_descriptors, descriptors2);
-      descriptors2.release()
-      let sum = 0
-      for (const x of matches) {
-        sum += x.distance
-      }
-      if (sum === 0) {
-        return [img.id]
-      }
-      similar_images.push({ id: img.id, avg_distance: sum / matches.length })
+async function get_similar_images_by_sift(image: Buffer) {
+  const metadata = await sharp(image).metadata()
+  if(metadata && metadata.height && metadata.width){
+    if(metadata.height*metadata.width>2000*2000){
+      const k=Math.sqrt(metadata.height*metadata.width/(2000*2000))
+      image = await sharp(image).resize({height:Math.round(metadata.height/k),width:Math.round(metadata.width/k)}).toBuffer()
     }
   }
+  const img_mat = await cv.imdecodeAsync(image)
+  const keyPoints = await detector.detectAsync(img_mat);
+
+  const query_image_desc = await detector.computeAsync(img_mat, keyPoints)
+  const query_image_desc_normalized=normalize(query_image_desc.getDataAsArray())
+  const query_image_desc_normalized_mat=new cv.Mat(query_image_desc_normalized, cv.CV_32FC1)
+
+  const number_of_images = await db_ops.image_search.get_number_of_images_sift_reverse_search()
+  const batch = 250;
+  const similar_images = []
+  console.time()
+  for (let i = 0; i < number_of_images; i += batch) {
+    console.log(123)
+    const descriptors = await db_ops.image_search.get_sift_features_batch(i, batch)
+    console.log(124124)
+    for (const img of descriptors) {
+      const descriptors2 = new cv.Mat(img.sift_features, cv.CV_32FC1)
+      // console.time()
+      const matches = await matchFunc(query_image_desc_normalized_mat, descriptors2,2);
+      descriptors2.release()
+      if(matches.length===0){
+        continue
+      }
+      const good_matches=[]
+      let dist=0
+      let wegweg=[]
+      for(const [desc1,desc2] of matches){
+        if(desc1.distance < 0.75*desc2.distance){
+          good_matches.push(desc1)
+          dist+=desc1.distance
+          wegweg.push(desc1.distance)
+        }
+      }
+      if(good_matches.length<5){
+        continue
+      }
+      wegweg.sort((a,b)=>a-b)
+      const bestN = 5;
+      let sum=0
+      const bestMatches = good_matches.sort(
+        (match1, match2) => match1.distance - match2.distance
+      ).slice(0, bestN);
+      for(const x of bestMatches){
+        sum+=x.distance
+      }
+      // console.timeEnd()
+      similar_images.push({ id: img.id, avg_distance: -((bestN/sum)*(good_matches.length/(dist))),good_matches:good_matches.length,top5_dist:sum,good_matches_sum:dist,good_matches_avg:dist/good_matches.length,goodmatches:wegweg })
+    }
+  }
+  
   similar_images.sort((a, b) => a.avg_distance - b.avg_distance)
   similar_images.length = 30
+  console.log(similar_images)
   const ids = similar_images.map((el) => el.id)
   return ids
 }
@@ -107,4 +168,4 @@ async function get_similar_images_by_phash(image: Buffer) {
   const ids = images.map((el) => el.id)
   return ids
 }
-export default { calculate_color_hist_and_similarities, get_similar_images_by_orb, get_similar_images_by_phash, calculate_orb_features }
+export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features }

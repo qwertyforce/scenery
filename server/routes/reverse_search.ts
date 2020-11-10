@@ -21,7 +21,7 @@ async function reverse_search(req: Request, res: Response) {
             // console.log(ids)
             res.json({ids:ids.join(',')})
         }else if(Mode===2){
-            const ids=await image_ops.get_similar_images_by_orb(req.file.buffer)
+            const ids=await image_ops.get_similar_images_by_sift(req.file.buffer)
             // console.log(ids)
             res.json({ids:ids.join(',')})
         }

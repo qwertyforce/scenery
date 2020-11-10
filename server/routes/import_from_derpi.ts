@@ -49,7 +49,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 const parsed_author = await parse_author(derpi_data.tags)
                 const derpi_link = "https://derpibooru.org/images/" + derpi_data.id
                 const phash = await imghash.hash(image.data, 16);
-                await image_ops.calculate_orb_features(new_image_id,image.data)
+                await image_ops.calculate_sift_features(new_image_id,image.data)
                 await image_ops.calculate_color_hist_and_similarities(new_image_id,image.data)
                 derpi_data.tags.push(`width:${derpi_data.width}`)
                 derpi_data.tags.push(`height:${derpi_data.height}`)
