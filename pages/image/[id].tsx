@@ -12,6 +12,7 @@ import ErrorPage from 'next/error'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
 import { useRouter } from 'next/router'
+import {promises as fs } from 'fs'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,6 +91,10 @@ export default function Image(props: any) {
                 <LinkIcon />
               &nbsp;<a href={props.similar_by_color_link} target="_blank" rel="noreferrer">Similar by color</a>
               </div>
+              <div className={classes.icon_container}>
+                <LinkIcon />
+              &nbsp;<a href={props.visually_similar_link} target="_blank" rel="noreferrer">Visually similar (Beta)</a>
+              </div>
               {((props.upscaled)?(
                 <div className={classes.icon_container}>
                 <LinkIcon />
@@ -113,6 +118,14 @@ export default function Image(props: any) {
 export const getStaticProps: GetStaticProps = async (context) => {
   if (context.params?.id) {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let all_images_similaties:any= await fs.readFile("find_visually_similar_images/data.txt","utf-8")
+    all_images_similaties=JSON.parse(all_images_similaties)
+    let visually_similar_link=""
+    // console.log(all_images_similaties[(context.params.id as string)])
+    if(all_images_similaties[(context.params.id as string)]!==undefined){
+      visually_similar_link=`/visually_similar/${img[0].id}`
+    }
     if (img.length === 1) {
       const date = new Date(img[0].created_at)
       const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
@@ -130,6 +143,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
           date: date_str,
           similar_by_tags_link:`/similar_by_tags/${img[0].id}`,
           similar_by_color_link:`/similar_by_color/${img[0].id}`,
+          visually_similar_link:visually_similar_link,
           upscaled:upscaled
         },
         revalidate: 5*60 //5 min
