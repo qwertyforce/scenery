@@ -4,7 +4,9 @@ import config from '../../config/config'
 const url = config.mongodb_url;
 const options = {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    native_parser: true,
+    poolSize: 100
 };
 const db_main = 'Scenery';
 const client = new MongoClient(url, options);
@@ -104,7 +106,7 @@ async function add_sift_features_by_id(id:number,sift_features:Array<any>){
 
 async function get_sift_features_batch(skip:number,limit:number){
     const collection = client.db(db_main).collection("sift_reverse_search");
-    collection.find().skip(skip).limit(limit).project({_id:0}).explain((_err,exp)=>console.log(exp))
+    // collection.find().skip(skip).limit(limit).project({_id:0}).explain((_err,exp)=>console.log(exp))
     const similarities = collection.find().skip(skip).limit(limit).project({_id:0}).toArray()
     return similarities
 }
