@@ -96,50 +96,42 @@ async function get_similar_images_by_sift(image: Buffer) {
   const query_image_desc_normalized_mat=new cv.Mat(query_image_desc_normalized, cv.CV_32FC1)
 
   const number_of_images = await db_ops.image_search.get_number_of_images_sift_reverse_search()
-  const batch = 250;
-  const similar_images = []
-  console.time()
+  const batch = 500;
+  let similar_images = []
   for (let i = 0; i < number_of_images; i += batch) {
-    console.log(123)
     const descriptors = await db_ops.image_search.get_sift_features_batch(i, batch)
-    console.log(124124)
     for (const img of descriptors) {
       const descriptors2 = new cv.Mat(img.sift_features, cv.CV_32FC1)
-      // console.time()
       const matches = await matchFunc(query_image_desc_normalized_mat, descriptors2,2);
       descriptors2.release()
       if(matches.length===0){
         continue
       }
       const good_matches=[]
-      let dist=0
-      let wegweg=[]
+      let good_matches_sum=0
       for(const [desc1,desc2] of matches){
         if(desc1.distance < 0.75*desc2.distance){
           good_matches.push(desc1)
-          dist+=desc1.distance
-          wegweg.push(desc1.distance)
+          good_matches_sum+=desc1.distance
         }
       }
       if(good_matches.length<5){
         continue
       }
-      wegweg.sort((a,b)=>a-b)
       const bestN = 5;
-      let sum=0
+      let topBestNSum=0
       const bestMatches = good_matches.sort(
         (match1, match2) => match1.distance - match2.distance
       ).slice(0, bestN);
       for(const x of bestMatches){
-        sum+=x.distance
+        topBestNSum+=x.distance
       }
-      // console.timeEnd()
-      similar_images.push({ id: img.id, avg_distance: -((bestN/sum)*(good_matches.length/(dist))),good_matches:good_matches.length,top5_dist:sum,good_matches_sum:dist,good_matches_avg:dist/good_matches.length,goodmatches:wegweg })
+      similar_images.push({ id: img.id, avg_distance: -((bestN/topBestNSum)*(good_matches.length/(good_matches_sum)))-(good_matches.length)})
     }
   }
   
   similar_images.sort((a, b) => a.avg_distance - b.avg_distance)
-  similar_images.length = 30
+  similar_images=similar_images.slice(0,30)
   console.log(similar_images)
   const ids = similar_images.map((el) => el.id)
   return ids
@@ -156,7 +148,7 @@ function hamming_distance(str1: string, str2: string) {
 
 async function get_similar_images_by_phash(image: Buffer) {
   const phash = await imghash.hash(image, 16)
-  const images = await db_ops.image_ops.get_ids_and_phashes()
+  let images = await db_ops.image_ops.get_ids_and_phashes()
   for (let i = 0; i < images.length; i++) {
     images[i].dist = hamming_distance(phash, images[i].phash)
     if (images[i].dist === 0) {
@@ -164,7 +156,7 @@ async function get_similar_images_by_phash(image: Buffer) {
     }
   }
   images.sort((a, b) => a.dist - b.dist)
-  images.length = 30
+  images=images.slice(0,30)
   const ids = images.map((el) => el.id)
   return ids
 }

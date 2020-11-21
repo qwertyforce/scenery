@@ -34,7 +34,7 @@ export default function ReverseSearch() {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      timeout:120000   //2min
+      timeout:5*60000   //5min
     }).then((resp) => {
       setOpen(false)
       console.log(resp.data.ids)
