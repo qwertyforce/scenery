@@ -4,9 +4,7 @@ import config from '../../config/config'
 const url = config.mongodb_url;
 const options = {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    native_parser: true,
-    poolSize: 100
+    useUnifiedTopology: true
 };
 const db_main = 'Scenery';
 const client = new MongoClient(url, options);
