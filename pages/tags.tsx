@@ -15,15 +15,17 @@ const useStyles = makeStyles(() => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Tags(props: any) {
   const classes = useStyles();
-  const characters=["ahuizotl","amethyst star","amira","angel bunny","apple bloom","apple bumpkin","athena sparkle","autumn blaze","babs seed","berry dreams","berry punch","big macintosh","big daddy mccolt","blossomforth","bon bon","braeburn","bright mac","bulk biceps","chancellor puddinghead","cheerilee","cherry jubilee","cinder glow","clover the clever","coco pommel","coloratura","daybreaker","daring do","derpy hooves","discord","diamond tiara","fancypants","flim","flam","fleur-de-lis","flash sentry","granny smith","joan pommelway","lemon hearts","lyra heartstrings","maud pie","mayor mare","scootaloo","shining armor","silver spoon","silverstream","smart cookie","snips","snails",`soarin'`,"spike","spitfire","star swirl the bearded","star hunter","starlight glimmer","steven magnet","sugar belle","sunset shimmer","sweetie belle","tank","tempest shadow","thorax","trixie","twilight sparkle (alicorn)","twinkleshine","unicorn twilight","ursa","vapor trail","vinyl scratch","winona","zecora"]
+  const characters=["princess cadance","princess celestia","princess luna","princess celestia","ahuizotl","amethyst star","amira","angel bunny","apple bloom","apple bumpkin","athena sparkle","autumn blaze","babs seed","berry dreams","berry punch","big macintosh","big daddy mccolt","blossomforth","bon bon","braeburn","bright mac","bulk biceps","chancellor puddinghead","cheerilee","cherry jubilee","cinder glow","clover the clever","coco pommel","coloratura","daybreaker","daring do","derpy hooves","discord","diamond tiara","fancypants","flim","flam","fleur-de-lis","flash sentry","granny smith","joan pommelway","lemon hearts","lyra heartstrings","maud pie","mayor mare","scootaloo","shining armor","silver spoon","silverstream","smart cookie","snips","snails",`soarin'`,"spike","spitfire","star swirl the bearded","star hunter","starlight glimmer","steven magnet","sugar belle","sunset shimmer","sweetie belle","tank","tempest shadow","thorax","trixie","twilight sparkle (alicorn)","twinkleshine","unicorn twilight","ursa","vapor trail","vinyl scratch","winona","zecora"]
   const Mane6=["rarity","applejack","twilight sparkle","fluttershy","rainbow dash","pinkie pie"]
   const Seasons=["winter","spring","summer","autumn"]
   const Styles=["traditional art","watercolor painting","acrylic painting","digital painting","oil painting","painting","bob ross","classic art","concept art","digital art","fine art emulation","fine art parody","pixel art","sketch","monochrome"]
+  const Episodes=["a hearth's warming tail","a royal problem","all bottled up","applebuck season"]
   const Tags=[]
   const Mane6_tags=[]
   const Seasons_tags=[]
   const Characters_tags=[]
   const Styles_tags=[]
+  const Episodes_tags=[]
   for (const [tag_name, number_of_pictures] of props.tags) {
     const tag = <Chip label={`${tag_name} (${number_of_pictures})`} key={tag_name} className={classes.chip} component="a" href={`/search?q=${tag_name}`} clickable />
     if (Mane6.includes(tag_name)) {
@@ -34,6 +36,8 @@ export default function Tags(props: any) {
       Characters_tags.push(tag)
     }else if(Styles.includes(tag_name)){
       Styles_tags.push(tag)
+    }else if(Episodes.includes(tag_name)){
+      Episodes_tags.push(tag)
     }
     else {
       Tags.push(tag)
@@ -58,6 +62,10 @@ export default function Tags(props: any) {
         Styles
       </Typography>
       {Styles_tags}
+      <Typography variant="h6" gutterBottom>
+        Episodes
+      </Typography>
+      {Episodes_tags}
       <Typography variant="h6" gutterBottom>
         Other
       </Typography>
