@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import Link from './Link'
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 import { IconButton } from '@material-ui/core';
 
@@ -70,7 +71,7 @@ export default function DenseAppBar() {
   const [tags, setTags] = useState(router.query.q||'');
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-       router.push(`/search?q=${tags}`)
+       router.push(`/search?q=${encodeURIComponent(tags)}`)
     }
   };
   return (
@@ -87,7 +88,7 @@ export default function DenseAppBar() {
               <SearchIcon />
             </div>
             <InputBase
-              placeholder="tag1, -tag2, tagN"
+              placeholder="tag1&&(tag2||tag3)"
               onChange={(e)=>setTags(e.target.value)}
               onKeyPress={(e)=>handleKeyPress(e)}
               classes={{
@@ -98,7 +99,10 @@ export default function DenseAppBar() {
               value={tags}
             />
           </div>
-          <IconButton  color="inherit"  aria-label="image_search" href="/reverse_search">
+          <IconButton  color="inherit" aria-label="search_syntax" href="/search_syntax">
+            <HelpOutlineIcon />
+          </IconButton>
+          <IconButton  color="inherit" aria-label="image_search" href="/reverse_search">
             <ImageSearchIcon />
           </IconButton>
         </Toolbar>

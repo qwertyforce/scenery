@@ -196,11 +196,8 @@ async function get_all_images(){
     return imgs
 }
 
-async function find_images_by_tags(include_tags:Array<string>,exclude_tags:Array<string>){
-    const imgs = findDocuments("images", {$and: [
-        { tags: { $all: include_tags } }, 
-        { tags: { $not: { $all: exclude_tags }}}
-    ] })
+async function find_images_by_tags(query:any){
+    const imgs = findDocuments("images",query)
     return imgs
 }
 async function find_image_by_sha512(hash:string){
