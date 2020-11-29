@@ -13,7 +13,7 @@ export default function SearchSyntax() {
           <Typography variant="h4" component="h1" gutterBottom>
             Search syntax
         </Typography>
-        Available operator: && , ||, !, -, ',' <br/>
+        Available operators: && , ||, !, -,  ,(comma) <br/>
         Examples:<br/>
         1) winter&&(rarity||fluttershy)<br/>
         2) autumn, -twilight sparkle<br/>
