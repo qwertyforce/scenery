@@ -122,15 +122,66 @@ function parse(query:string) {
       }
     }
   }
+  function detect_brackets(str:string) {
+    const tokens = ["&&", "||", "!", ",","-"]
+    const tokens2 = ["&&", "||", "!", "(", ")", ",","-"]
+    const stack=[]
+    const closing_brackets=[]
+    const opening_brackets=[]
+    for(let i=0;i<str.length;i++){
+        if(tokens2.includes(str[i])){
+            stack.push({token:str[i],idx:i})
+        }
+        if(str[i+1] && tokens2.includes(str[i]+str[i+1])){
+            stack.push({token:str[i]+str[i+1],idx:i})
+        }
+        if(str[i]===")"){
+             let x:any=stack.pop()
+             let m=false
+             while(x.token!=="("){
+                 x=stack.pop()
+                 if(tokens.includes(x.token)){
+                     m=true
+                 }
+             }
+             if(!m && (x.idx>0 && (tokens.includes(str[x.idx-1])) || (str[x.idx-2] && tokens.includes(str[x.idx-2]+str[x.idx-1]))) || 
+             (x.idx===0)){
+                closing_brackets.push(i)
+                opening_brackets.push(x.idx)
+             }else if(m){
+                closing_brackets.push(i)
+                opening_brackets.push(x.idx)
+             }
+        }
+    }
+    const arr=str.split("")
+    for(let i=0;i<closing_brackets.length;i++){
+      arr[opening_brackets[i]]="(%"
+      arr[closing_brackets[i]]="%)"
+    }
+    str=arr.join("")
+    return str
+}
+
 
   function split(str:any) {
-    const tokens = ["&&", "||", "!", "(", ")", ",","-"]
+    const tokens = ["&&", "||", "!", "(%", "%)", ",","-"]
     const temp_char = "#$#"
+    str=detect_brackets(str)
+    console.log(str)
     for (const token of tokens) {
       str = str.replaceAll(token, temp_char + token + temp_char)
     }
-    str = str.split(temp_char).map((el:any)=>el.trim()).filter((el:any) => el !== "")
-    return str;
+    const arr = str.split(temp_char).map((el:any)=>el.trim()).filter((el:any) => el !== "")
+    for(let i=0;i<arr.length;i++){
+      if(arr[i]==="(%"){
+        arr[i]="("
+      }
+      if(arr[i]==="%)"){
+        arr[i]=")"
+      }
+    }
+    return arr;
   }
 
   const query_splitted = split(query)
