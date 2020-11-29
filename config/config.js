@@ -16,5 +16,6 @@ export default {
     session_secret:"ghuieorifigyfuu9u3i45jtr73490548t7ht",
     root_path: path.join("D:","scenery"),
     deviant_art_client_id:"client_id",
-    deviant_art_client_secret:"client_secret"
+    deviant_art_client_secret:"client_secret",
+    reverse_search_url:"http://localhost"
 }

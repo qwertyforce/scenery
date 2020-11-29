@@ -28,7 +28,7 @@ export default function ReverseSearch() {
     formData.append("image", Files[0]);
     formData.append("g-recaptcha-response", token);
     formData.append("mode", mode);
-    axios(`/reverse_search`, {
+    axios(`${config.reverse_search_url}/reverse_search`, {
       method: "post",
       data: formData,
       headers: {
