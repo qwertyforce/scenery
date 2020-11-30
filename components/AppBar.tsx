@@ -71,7 +71,7 @@ export default function DenseAppBar() {
   const [tags, setTags] = useState(router.query.q||'');
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-       router.push(`/search?q=${encodeURIComponent(tags)}`)
+       router.push(`/search?q=${encodeURIComponent((tags as string))}`)
     }
   };
   return (
