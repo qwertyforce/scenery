@@ -6,7 +6,7 @@ https://onlycomfy.art
  
  
 Features: <br>
-Search by tags <br>
+Search by tags (supports logical expressions) (https://onlycomfy.art/search_syntax) <br>
 You can find images with similar tags. <br>
 You can find images with similar color palette. <br>
 You can find visually similar images (ResNet50). <br>
