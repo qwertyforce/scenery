@@ -6,7 +6,7 @@
 /dist
 /public
 /find_visually_similar_images/data.txt
-/find_visually_similar_images/ResNet50.pkl
+/find_visually_similar_images/image_features.pkl
 /images
 /import_from_derpi
 /webp_images
