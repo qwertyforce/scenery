@@ -22,7 +22,8 @@ async function deviant_art_checker() {
     const browser = await launch({ headless: true,args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const images = await db_ops.image_ops.get_all_images()
     let access_token = await get_token()
-    for (const image of images) {
+    for (let i=0;i<images.length;i++) {
+        const image=images[i]
         console.log(image.id)
         if (image.source_url?.includes("deviantart.com")) {
             await sleep(3000)
@@ -50,8 +51,16 @@ async function deviant_art_checker() {
                 if(image.width*image.height<res.data.width*res.data.height){
                     const new_img= await axios.get(res.data.src,{responseType: 'arraybuffer'})
                     console.log(`${config.root_path}/public/images/${image.id}.${image.file_ext}`)
+                    const tags=image.tags
+                    for(let i=0;i<tags.length;i++){
+                        if(tags[i].includes("width:") || tags[i].includes("height:")) {
+                            tags.splice(i,1)
+                        }
+                    }
+                    tags.push(`height:${res.data.height}`)
+                    tags.push(`width:${res.data.width}`)
                     await fs.writeFile(`${config.root_path}/public/images/${image.id}.${image.file_ext}`,new_img.data,"binary")
-                    await db_ops.image_ops.update_image_data_by_id(image.id,{width:res.data.width,height:res.data.height,size:res.data.filesize})
+                    await db_ops.image_ops.update_image_data_by_id(image.id,{width:res.data.width,height:res.data.height,size:res.data.filesize,tags:tags})
                     console.log(res.data)
                 }
             } catch (e) {
