@@ -34,21 +34,23 @@ def get_features(f):
     return X_conv[0]
 
 model = ResNet50(weights='imagenet', include_top=False,input_shape=(224, 224, 3),pooling='max')
-features=pk.load( open("ResNet50.pkl", "rb"))
+image_features=pk.load( open("image_features.pkl", "rb"))
+features=[]
+for image in image_features:
+    features.append(np.array(image['features']))
+features=np.array(features)
 path="../public/images"
 knn = NearestNeighbors(n_neighbors=20,algorithm='brute',metric='euclidean')
 knn.fit(features)
 file_names=listdir(path)
 ALL_SIMILAR_IMAGES={}
-for file_name in file_names:
-    id=Path(file_name).stem
-    print(id)
-    feature=get_features(path+"/"+file_name).reshape(1,-1)
-    indices = knn.kneighbors(feature, return_distance=False)
+for image in image_features:
+    print(image['image_id'])
+    indices = knn.kneighbors(np.array(image['features']).reshape(1,-1), return_distance=False)
     similar_images=[]
     for i in range(indices[0].size):
-        similar_images.append(Path(file_names[indices[0][i]]).stem)
-    ALL_SIMILAR_IMAGES[id]=similar_images
+        similar_images.append(image_features[indices[0][i]]['image_id'])
+    ALL_SIMILAR_IMAGES[image['image_id']]=similar_images
 with open('data.txt', 'w') as outfile:
     json.dump(ALL_SIMILAR_IMAGES, outfile)
 

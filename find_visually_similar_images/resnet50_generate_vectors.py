@@ -1,9 +1,13 @@
 from keras.applications.resnet50 import ResNet50
 from keras.applications.resnet50 import preprocess_input
+import os
 from os import listdir
 import numpy as np
 from PIL import Image
 import pickle as pk
+from pymongo import MongoClient
+client = MongoClient('mongodb://localhost:27017/')
+db = client['Scenery']
 
 def read_img_file(f):
     img = Image.open(f)
@@ -34,12 +38,36 @@ arr=[]
 
 path="../public/images"
 file_names=listdir(path)
-for f in file_names:
-    print(f)
-    features=get_features(path+"/"+f)
-    print(features)
-    arr.append(features)
-arr=np.array(arr)
+try:
+    arr=pk.load(open("image_features.pkl", "rb"))
+except (OSError, IOError) as e:
+    print("file_not_found")
+images=list(db.images.find({}))
+def exists_in_arr(image_id):
+    for image in arr:
+        if image['image_id'] == image_id:
+            # print("skipping "+ str(image_id))
+            return True
+    return False
+def exists_in_db(image_id):
+    for image in images:
+        if image['id'] == image_id:
+            return True
+    return False
 
-pk.dump(arr, open("ResNet50.pkl","wb"))
+for i in range(len(arr)):
+    if not exists_in_db(arr[i]['image_id']):
+        print("deleting "+ str(arr[i]['image_id']))
+        del arr[i]
+        break
+
+for image in images:
+    image_filename=str(image['id'])+'.'+image['file_ext']
+    if exists_in_arr(image['id']):
+        continue;
+    image_features=get_features(path+"/"+image_filename)
+    print(image_filename)
+    print(image_features)
+    arr.append({'image_id':image['id'],'features':image_features})
+pk.dump(arr, open("image_features.pkl","wb"))
 
