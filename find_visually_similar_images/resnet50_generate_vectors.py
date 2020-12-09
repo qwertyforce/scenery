@@ -59,7 +59,6 @@ for i in range(len(arr)):
     if not exists_in_db(arr[i]['image_id']):
         print("deleting "+ str(arr[i]['image_id']))
         del arr[i]
-        break
 
 for image in images:
     image_filename=str(image['id'])+'.'+image['file_ext']
