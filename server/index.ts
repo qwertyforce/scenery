@@ -36,6 +36,7 @@ import update_image_data from './routes/update_image_data'
 import delete_image from './routes/delete_image'
 import import_from_derpi from './routes/import_from_derpi'
 import reverse_search from './routes/reverse_search'
+import proxy_get_image from './routes/proxy_get_image'
 next_app.prepare().then(() => {
   const app = express()
   const api_router=express.Router()
@@ -96,6 +97,11 @@ next_app.prepare().then(() => {
   api_router.post('/update_image_data', update_image_data)
   api_router.post('/delete_image', delete_image)
   api_router.post('/import_from_derpi', import_from_derpi)
+
+  api_router.post('/proxy_get_image', [
+    recaptcha.middleware.verify,
+    check('image_url').isURL(),
+  ], proxy_get_image)
 
   api_router.post('/signup', [
     recaptcha.middleware.verify,
