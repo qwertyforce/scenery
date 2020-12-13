@@ -141,7 +141,9 @@ export default function ReverseSearch() {
       </Backdrop>
       <Box my={4}>
       <div className={classes.url_div}>
-        <TextField onChange={(e)=>setUrl(e.target.value)} value={URL} className={classes.url_text_field} label="url" variant="outlined" size="small" />
+        <TextField onChange={(e)=>setUrl(e.target.value)} value={URL} 
+        className={classes.url_text_field} label="url"
+        placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
       <Button onClick={get_image_by_url} size="small" variant="outlined">Fetch</Button>
       </div>
         <DropzoneAreaBase
