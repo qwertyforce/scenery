@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Box from '@material-ui/core/Box';
 import AppBar from '../components/AppBar'
 import { DropzoneAreaBase } from 'material-ui-dropzone';
@@ -45,7 +45,7 @@ export default function ReverseSearch() {
   const send_image = (token: string,mode:string) => {
     setOpen(true)
     const formData = new FormData();
-    formData.append("image", fileObjects[0].file);
+    formData.append("image", (fileObjects[0] as any).file);
     formData.append("g-recaptcha-response", token);
     formData.append("mode", mode);
     axios(`${config.reverse_search_url}/reverse_search`, {

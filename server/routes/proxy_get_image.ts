@@ -32,7 +32,6 @@ async function proxy_get_image(req:Request,res:Response) {
     try{
         const resp= await axios.head(image_url)
         const headers=resp.headers
-        console.log(headers)
         if(allowed.includes(headers["content-type"])){   
             if(headers["content-length"]){
                 const size=parseInt(headers["content-length"])
