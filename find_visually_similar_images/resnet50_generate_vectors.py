@@ -55,10 +55,14 @@ def exists_in_db(image_id):
             return True
     return False
 
+for_deletion=[]
 for i in range(len(arr)):
     if not exists_in_db(arr[i]['image_id']):
         print("deleting "+ str(arr[i]['image_id']))
-        del arr[i]
+        for_deletion.append(i)
+for i in for_deletion:
+    del arr[i]
+
 
 for image in images:
     image_filename=str(image['id'])+'.'+image['file_ext']
