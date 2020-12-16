@@ -9,6 +9,7 @@ import Link from './Link'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 import { IconButton } from '@material-ui/core';
+import config from '../config/config'
 
 import { useRouter } from 'next/router'
 
@@ -65,21 +66,22 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function DenseAppBar() {
+export default function DenseAppBar(props:any) {
   const classes = useStyles();
   const router = useRouter()
   const [tags, setTags] = useState(router.query.q||'');
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-       router.push(`/search?q=${encodeURIComponent((tags as string))}`)
+       router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}`)
     }
   };
+
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.app_bar}>
         <Toolbar variant="dense" className={classes.tool_bar}>
           <Typography variant="h6" color="inherit">
-          <Link href="/" color="inherit" underline="none">
+          <Link href={config.domain} color="inherit" underline="none">
              OnlyComfy
            </Link>
           </Typography>
@@ -99,10 +101,10 @@ export default function DenseAppBar() {
               value={tags}
             />
           </div>
-          <IconButton  color="inherit" aria-label="search_syntax" href="/search_syntax">
+          <IconButton  component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
             <HelpOutlineIcon />
           </IconButton>
-          <IconButton  color="inherit" aria-label="image_search" href="/reverse_search">
+          <IconButton  component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
             <ImageSearchIcon />
           </IconButton>
         </Toolbar>
