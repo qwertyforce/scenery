@@ -37,15 +37,35 @@ import delete_image from './routes/delete_image'
 import import_from_derpi from './routes/import_from_derpi'
 import reverse_search from './routes/reverse_search'
 import proxy_get_image from './routes/proxy_get_image'
+import reverse_search_global from './routes/reverse_search_global'
+import temp_image from './routes/temp_image'
 next_app.prepare().then(() => {
   const app = express()
+  ///////////////////////////////////////////////
   const api_router=express.Router()
-  const storage = multer.memoryStorage()
-  const upload = multer({ storage: storage,limits:{files:1,fileSize:50000000}})  //50MB
   const limiter = rateLimit({
     windowMs: 15 * 60,  // 15 minutes
     max: 200 // limit each IP to w00 requests per windowMs
   });
+  const cors_options = {
+    "origin": config.domain,
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "credentials": true,
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+  }
+  api_router.use(cors(cors_options));
+  api_router.use(limiter);
+  app.use(api_router)
+ /////////////////////////////////////////////// 
+
+ /////////////////////////////////////////////// 
+  const public_api_router=express.Router()
+  public_api_router.use(cors())
+  app.use(public_api_router)
+ /////////////////////////////////////////////// 
+  const storage = multer.memoryStorage()
+  const upload = multer({ storage: storage,limits:{files:1,fileSize:50000000}})  //50MB
   const recaptcha = new RecaptchaV3(config.recaptcha_site_key, config.recaptcha_secret_key);
   ////////////////
   app.use(function (_req, res, next) {
@@ -57,14 +77,7 @@ next_app.prepare().then(() => {
     extended: true
   }));
   app.use(bodyParser.json());
-  const cors_options = {
-    "origin": config.domain,
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "credentials": true,
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
-  }
-  app.use(cors(cors_options));
+
   app.disable('x-powered-by');
   app.use(cookieParser());
   app.use(session({
@@ -81,12 +94,13 @@ next_app.prepare().then(() => {
       ttl: 14 * 24 * 60 * 60
     }) // = 14 days. Default
   }))
-  api_router.use(limiter);
-  app.use(api_router)
   app.use(mongoSanitize());
-   ///////////////
-
-
+  ///////////////////////////////////////PUBLIC_API
+  // public_api_router.get('/api/reverse_search_global', reverse_search_global)
+  public_api_router.get('/public_api/image/:image_id', temp_image)
+  public_api_router.post('/public_api/reverse_search_global',[upload.single('image'),recaptcha.middleware.verify], reverse_search_global)
+  ///////////////////////////////////////
+  
   api_router.get('/auth/google', google_oauth_redirect)
   api_router.get('/auth/github', github_oauth_redirect)
   api_router.get('/auth/github/callback', github_oauth_callback)
