@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function DenseAppBar(props:any) {
+export default function DenseAppBar() {
   const classes = useStyles();
   const router = useRouter()
   const [tags, setTags] = useState(router.query.q||'');
