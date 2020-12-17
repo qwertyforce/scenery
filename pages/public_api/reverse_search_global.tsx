@@ -112,7 +112,7 @@ export default function GlobalReverseSearch() {
 
   return (
     <div>
-      <AppBar use_abs_links={true}/>
+      <AppBar/>
       <Backdrop className={classes.backdrop} open={open}>
         <CircularProgress color="inherit" />
       </Backdrop>
