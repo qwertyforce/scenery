@@ -41,33 +41,9 @@ import reverse_search_global from './routes/reverse_search_global'
 import temp_image from './routes/temp_image'
 next_app.prepare().then(() => {
   const app = express()
-  ///////////////////////////////////////////////
-  const api_router=express.Router()
-  const limiter = rateLimit({
-    windowMs: 15 * 60,  // 15 minutes
-    max: 200 // limit each IP to w00 requests per windowMs
-  });
-  const cors_options = {
-    "origin": config.domain,
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "credentials": true,
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
-  }
-  api_router.use(cors(cors_options));
-  api_router.use(limiter);
-  app.use(api_router)
- /////////////////////////////////////////////// 
-
- /////////////////////////////////////////////// 
-  const public_api_router=express.Router()
-  public_api_router.use(cors())
-  app.use(public_api_router)
- /////////////////////////////////////////////// 
   const storage = multer.memoryStorage()
   const upload = multer({ storage: storage,limits:{files:1,fileSize:50000000}})  //50MB
   const recaptcha = new RecaptchaV3(config.recaptcha_site_key, config.recaptcha_secret_key);
-  ////////////////
   app.use(function (_req, res, next) {
     res.setHeader('X-Content-Type-Options', "nosniff")
     res.setHeader('X-Frame-Options', "Deny")  //clickjacking protection
@@ -77,7 +53,6 @@ next_app.prepare().then(() => {
     extended: true
   }));
   app.use(bodyParser.json());
-
   app.disable('x-powered-by');
   app.use(cookieParser());
   app.use(session({
@@ -95,6 +70,30 @@ next_app.prepare().then(() => {
     }) // = 14 days. Default
   }))
   app.use(mongoSanitize());
+  ///////////////////////////////////////////////PRIVATE_API_ROUTER 
+  const api_router=express.Router()
+  const limiter = rateLimit({
+    windowMs: 15 * 60,  // 15 minutes
+    max: 200 // limit each IP to w00 requests per windowMs
+  });
+  const cors_options = {
+    "origin": config.domain,
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "credentials": true,
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+  }
+  api_router.use(cors(cors_options));
+  api_router.use(limiter);
+  app.use(api_router)
+ /////////////////////////////////////////////// 
+
+ ///////////////////////////////////////////////PUBLIC_API_ROUTER 
+  const public_api_router=express.Router()
+  public_api_router.use(cors())
+  app.use(public_api_router)
+ /////////////////////////////////////////////// 
+
   ///////////////////////////////////////PUBLIC_API
   // public_api_router.get('/api/reverse_search_global', reverse_search_global)
   public_api_router.get('/public_api/image/:image_id', temp_image)
