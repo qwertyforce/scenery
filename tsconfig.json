@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
-    "lib": ["dom", "es2020"],
+    "lib": ["dom", "es2020","ESNext.String"],
     "baseUrl": ".",
     "moduleResolution": "node",
     "strict": true,

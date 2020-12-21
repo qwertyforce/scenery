@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "outDir": "dist",
-    "target": "es2017",
+    "target": "esnext",
     "isolatedModules": false,
     "noEmit": false
   },
