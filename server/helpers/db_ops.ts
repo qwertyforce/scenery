@@ -47,12 +47,13 @@ async function findDocuments(collection_name:string, selector:Record<string,unkn
 }
 async function removeDocument(collection_name:string, selector:Record<string,unknown>) {
     const collection = client.db(db_main).collection(collection_name);
-    collection.deleteOne(selector)
+    return collection.deleteOne(selector)
+
 }
 
 async function insertDocuments(collection_name:string, documents:Array<any>) {
     const collection = client.db(db_main).collection(collection_name);
-    collection.insertMany(documents)
+    return collection.insertMany(documents)
     // const result = await collection.insertMany(documents);
     // return result
 }
@@ -212,9 +213,10 @@ async function find_image_by_id(id:number){
     })
     return img
 }
-async function find_image_by_derpi_id(id:number){
+async function find_image_by_booru_id(booru:string,id:number){
     const img = findDocuments("images", {
-        derpi_id: id
+        booru:booru,
+        booru_id: id
     })
     return img
 }
@@ -231,13 +233,16 @@ async function get_max_image_id(){
     return result[0]?.id
 }
 async function delete_image_by_id(id:number){
-    removeDocument("images",{id:id})
+    return removeDocument("images",{id:id})
+}
+async function add_image_by_object(image:any){
+    return insertDocuments("images", [image])
 }
 
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
-    size:string,derpi_link:string,
-    derpi_likes:number,derpi_dislikes:number,
-    derpi_id:number,derpi_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string,description:string){
+    size:string,booru_link:string, 
+    booru_likes:number,booru_dislikes:number,
+    booru_id:number,booru_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string,description:string,booru:string){
     insertDocuments("images", [{
         id:id,
         file_ext:file_ext,
@@ -250,11 +255,12 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
         phash:phash,
         sha512:sha512,
         tags:tags,
-        derpi_id:derpi_id,
-        derpi_likes:derpi_likes,
-        derpi_dislikes:derpi_dislikes,
-        derpi_link:derpi_link,
-        derpi_date:derpi_date,
+        booru:booru,
+        booru_id:booru_id,
+        booru_likes:booru_likes,
+        booru_dislikes:booru_dislikes,
+        booru_link:booru_link,
+        booru_date:booru_date,
         source_url:source_url,
         wilson_score:wilson_score
     }])
@@ -379,6 +385,7 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 export default {
     image_ops: {
         add_image,
+        add_image_by_object,
         get_all_images,
         find_image_by_id,
         get_max_image_id,
@@ -387,7 +394,7 @@ export default {
         get_ids_and_phashes,
         find_image_by_phash,
         find_image_by_sha512,
-        find_image_by_derpi_id,
+        find_image_by_booru_id,
         update_image_data_by_id,
         add_tags_to_image_by_id
     },

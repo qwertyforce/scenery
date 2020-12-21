@@ -77,7 +77,7 @@ export default function Image(props: any) {
               </div>
               <div className={classes.icon_container}>
                 <LinkIcon />
-              &nbsp;<a href={props.derpi_link} target="_blank" rel="noreferrer">Derpi Link</a>
+              &nbsp;<a href={props.booru_link} target="_blank" rel="noreferrer">{props.booru} link</a>
               </div>
               <div className={classes.icon_container}>
                 <LinkIcon />
@@ -118,15 +118,15 @@ export default function Image(props: any) {
 export const getStaticProps: GetStaticProps = async (context) => {
   if (context.params?.id) {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let all_images_similaties:any= await fs.readFile("find_visually_similar_images/data.txt","utf-8")
-    all_images_similaties=JSON.parse(all_images_similaties)
-    let visually_similar_link=""
     // console.log(all_images_similaties[(context.params.id as string)])
-    if(all_images_similaties[(context.params.id as string)]!==undefined){
-      visually_similar_link=`/visually_similar/${img[0].id}`
-    }
     if (img.length === 1) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let all_images_similaties:any= await fs.readFile("find_visually_similar_images/data.txt","utf-8")
+      all_images_similaties=JSON.parse(all_images_similaties)
+      let visually_similar_link=""
+      if(all_images_similaties[(context.params.id as string)]!==undefined){
+        visually_similar_link=`/visually_similar/${img[0].id}`
+      }
       const date = new Date(img[0].created_at)
       const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
       const upscaled = (img[0].tags.includes('upscaled')?(`/upscaled/${img[0].id}.png`):null)
@@ -138,7 +138,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
           size: (img[0].size / (10 ** 6)).toFixed(2),
           author: img[0].author,
           tags: img[0].tags,
-          derpi_link: img[0].derpi_link,
+          booru:img[0].booru,
+          booru_link: img[0].booru_link,
           source_link: img[0].source_url,
           date: date_str,
           similar_by_tags_link:`/similar_by_tags/${img[0].id}`,

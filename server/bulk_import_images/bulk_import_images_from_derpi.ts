@@ -58,7 +58,7 @@ async function import_images() {
             console.log(`imported ${image_file_name}`)
             db_ops.image_ops.add_image(id, derpi_data.format.toLowerCase(), derpi_data.width, derpi_data.height, parsed_author, derpi_data.size,
                 derpi_link, derpi_data.upvotes, derpi_data.downvotes, derpi_data.id, derpi_data.created_at,
-                derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash,derpi_data.description)
+                derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash,derpi_data.description,"derpibooru")
 
         }
     }
