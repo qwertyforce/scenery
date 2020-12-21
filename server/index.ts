@@ -97,7 +97,7 @@ next_app.prepare().then(() => {
   ///////////////////////////////////////PUBLIC_API
   // public_api_router.get('/api/reverse_search_global', reverse_search_global)
   public_api_router.get('/public_api/image/:image_id', temp_image)
-  public_api_router.post('/public_api/reverse_search_global',[upload.single('image'),recaptcha.middleware.verify], reverse_search_global)
+  public_api_router.post('/public_api/reverse_search_global',[upload.single('image')], reverse_search_global)
   ///////////////////////////////////////
   
   api_router.get('/auth/google', google_oauth_redirect)
