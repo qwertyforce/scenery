@@ -60,7 +60,7 @@ for i in range(len(arr)):
     if not exists_in_db(arr[i]['image_id']):
         print("deleting "+ str(arr[i]['image_id']))
         for_deletion.append(i)
-for i in for_deletion:
+for i in reversed(for_deletion):
     del arr[i]
 
 
