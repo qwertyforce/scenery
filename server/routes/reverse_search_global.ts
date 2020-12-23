@@ -2,7 +2,6 @@
 import {Request, Response} from 'express';
 import axios from "axios"
 import config from "../../config/config"
-import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 export const temp_images=new Map()
 const boorus=[
     {url:"https://ponerpics.org",api_key:"e1YPLqyucu0uYe5_xyXA"},
@@ -55,12 +54,6 @@ function isValidURL(url:string){
 async function reverse_search_global (req:Request, res:Response){
     const image_url=req.query.url?.toString()
     if(req.file){
-        const recaptcha_score=(req.recaptcha as RecaptchaResponseV3)?.data?.score
-        if (req.recaptcha?.error|| (typeof recaptcha_score==="number" && recaptcha_score<0.5)) {
-            return res.status(403).json({
-                message: "Captcha error"
-            });
-        }
         console.log(req.file)
         const image_id=get_random_hex(8)
         temp_images.set(image_id,req.file)
