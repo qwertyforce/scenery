@@ -10,6 +10,7 @@ import { GetStaticPaths } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
+import Footer from '../../components/Footer'
 import ErrorPage from 'next/error'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 
@@ -17,10 +18,6 @@ const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
     justifyContent: 'center'
-  },
-  footer: {
-    display: "flex",
-    justifyContent: "center"
   }
 }));
 function a11yProps(index: number) {
@@ -70,11 +67,7 @@ const MainPage = (props: any) => {
         }
         } siblingCount={3} color="primary" size="large" />
       </div>
-      <div className={classes.footer}>
-        <Link href='/about'>About&nbsp;</Link>
-        <Link href='/stats'>Stats&nbsp;</Link>
-        <Link href='/tags'>Tags</Link>
-      </div>
+      <Footer/>
     </div>
 
   )
