@@ -59,11 +59,10 @@ export default function GlobalReverseSearch() {
       setSearchResults(search_results)
     }
   }
-  const send_image = (token: string) => {
+  const send_image = () => {
     setOpen(true)
     const formData = new FormData();
     formData.append("image", (fileObjects[0] as any).file);
-    formData.append("g-recaptcha-response", token);
     axios(`${config.api_domain}/reverse_search_global`, {
       method: "post",
       data: formData,
@@ -78,15 +77,6 @@ export default function GlobalReverseSearch() {
       setOpen(false)
       console.log(err)
       alert(err)
-    })
-  }
-
-  const _send_image = () => {
-    /*global grecaptcha*/ // defined in pages/_document.tsx
-    grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
-        send_image(token)
-      });
     })
   }
 
@@ -142,7 +132,7 @@ export default function GlobalReverseSearch() {
           maxFileSize={49000000}
         />
       </Box>
-      <Button onClick={() => { _send_image() }} variant="contained" color="primary" >Find by file</Button>
+      <Button onClick={() => { send_image() }} variant="contained" color="primary" >Find by file</Button>
       <div>
       Results<br/>
       {(SearchResults[0]==="not found")?"not found":SearchResults.map((el)=><div key={el}><a href={el}>{el}</a></div>)}
