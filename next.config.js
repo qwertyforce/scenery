@@ -5,7 +5,7 @@ module.exports = {
           {
             source: '/',
             destination: '/last_added/1'
-          },
+          }
         ]
       }
 }
