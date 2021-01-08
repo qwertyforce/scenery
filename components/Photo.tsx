@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import Link from './Link'
 const imgWithClick = { cursor: 'pointer' };
 
 const Photo = ({ index, onClick, photo, margin, direction, top, left, key }:{ index:any, onClick:any, photo:any, margin:any, direction:any, top:any, left:any, key:any }) => {
@@ -19,13 +19,13 @@ const Photo = ({ index, onClick, photo, margin, direction, top, left, key }:{ in
   };
 
   return (
-      <a key={key} href={key}>
+      <Link key={key} href={key}>
     <img
       style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
       {...photo}
       onClick={onClick ? handleClick : null}
     />
-    </a>
+    </Link>
   );
 };
 
