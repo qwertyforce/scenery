@@ -3,8 +3,15 @@ import db_ops from '../server/helpers/db_ops'
 import AppBar from '../components/AppBar'
 import { GetStaticProps } from 'next'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Index(props: any) {
+interface StatsProps {
+  number_of_images: number,
+  number_of_authors: number,
+  number_of_tags: number,
+  number_of_deleted: number,
+  last_image_id: number
+}
+
+export default function Stats(props: StatsProps) {
   return (
     <div>
       <AppBar />
@@ -21,7 +28,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const imgs = await db_ops.image_ops.get_all_images()
   const authors = new Set()
   const tags = new Set()
-  const id_of_last_image=imgs[imgs.length-1].id
+  const id_of_last_image = imgs[imgs.length - 1].id
   for (const img of imgs) {
     authors.add(img.author)
     for (const tag of img.tags) {
@@ -33,9 +40,9 @@ export const getStaticProps: GetStaticProps = async () => {
       number_of_images: imgs.length,
       number_of_authors: authors.size,
       number_of_tags: tags.size,
-      number_of_deleted:id_of_last_image-imgs.length,
-      last_image_id:id_of_last_image
+      number_of_deleted: id_of_last_image - imgs.length,
+      last_image_id: id_of_last_image
     },
-    revalidate:5*60 //5 min
+    revalidate: 5 * 60 //5 min
   }
 }
