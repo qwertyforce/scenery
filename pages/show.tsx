@@ -4,10 +4,18 @@ import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Photo from '../components/Photo'
 import ErrorPage from 'next/error'
+interface Photo{
+  src:string,
+  key: string,
+  width: number,
+  height: number
+}
+interface ShowProps{
+  photos:Photo[],
+  err:boolean
+}
 
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Show(props: any) {
+export default function Show(props: ShowProps) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
@@ -30,13 +38,13 @@ export async function getServerSideProps(context: any) {
       const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
       if(img_data[0]){images.push(img_data[0])}
     }
-    const photos = []
+    const photos:Photo[] = []
     for (const image of images) {
       photos.push({
         src: `/thumbnails/${image.id}.jpg`,
         key: `/image/${image.id}`,
-        width: image.width,
-        height: image.height
+        width: image.width as number,
+        height: image.height as number
       })
     }
     if(photos.length!==0){
