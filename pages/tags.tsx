@@ -12,8 +12,11 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
+interface PropsTags{
+  tags:[string,number][]
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Tags(props: any) {
+export default function Tags(props: PropsTags) {
   const classes = useStyles();
   const characters=["queen chrysalis","owlowiscious","octavia melody","lotus blossom","little strongheart","lightning dust","king sombra","doctor whooves","ditzy doo","dinky hooves","cheese sandwich","button mash","princess cadance","princess celestia","princess luna","princess celestia","ahuizotl","amethyst star","amira","angel bunny","apple bloom","apple bumpkin","athena sparkle","autumn blaze","babs seed","berry dreams","berry punch","big macintosh","big daddy mccolt","blossomforth","bon bon","braeburn","bright mac","bulk biceps","chancellor puddinghead","cheerilee","cherry jubilee","cinder glow","clover the clever","coco pommel","coloratura","daybreaker","daring do","derpy hooves","discord","diamond tiara","fancypants","flim","flam","fleur-de-lis","flash sentry","granny smith","joan pommelway","lemon hearts","lyra heartstrings","maud pie","mayor mare","scootaloo","shining armor","silver spoon","silverstream","smart cookie","snips","snails",`soarin'`,"spike","spitfire","star swirl the bearded","star hunter","starlight glimmer","steven magnet","sugar belle","sunset shimmer","sweetie belle","tank","tempest shadow","thorax","trixie","twilight sparkle (alicorn)","twinkleshine","unicorn twilight","ursa","vapor trail","vinyl scratch","winona","zecora"]
   const Mane6=["rarity","applejack","twilight sparkle","fluttershy","rainbow dash","pinkie pie"]
@@ -85,10 +88,10 @@ export const getStaticProps: GetStaticProps = async () => {
      }
      return true
   }
-  const tags = new Map()
+  const tags:Map<string, number> = new Map()
   for (const img of imgs) {
     for (const tag of img.tags) {
-      tags.set(tag,tags.get(tag)+1||1)
+      tags.set(tag,(tags.get(tag)||0)+1)
     }
   }
   const filtered_tags=[...tags].filter(([tag_name])=>filter_tag(tag_name))
