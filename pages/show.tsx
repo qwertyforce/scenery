@@ -2,16 +2,11 @@ import React from "react";
 import Gallery from "react-photo-gallery";
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
-import Photo from '../components/Photo'
+import PhotoComponent from '../components/Photo'
 import ErrorPage from 'next/error'
-interface Photo{
-  src:string,
-  key: string,
-  width: number,
-  height: number
-}
+import PhotoInterface from '../types/photo'
 interface ShowProps{
-  photos:Photo[],
+  photos:PhotoInterface[],
   err:boolean
 }
 
@@ -24,7 +19,7 @@ export default function Show(props: ShowProps) {
       <AppBar />
       {/* 
   // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
+      <Gallery targetRowHeight={250} photos={props.photos} renderImage={PhotoComponent} />   {/* FIX THIS SHIT */}
     </div>
   )
 }
@@ -38,7 +33,7 @@ export async function getServerSideProps(context: any) {
       const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
       if(img_data[0]){images.push(img_data[0])}
     }
-    const photos:Photo[] = []
+    const photos:PhotoInterface[] = []
     for (const image of images) {
       photos.push({
         src: `/thumbnails/${image.id}.jpg`,
