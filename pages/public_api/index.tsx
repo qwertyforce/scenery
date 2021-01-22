@@ -30,7 +30,7 @@ export default function Api() {
             <Link href={`${config.api_domain}/reverse_search_global`}>UI</Link>
 
             <h4>{`Reverse search by link - POST (no body) ${config.api_domain}/reverse_search_global?url=https://sitename.com/image.jpg`}</h4>
-            <h4>{`Reverse search by image file - POST (no body) ${config.api_domain}/reverse_search_global`}</h4>
+            <h4>{`Reverse search by image file - POST ${config.api_domain}/reverse_search_global`}</h4>
             <h4>multipart/form-data; put image data (binary) in `image` field</h4>
             </Paper>
             
