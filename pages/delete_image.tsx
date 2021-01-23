@@ -16,8 +16,10 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function deleteImage(props: any) {
+interface DeleteImageProps{
+ err:boolean
+}
+export default function deleteImage(props: DeleteImageProps) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
