@@ -9,6 +9,7 @@ import Photo from '../components/Photo'
 import Link from '../components/Link'
 import ErrorPage from 'next/error'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
+import PhotoInterface from '../types/photo'
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -17,8 +18,14 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Search(props: any) {
+interface SearchProps{
+  err:boolean,
+  photos:PhotoInterface[],
+  search_query:string,
+  current_page:number,
+  max_page:number
+}
+export default function Search(props: SearchProps) {
   const classes = useStyles();
   if (props.err) {
     return <ErrorPage statusCode={404} />
@@ -27,13 +34,14 @@ export default function Search(props: any) {
     <div>
       <AppBar />
       {/* 
-  // @ts-ignore */ }
+      // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
       <div className={classes.pagination}>
-        {/* // @ts-ignore */}
+        {/* 
+        // @ts-ignore */}
         <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
           {/* 
-// @ts-ignore */ }
+          // @ts-ignore */ }
           return (<PaginationItem
             component={Link}
             href={`/search?q=${props.search_query}&page=${item.page}`}
@@ -284,8 +292,8 @@ export async function getServerSideProps(context: any) {
     }
     const images = await db_ops.image_ops.find_images_by_tags(query)
     const images_on_page = 30
-    const photos = []
-    let page;
+    const photos:PhotoInterface[] = []
+    let page:number;
     if (context.query.page) {
       page = parseInt(context.query.page)
     } else {
