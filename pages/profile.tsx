@@ -1,7 +1,7 @@
 import React from 'react';
 import db_ops from '../server/helpers/db_ops'
 
-export default function Index(props: { user_data: React.ReactNode; }) {
+export default function Index(props: { user_data: string; }) {
   return (
     <div>{props.user_data}</div>
   );

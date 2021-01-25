@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; }) {
+function LoginForm() {
   const router = useRouter()
   const classes = useStyles();
   const [email, setEmail] = React.useState('');
@@ -152,7 +152,6 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={props.handleSync}
                 href={`/auth/google`}
                 startIcon={
                   <SvgIcon>
@@ -166,7 +165,6 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
             <Grid item>
               <Button
                 variant="contained"
-                onClick={props.handleSync}
                 href={`/auth/github`}
                 startIcon={
                   <SvgIcon>
@@ -178,8 +176,6 @@ function LoginForm(props: { handleSync: ((event: React.MouseEvent<HTMLAnchorElem
                 </Button>
             </Grid>
           </Grid>
-
-
         </CardActions>
       </Card>
     </form>
