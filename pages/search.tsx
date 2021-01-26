@@ -44,7 +44,7 @@ export default function Search(props: SearchProps) {
           // @ts-ignore */ }
           return (<PaginationItem
             component={Link}
-            href={`/search?q=${props.search_query}&page=${item.page}`}
+            href={`/search?q=${encodeURIComponent(props.search_query)}&page=${item.page}`}
             underline="none"
             {...item}
           />)
