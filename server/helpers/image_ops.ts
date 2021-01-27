@@ -4,10 +4,10 @@ import * as cv from 'opencv4nodejs'
 import { HistAxes } from 'opencv4nodejs';
 import db_ops from './db_ops';
 import sharp from 'sharp'
+import  { bmvbhash } from 'blockhash-core'
 
 const detector=new cv.SIFTDetector({nFeatures:500})
 const matchFunc = cv.matchKnnBruteForceAsync
-const imghash = require('imghash');
 
 const BIN_SIZE = 16
 const histAxes: HistAxes[] = [
@@ -43,7 +43,16 @@ function normalize(descriptor:any){
   }
   return descriptor
 }
-
+async function get_phash(image:Buffer|string){
+  const { data, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const imageData = {
+        width: info.width,
+        height: info.height,
+        data: data
+    };
+    const x=bmvbhash(imageData,16)
+    return x
+}
 async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
   const img_mat = await cv.imdecodeAsync(image)
   let rgb_hist = await cv.calcHistAsync(img_mat, histAxes)
@@ -136,6 +145,7 @@ async function get_similar_images_by_sift(image: Buffer) {
   const ids = similar_images.map((el) => el.id)
   return ids
 }
+
 function hamming_distance(str1: string, str2: string) {
   let distance = 0;
   for (let i = 0; i < str1.length; i += 1) {
@@ -147,7 +157,7 @@ function hamming_distance(str1: string, str2: string) {
 }
 
 async function get_similar_images_by_phash(image: Buffer) {
-  const phash = await imghash.hash(image, 16)
+  const phash = await get_phash(image)
   let images = await db_ops.image_ops.get_ids_and_phashes()
   for (let i = 0; i < images.length; i++) {
     images[i].dist = hamming_distance(phash, images[i].phash)
@@ -160,4 +170,4 @@ async function get_similar_images_by_phash(image: Buffer) {
   const ids = images.map((el) => el.id)
   return ids
 }
-export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features }
+export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features,get_phash }
