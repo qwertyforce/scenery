@@ -5,7 +5,8 @@
     "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
     "build_server": "tsc --project tsconfig.server.json",
-    "start": "cross-env NODE_ENV=production node dist/server/index.js"
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "start_debug": "cross-env NODE_ENV=production node --inspect --expose-gc dist/server/index.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
@@ -19,6 +20,7 @@
     "@types/sharp": "^0.26.0",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
+    "blockhash-core": "^0.1.0",
     "body-parser": "^1.19.0",
     "connect-mongo": "^3.2.0",
     "cookie-parser": "^1.4.5",
@@ -30,11 +32,10 @@
     "express-recaptcha": "^5.0.2",
     "express-session": "^1.17.1",
     "express-validator": "^6.6.1",
-    "imghash": "0.0.7",
     "material-ui-dropzone": "^3.4.0",
     "mongodb": "^3.6.1",
     "multer": "^1.4.2",
-    "next": "latest",
+    "next": "^10.0.5",
     "nodemailer": "^6.4.11",
     "opencv4nodejs": "^5.6.0",
     "prop-types": "^15.7.2",
