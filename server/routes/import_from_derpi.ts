@@ -8,7 +8,6 @@ import fs from 'fs'
 import path from 'path';
 import image_ops from './../helpers/image_ops'
 import thumbnail_ops from '../helpers/thumbnail_ops'
-const imghash: any = require('imghash');
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
 async function parse_author(tags: any) {
     for (const tag of tags) {
@@ -61,7 +60,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 });           
                 const parsed_author = await parse_author(booru_image_data.tags)
                 const booru_link = `${booru_domain}/images/${booru_image_data.id}`
-                const phash = await imghash.hash(image.data, 16);
+                const phash =await image_ops.get_phash(image.data)
                 await image_ops.calculate_sift_features(new_image_id,image.data)
                 await image_ops.calculate_color_hist_and_similarities(new_image_id,image.data)
                 booru_image_data.tags.push(`width:${booru_image_data.width}`)

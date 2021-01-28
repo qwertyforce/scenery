@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 const { COPYFILE_EXCL } = fs.constants;
 
-const imghash: any = require('imghash');
+import  image_ops from "../helpers/image_ops"
 
 import config from "../../config/config"
 
@@ -52,7 +52,7 @@ async function import_images() {
                 parsed_author="???"
             }
             const derpi_link = "https://derpibooru.org/images/" + derpi_data.id
-            const phash = await imghash.hash(`${PATH_TO_IMAGES}/${image_file_name}`, 16);
+            const phash = await image_ops.get_phash(`${PATH_TO_IMAGES}/${image_file_name}`);
             id++
             fs.copyFile(`${PATH_TO_IMAGES}/${image_file_name}`, `${PATH_TO_IMPORTED_IMAGES}/${id}.${derpi_data.format.toLowerCase()}`, COPYFILE_EXCL,callback )
             console.log(`imported ${image_file_name}`)

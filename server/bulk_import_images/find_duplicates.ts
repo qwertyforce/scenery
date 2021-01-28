@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import fs from 'fs'
 import path from 'path'
-const imghash: any = require('imghash');
+import  image_ops from "../helpers/image_ops"
 
 // const PATH_TO_IMAGES = path.join("..", "..", "..", 'import_from_derpi', 'images')
 const PATH_TO_IMAGES = path.join("D:", "derpi_downloader", 'Downloads', 'derpi2')
@@ -30,7 +30,7 @@ async function find_duplicates() {
         // console.log(IMAGES.indexOf(image_file_name))
 
         try {
-            const phash = await imghash.hash(`${PATH_TO_IMAGES}/${image_file_name}`, 16);
+            const phash = await image_ops.get_phash(`${PATH_TO_IMAGES}/${image_file_name}`);
             for (const hash of Object.keys(hashes)) {
                 const distance = hamming_distance(hash, phash)
                 if (distance < 20) {
