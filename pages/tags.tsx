@@ -23,12 +23,14 @@ export default function Tags(props: PropsTags) {
   const Seasons=["winter","spring","summer","autumn"]
   const Styles=["grayscale","dutch angle","traditional art","paint","watercolor painting","acrylic painting","digital painting","oil painting","painting","bob ross","classic art","concept art","digital art","fine art emulation","fine art parody","pixel art","sketch","monochrome"]
   const Episodes=["a hearth's warming tail","a royal problem","all bottled up","applebuck season","apples to the core","crusaders of the lost mark","do princesses dream of magic sheep","filli vanilli","hearth's warming eve (episode)","it ain't easy being breezies","may the best pet win","maud pie (episode)","princess twilight sparkle (episode)","read it and weep","road to friendship","rock solid friendship","sleepless in ponyville","slice of life (episode)","the crystalling","the cutie map","the cutie mark chronicles","the cutie re-mark","the gift of the maud pie","the last problem","the lost treasure of griffonstone","the mane attraction","the perfect pear","the return of harmony","to where and back again","too many pinkie pies","viva las pegasus","winter wrap up"]
+  const Orientation=["horizontal","vertical","square"]
   const Tags=[]
   const Mane6_tags=[]
   const Seasons_tags=[]
   const Characters_tags=[]
   const Styles_tags=[]
   const Episodes_tags=[]
+  const Orientation_tags=[]
   for (const [tag_name, number_of_pictures] of props.tags) {
     const tag = <Chip label={`${tag_name} (${number_of_pictures})`} key={tag_name} className={classes.chip} component="a" href={`/search?q=${tag_name}`} clickable />
     if (Mane6.includes(tag_name)) {
@@ -41,6 +43,8 @@ export default function Tags(props: PropsTags) {
       Styles_tags.push(tag)
     }else if(Episodes.includes(tag_name)){
       Episodes_tags.push(tag)
+    }else if(Orientation.includes(tag_name)){
+      Orientation_tags.push(tag)
     }
     else {
       Tags.push(tag)
@@ -69,6 +73,10 @@ export default function Tags(props: PropsTags) {
         Episodes
       </Typography>
       {Episodes_tags}
+      <Typography variant="h6" gutterBottom>
+        Orientation
+      </Typography>
+      {Orientation_tags}
       <Typography variant="h6" gutterBottom>
         Other
       </Typography>

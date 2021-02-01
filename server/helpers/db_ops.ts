@@ -242,7 +242,8 @@ async function add_image_by_object(image:any){
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
     size:string,booru_link:string, 
     booru_likes:number,booru_dislikes:number,
-    booru_id:number,booru_date:Date,source_url:string,tags:Array<string>,wilson_score:number,sha512:string,phash:string,description:string,booru:string){
+    booru_id:number,booru_date:Date,source_url:string,tags:Array<string>,
+    wilson_score:number,sha512:string,phash:string,description:string,booru:string,orientation:string){
     insertDocuments("images", [{
         id:id,
         file_ext:file_ext,
@@ -262,7 +263,8 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
         booru_link:booru_link,
         booru_date:booru_date,
         source_url:source_url,
-        wilson_score:wilson_score
+        wilson_score:wilson_score,
+        orientation:orientation
     }])
 }
 /////////////////////////////////////////////////////////

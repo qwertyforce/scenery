@@ -63,11 +63,20 @@ async function import_from_derpi(req: Request, res: Response) {
                 const phash =await image_ops.get_phash(image.data)
                 await image_ops.calculate_sift_features(new_image_id,image.data)
                 await image_ops.calculate_color_hist_and_similarities(new_image_id,image.data)
+                let orientation=""
+                if(booru_image_data.height>booru_image_data.width){
+                    orientation="vertical"
+                }else if(booru_image_data.height<booru_image_data.width){
+                    orientation="horizontal"
+                }else{
+                    orientation="square"
+                }
                 booru_image_data.tags.push(`width:${booru_image_data.width}`)
                 booru_image_data.tags.push(`height:${booru_image_data.height}`)
                 await db_ops.image_ops.add_image(new_image_id, booru_image_data.format.toLowerCase(), booru_image_data.width, booru_image_data.height, parsed_author, booru_image_data.size,
                 booru_link, booru_image_data.upvotes, booru_image_data.downvotes, booru_image_data.id, booru_image_data.created_at,
-                    booru_image_data.source_url, booru_image_data.tags, booru_image_data.wilson_score, booru_image_data.sha512_hash, phash, booru_image_data.description,booru)
+                    booru_image_data.source_url, booru_image_data.tags, booru_image_data.wilson_score, booru_image_data.sha512_hash,
+                     phash, booru_image_data.description,booru,orientation)
                 console.log(`OK. New image_id: ${new_image_id}`)
                 res.json({ message: `OK. New image_id: ${new_image_id}`})
                 return
