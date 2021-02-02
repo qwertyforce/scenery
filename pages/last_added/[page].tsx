@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
@@ -6,14 +5,14 @@ import AppBar from '../../components/AppBar'
 import { Tab, Tabs } from "@material-ui/core";
 import db_ops from '../../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
-import { GetStaticPaths } from 'next'
+import { GetStaticProps, GetStaticPaths } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import Footer from '../../components/Footer'
 import ErrorPage from 'next/error'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
-
+import PhotoInterface from '../../types/photo'
 const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
@@ -26,8 +25,13 @@ function a11yProps(index: number) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MainPage = (props: any) => {
+interface LastAddedPageProps{
+  photos: PhotoInterface,
+  current_page: number,
+  max_page: number,
+  err:boolean
+}
+export default function LastAddedPage(props: LastAddedPageProps){
   const classes = useStyles();
   const router = useRouter()
   if (router.isFallback) {
@@ -73,10 +77,10 @@ const MainPage = (props: any) => {
   )
 }
 
-export async function getStaticProps(context: any) {
+export const getStaticProps: GetStaticProps = async (context) => {
   const images_on_page = 30
   const photos = []
-  if (context.params.page) {
+  if (typeof context.params?.page === "string") {
     const images = (await db_ops.image_ops.get_all_images()).reverse()
     const page = parseInt(context.params.page)
     if (page >= 1 && page <= Math.ceil(images.length / images_on_page)) {
@@ -116,5 +120,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: true
   };
 }
-export default MainPage
 
