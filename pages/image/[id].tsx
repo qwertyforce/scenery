@@ -136,8 +136,8 @@ interface ImageProps{
 
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  if (context.params?.id) {
-    const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
+  if (typeof context.params?.id === "string") {
+    const img = await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
     if (img.length === 1) {
       const all_images_similaties:ImageSimilarities= JSON.parse(await fs.readFile("find_visually_similar_images/data.txt","utf-8"))
        let visually_similar_link=""
