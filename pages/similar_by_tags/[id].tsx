@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
-import { GetStaticPaths } from 'next'
+import { GetStaticPaths,GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import ErrorPage from 'next/error'
+import PhotoInterface from '../../types/photo'
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -20,8 +20,11 @@ const useStyles = makeStyles(() => ({
     justifyContent: "center"
   }
 }));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MainPage = (props: any) => {
+interface SimilarByTagsProps{
+  photos:PhotoInterface,
+  err:boolean
+}
+export default function SimilarByTags(props: SimilarByTagsProps){
   const classes = useStyles();
   const router = useRouter()
   if (router.isFallback) {
@@ -54,13 +57,14 @@ async function get_similarity(orig_tags: Array<string>, img_tags: Array<string>)
   }
   return similarity
 }
-export async function getStaticProps(context: any) {
+export const getStaticProps: GetStaticProps = async (context) => {
   const images_on_page = 30
   const photos = []
   let similar_by_tags = []
-  if (context.params.id) {
+  if (typeof context.params?.id === "string") {
+    const image_id=context.params.id
     const images = await db_ops.image_ops.get_all_images()
-    const orig_tags = (images.find((el) => el.id.toString() === context.params.id))?.tags
+    const orig_tags = (images.find((el) => el.id.toString() === image_id)).tags
     if (orig_tags) {
       for (const image of images) {
         if (image.id.toString() !== context.params.id) {
@@ -102,5 +106,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: true
   };
 }
-export default MainPage
 

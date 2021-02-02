@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
-import { GetStaticPaths } from 'next'
+import { GetStaticPaths,GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import ErrorPage from 'next/error'
+import PhotoInterface from '../../types/photo'
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -20,8 +20,15 @@ const useStyles = makeStyles(() => ({
     justifyContent: "center"
   }
 }));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MainPage = (props: any) => {
+
+interface SimilarByColorProps{
+  photos: PhotoInterface,
+  current_page: number,
+  max_page: number,
+  err:boolean
+}
+
+export default function SimilarByColor(props: SimilarByColorProps){
   const classes = useStyles();
   const router = useRouter()
   if (router.isFallback) {
@@ -45,18 +52,27 @@ const MainPage = (props: any) => {
 
   )
 }
- 
-export async function getStaticProps(context: any) {
+
+interface  Similarity{
+  id:number,
+  similarity:number
+}
+
+interface Similarities{
+  id: number,
+  similarities:Similarity[];
+}
+
+export const getStaticProps: GetStaticProps = async (context) => {
   const images_on_page = 120
   const photos = []
-  if (context.params.id) {
+  if (typeof context.params?.id === "string") {
     const id = parseInt(context.params.id)
-    let similar_by_color: Array<Record<string, any>> = await db_ops.image_search.get_color_similarities_by_id(id)
-    if (similar_by_color.length !== 0) {
-      similar_by_color = similar_by_color[0].similarities.filter((el: any) => el.similarity > 0.2)
-      similar_by_color.sort((a, b) => b.similarity - a.similarity)
-      similar_by_color = similar_by_color.slice(0, images_on_page)
-      for (const img of similar_by_color) {
+    const similarities_by_color:Array<Similarities> = await db_ops.image_search.get_color_similarities_by_id(id)
+    if (similarities_by_color.length !== 0) {
+      const similar_by_color=similarities_by_color[0]
+      const similar_images = similar_by_color.similarities.filter((el: Similarity) => el.similarity > 0.2).sort((a, b) => b.similarity - a.similarity).slice(0, images_on_page)
+      for (const img of similar_images) {
         const image = (await db_ops.image_ops.find_image_by_id(img.id))[0]
         photos.push({
           src: `/thumbnails/${image.id}.jpg`,
@@ -90,5 +106,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: true
   };
 }
-export default MainPage
 
