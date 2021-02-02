@@ -39,8 +39,28 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
   },
 }));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Image(props: any) {
+
+interface ImageSimilarities {
+  [key: string]: number[];
+} 
+interface ImageProps{
+  filename: string,
+  width:number,
+  height: number,
+  size: number,
+  author: string,
+  tags: string[],
+  booru:string,
+  booru_link: string,
+  source_link: string,
+  date: string,
+  similar_by_tags_link: string,
+  similar_by_color_link:string,
+  visually_similar_link:string,
+  upscaled:string,
+  err:boolean
+}
+ export default function Image(props: ImageProps) {
   const router = useRouter()
 
   if (router.isFallback) {
@@ -118,12 +138,9 @@ export default function Image(props: any) {
 export const getStaticProps: GetStaticProps = async (context) => {
   if (context.params?.id) {
     const img = await db_ops.image_ops.find_image_by_id(parseInt((context.params.id as string)))
-    // console.log(all_images_similaties[(context.params.id as string)])
     if (img.length === 1) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let all_images_similaties:any= await fs.readFile("find_visually_similar_images/data.txt","utf-8")
-      all_images_similaties=JSON.parse(all_images_similaties)
-      let visually_similar_link=""
+      const all_images_similaties:ImageSimilarities= JSON.parse(await fs.readFile("find_visually_similar_images/data.txt","utf-8"))
+       let visually_similar_link=""
       if(all_images_similaties[(context.params.id as string)]!==undefined){
         visually_similar_link=`/visually_similar/${img[0].id}`
       }
@@ -165,21 +182,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths: paths,
     fallback: true
   };
-
 }
-
-
-
-// const Image = () => {
-//   const router = useRouter()
-//   const { id } = router.query
-
-//   return (
-//   <div>
-// <p>Post: {id}</p>
-//   </div>
-
-//   )
-// }
-
-// export default Image
