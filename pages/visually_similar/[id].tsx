@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
-import { GetStaticPaths } from 'next'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import ErrorPage from 'next/error'
 import db_ops from '../../server/helpers/db_ops'
-import {promises as fs } from 'fs'
+import PhotoInterface from '../../types/photo'
+import { promises as fs } from 'fs'
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -21,8 +21,12 @@ const useStyles = makeStyles(() => ({
     justifyContent: "center"
   }
 }));
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MainPage = (props: any) => {
+
+interface VisuallySimilarProps {
+  photos: PhotoInterface,
+  err: boolean
+}
+export default function VisuallySimilar(props: VisuallySimilarProps) {
   const classes = useStyles();
   const router = useRouter()
   if (router.isFallback) {
@@ -47,17 +51,20 @@ const MainPage = (props: any) => {
   )
 }
 
-export async function getStaticProps(context: any) {
+interface ImageSimilarities {
+  [key: string]: number[];
+}
+
+export const getStaticProps: GetStaticProps = async (context) => {
   const photos = []
-  if (context.params.id) {
-    let all_images_similaties: any = await fs.readFile("find_visually_similar_images/data.txt", "utf-8")
-    all_images_similaties = JSON.parse(all_images_similaties)
-    const similar_images_ids = all_images_similaties[(context.params.id as string)]
+  if (typeof context.params?.id === "string") {
+    const all_images_similaties: ImageSimilarities = JSON.parse(await fs.readFile("find_visually_similar_images/data.txt", "utf-8"))
+    const similar_images_ids = all_images_similaties[context.params.id]
     if (similar_images_ids) {
       const similar_images = []
       for (const image_id of similar_images_ids) {
-        const img = (await db_ops.image_ops.find_image_by_id(parseInt(image_id)))[0]
-        if(img){
+        const img = (await db_ops.image_ops.find_image_by_id(image_id))[0]
+        if (img) {
           similar_images.push({ id: img.id, width: img.width, height: img.height })
         }
       }
@@ -77,7 +84,7 @@ export async function getStaticProps(context: any) {
       }
     }
   }
-  
+
   return {
     props: { err: true },
     revalidate: 5 * 60 //5 min
@@ -95,5 +102,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: true
   };
 }
-export default MainPage
 
