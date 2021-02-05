@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-var-requires */
 import db_ops from './../helpers/db_ops'
 import { Request, Response } from 'express';
 import axios from 'axios'
@@ -9,7 +6,7 @@ import path from 'path';
 import image_ops from './../helpers/image_ops'
 import thumbnail_ops from '../helpers/thumbnail_ops'
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
-async function parse_author(tags: any) {
+async function parse_author(tags: string[]) {
     for (const tag of tags) {
         const idx = tag.indexOf("artist:")
         if (idx === 0) {    //tag starts with "artist:" 

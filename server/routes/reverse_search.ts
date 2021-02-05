@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-var-requires */
-// import db_ops from './../helpers/db_ops'
 import { Request, Response } from 'express';
 import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 import image_ops from '../helpers/image_ops'
@@ -12,7 +9,6 @@ async function reverse_search(req: Request, res: Response) {
             message: "Captcha error"
         });
     }
-
     if(req.file){
         const Mode=parseInt(req.body.mode)
         req.connection.setTimeout(5*60000)//5min
