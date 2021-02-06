@@ -61,12 +61,15 @@ async function import_images() {
             }else{
                 orientation="square"
             }
+            derpi_data.tags.push(`width:${derpi_data.width}`)
+            derpi_data.tags.push(`height:${derpi_data.height}`)
+            derpi_data.tags.push(orientation)
             id++
             fs.copyFile(`${PATH_TO_IMAGES}/${image_file_name}`, `${PATH_TO_IMPORTED_IMAGES}/${id}.${derpi_data.format.toLowerCase()}`, COPYFILE_EXCL,callback )
             console.log(`imported ${image_file_name}`)
             db_ops.image_ops.add_image(id, derpi_data.format.toLowerCase(), derpi_data.width, derpi_data.height, parsed_author, derpi_data.size,
                 derpi_link, derpi_data.upvotes, derpi_data.downvotes, derpi_data.id, derpi_data.created_at,
-                derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash,derpi_data.description,"derpibooru",orientation)
+                derpi_data.source_url, derpi_data.tags, derpi_data.wilson_score, derpi_data.sha512_hash, phash,derpi_data.description,"derpibooru")
 
         }
     }

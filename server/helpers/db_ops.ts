@@ -73,7 +73,7 @@ async function addToArrayInDocument(collection_name:string,selector:Record<strin
 
 
 async function generate_id() {
-    const id = new Promise((resolve, reject) => {
+    const id:Promise<string> = new Promise((resolve, reject) => {
         crypto.randomBytes(32, async function(ex, buffer) {
             if (ex) {
                 reject("error");
@@ -243,7 +243,7 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
     size:string,booru_link:string, 
     booru_likes:number,booru_dislikes:number,
     booru_id:number,booru_date:Date,source_url:string,tags:Array<string>,
-    wilson_score:number,sha512:string,phash:string,description:string,booru:string,orientation:string){
+    wilson_score:number,sha512:string,phash:string,description:string,booru:string){
     insertDocuments("images", [{
         id:id,
         file_ext:file_ext,
@@ -263,8 +263,7 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
         booru_link:booru_link,
         booru_date:booru_date,
         source_url:source_url,
-        wilson_score:wilson_score,
-        orientation:orientation
+        wilson_score:wilson_score
     }])
 }
 /////////////////////////////////////////////////////////
