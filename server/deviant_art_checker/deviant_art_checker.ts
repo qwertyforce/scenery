@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import config from '../../config/config';
 import axios from 'axios';
 import db_ops from '../helpers/db_ops';
-import { launch } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import {promises as fs} from 'fs'
 function sleep(ms:number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -19,7 +18,7 @@ async function get_token(){
 }
 
 async function deviant_art_checker() {
-    const browser = await launch({ headless: true,args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const browser = await puppeteer.launch({ headless: true,args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const images = await db_ops.image_ops.get_all_images()
     let access_token = await get_token()
     for (let i=0;i<images.length;i++) {
