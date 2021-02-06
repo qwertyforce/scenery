@@ -15,7 +15,12 @@ import { check } from 'express-validator';
 import { RecaptchaV3 } from 'express-recaptcha'
 //import fs from 'fs';
 import config from '../config/config'
-
+declare module "express-session" {
+  interface Session {
+    user_id: string,
+    authed: boolean
+  }
+}
 const PASS_MIN = 8;
 const PASS_MAX = 128;
 const port = parseInt(process.env.NODE_PORT||config.server_port)
@@ -163,8 +168,7 @@ next_app.prepare().then(() => {
     return handle(req, res)
   })
   app.set('trust proxy','127.0.0.1')
-  app.listen(port,'localhost', (err) => {
-    if (err) throw err
+  app.listen(port,'localhost', () => {
     console.log(`> Ready on ${port}`)
   })
 })

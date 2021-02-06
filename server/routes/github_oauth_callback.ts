@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import db_ops from './../helpers/db_ops';
 import config from '../../config/config';
 import axios from 'axios';
@@ -29,11 +28,11 @@ async function github_oauth_callback(req:Request, res:Response) {
         const users = await db_ops.activated_user.find_user_by_oauth_id(oauth_id)
         if (users.length === 0) {
             const usr_id = await db_ops.activated_user.create_new_user_activated_github(oauth_id)
-            req.session!.user_id = usr_id;
+            req.session.user_id = usr_id;
         } else {
-            req.session!.user_id = users[0].id;
+            req.session.user_id = users[0].id;
         }
-        req.session!.authed = true;
+        req.session.authed = true;
         res.redirect(config.domain)
     } catch (e) {
         console.log(e)

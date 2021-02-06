@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import db_ops from './../helpers/db_ops'
 import { validationResult } from 'express-validator'
 import crypto_ops from './../helpers/crypto_ops'
@@ -32,8 +31,8 @@ async function login(req:Request,res:Response) {
         const match = await crypto_ops.check_password(password, users[0].password);
         if (match) {
             if (users[0].activated === true) {
-                req.session!.authed = true;
-                req.session!.user_id = users[0].id;
+                req.session.authed = true;
+                req.session.user_id = users[0].id;
                 res.json({
                     message: "success"
                 })
