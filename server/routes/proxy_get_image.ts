@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 import { validationResult } from 'express-validator'
 import {Request, Response} from 'express';

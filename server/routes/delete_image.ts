@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import db_ops from './../helpers/db_ops'
 import { Request, Response } from 'express';
 import config from '../../config/config'

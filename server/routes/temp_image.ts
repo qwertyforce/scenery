@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-var-requires */
-// import db_ops from './../helpers/db_ops'
 import { Request, Response } from 'express';
 import {temp_images} from './reverse_search_global'
 
