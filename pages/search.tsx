@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import Gallery from "react-photo-gallery";
@@ -7,7 +8,6 @@ import db_ops from '../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
 import Photo from '../components/Photo'
 import Link from '../components/Link'
-import ErrorPage from 'next/error'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 import PhotoInterface from '../types/photo'
 
@@ -20,6 +20,7 @@ const useStyles = makeStyles(() => ({
 
 interface SearchProps{
   err:boolean,
+  total_images:number,
   photos:PhotoInterface[],
   search_query:string,
   current_page:number,
@@ -28,11 +29,15 @@ interface SearchProps{
 export default function Search(props: SearchProps) {
   const classes = useStyles();
   if (props.err) {
-    return <ErrorPage statusCode={404} />
+    return (<div>
+      <AppBar />
+      <p>Total images: 0</p>
+    </div>)
   }
   return (
     <div>
       <AppBar />
+      <p>Total images: {props.total_images}</p>
       {/* 
       // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
@@ -311,6 +316,7 @@ export async function getServerSideProps(context: any) {
       }
       return {
         props: {
+          total_images:images.length,
           photos: photos,
           search_query: context.query.q,
           current_page: page,
