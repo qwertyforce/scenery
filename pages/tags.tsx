@@ -31,6 +31,7 @@ export default function Tags(props: PropsTags) {
   const Styles_tags=[]
   const Episodes_tags=[]
   const Orientation_tags=[]
+  let Artist_tags=[]
   for (const [tag_name, number_of_pictures] of props.tags) {
     const tag = <Chip label={`${tag_name} (${number_of_pictures})`} key={tag_name} className={classes.chip} component="a" href={`/search?q=${tag_name}`} clickable />
     if (Mane6.includes(tag_name)) {
@@ -45,11 +46,14 @@ export default function Tags(props: PropsTags) {
       Episodes_tags.push(tag)
     }else if(Orientation.includes(tag_name)){
       Orientation_tags.push(tag)
+    }else if(tag_name.includes("artist:")){
+      Artist_tags.push({tag,number_of_pictures})
     }
     else {
       Tags.push(tag)
     }
   }
+  Artist_tags=Artist_tags.sort((a,b)=>b.number_of_pictures-a.number_of_pictures).map((el)=>el.tag)
   return (
     <div>
       <AppBar />
@@ -78,6 +82,10 @@ export default function Tags(props: PropsTags) {
       </Typography>
       {Orientation_tags}
       <Typography variant="h6" gutterBottom>
+        Artists
+      </Typography>
+      {Artist_tags}
+      <Typography variant="h6" gutterBottom>
         Other
       </Typography>
       {Tags}
@@ -88,7 +96,7 @@ export default function Tags(props: PropsTags) {
 export const getStaticProps: GetStaticProps = async () => {
   const imgs = await db_ops.image_ops.get_all_images() 
   const filter_tag=(tag:string)=>{
-    const filtered_tags=["width:","height:","artist:"]
+    const filtered_tags=["width:","height:"]
      for(const f_tag of filtered_tags){
        if(tag.includes(f_tag)){
          return false
