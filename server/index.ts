@@ -42,8 +42,9 @@ import delete_image from './routes/delete_image'
 import import_from_derpi from './routes/import_from_derpi'
 import reverse_search from './routes/reverse_search'
 import proxy_get_image from './routes/proxy_get_image'
-import reverse_search_global from './routes/reverse_search_global'
-import temp_image from './routes/temp_image'
+import reverse_search_global from './routes/public_api/reverse_search_global'
+import get_all_images from './routes/public_api/get_all_images'
+import temp_image from './routes/public_api/temp_image'
 next_app.prepare().then(() => {
   const app = express()
   const storage = multer.memoryStorage()
@@ -103,6 +104,7 @@ next_app.prepare().then(() => {
   // public_api_router.get('/api/reverse_search_global', reverse_search_global)
   public_api_router.get('/public_api/image/:image_id', temp_image)
   public_api_router.post('/public_api/reverse_search_global',[upload.single('image')], reverse_search_global)
+  public_api_router.get('/public_api/get_all_images',get_all_images)
   ///////////////////////////////////////
   
   api_router.get('/auth/google', google_oauth_redirect)

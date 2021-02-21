@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import axios from "axios"
-import config from "../../config/config"
+import config from "../../../config/config"
 export const temp_images = new Map()
 const boorus = [
     { url: "https://ponerpics.org", api_key: "e1YPLqyucu0uYe5_xyXA" },
