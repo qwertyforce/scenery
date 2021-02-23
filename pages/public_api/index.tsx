@@ -11,6 +11,7 @@ import Link from '../../components/Link'
 const useStyles = makeStyles(() => ({
   api_route: {
     padding:5,
+    marginTop:10,
     width:"fit-content!important"
   }
 }));
@@ -33,7 +34,11 @@ export default function Api() {
             <h4>{`Reverse search by image file - POST ${config.api_domain}/reverse_search_global`}</h4>
             <h4>multipart/form-data; put image data (binary) in `image` field</h4>
             </Paper>
-            
+            <Paper className={classes.api_route}>
+            <h3>Get all images</h3>
+            <h4>{`Get all images - GET ${config.api_domain}/get_all_images`}</h4>
+            <h4>Returns json with information about all images</h4>
+            </Paper>
         </Box>
       </Container>
     </div>
