@@ -16,7 +16,12 @@ async function add_tags() {
             await db_ops.image_ops.add_tags_to_image_by_id(image.id, [orientation])
         }
     }
+}
+async function run(){
+    await add_tags()
     process.exit()
 }
-add_tags()
+run()
+
+
 

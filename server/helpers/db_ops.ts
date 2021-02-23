@@ -59,7 +59,7 @@ async function insertDocuments(collection_name:string, documents:Array<any>) {
 }
 async function updateDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
   const collection = client.db(db_main).collection(collection_name);
-  collection.updateOne(selector, { $set: update })
+  return collection.updateOne(selector, { $set: update })
   //const result= await collection.updateOne(selector, { $set: update })
  // console.log(result)
 }
@@ -189,7 +189,7 @@ async function get_ids_and_phashes(){
 }
 
 async function update_image_data_by_id(id:number,update:Record<string,unknown>){
-    updateDocument("images", {id: id},update)
+    return updateDocument("images", {id: id},update)
 }
 
 async function get_all_images(){
