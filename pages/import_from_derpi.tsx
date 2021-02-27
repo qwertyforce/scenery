@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Button from '@material-ui/core/Button';
@@ -12,6 +11,9 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import ErrorPage from 'next/error'
+import { useState } from 'react';
+import { ChangeEvent } from 'react';
 
 const useStyles = makeStyles(() => ({
   backdrop: {
@@ -19,18 +21,16 @@ const useStyles = makeStyles(() => ({
     color: '#fff',
   },
 }));
-import ErrorPage from 'next/error'
-import { useState } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function Import_from_derpi(props: any) {
-  const [Booru, setBooru] = useState('');
-  const handleChange = (event:any) => {
-    setBooru(event.target.value);
-  };
+
+export default function Import_from_derpi(props:{err:boolean}) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
+  const [Booru, setBooru] = useState('');
+  const handleChange = (event:ChangeEvent<HTMLInputElement>) => {
+    setBooru(event.target.value);
+  };
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [ImageID, setID] = useState(0);
