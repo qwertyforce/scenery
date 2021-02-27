@@ -1,16 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import AppBar from '../components/AppBar'
 import { DropzoneAreaBase } from 'material-ui-dropzone';
 import Button from '@material-ui/core/Button';
 import config from '../config/config'
 import axios from "axios"
+import db_ops from '../server/helpers/db_ops'
 import { useRouter } from 'next/router'
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
+import Autocomplete,{ createFilterOptions } from '@material-ui/lab/Autocomplete';
+import Chip from '@material-ui/core/Chip';
+import ErrorPage from 'next/error'
+
 
 const useStyles = makeStyles(() => ({
   backdrop: {
@@ -25,8 +31,20 @@ const useStyles = makeStyles(() => ({
   url_text_field:{
     width:"300px",
     marginRight:"10px"
+  },
+  fetch_img_div:{
+    display:"flex",
+    marginBottom:"10px"
+  },
+  upload_interface:{
+    margin: "10px",
+    padding: "10px"
+  },
+  tags_field:{
+    margin:10
   }
 }));
+
 function isValidURL(url:string){
   const RegExp = /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
   if(RegExp.test(url)){
@@ -36,20 +54,74 @@ function isValidURL(url:string){
   }
 } 
 
-export default function ReverseSearch() {
+function AutoCompleteTagTextField(props:{AllTags:string[],SelectedTags:string[],setSelectedTags:React.Dispatch<React.SetStateAction<string[]>>}){
   const classes = useStyles();
-  const router = useRouter()
+  const [inputValue, setInputValue] = React.useState("");
+  const [openTagsAutocomplete, setOpenTagsAutocomplete] = React.useState(false);
+  const filterOptions = createFilterOptions({
+    matchFrom: 'start'
+  });
+  const handleOpenTagsAutocomplete = () => {
+    if (inputValue.length > 0) {
+      setOpenTagsAutocomplete(true);
+    }
+  };
+  const handleInputChange = (_event: ChangeEvent<unknown>, newInputValue:string) => {
+    setInputValue(newInputValue);
+    if (newInputValue.length > 0) {
+      setOpenTagsAutocomplete(true);
+    } else {
+      setOpenTagsAutocomplete(false);
+    }
+  };
+  return( 
+  <Autocomplete
+    className={classes.tags_field}
+    multiple
+    autoComplete
+    freeSolo
+    open={openTagsAutocomplete}
+    onOpen={handleOpenTagsAutocomplete}
+    onClose={() => setOpenTagsAutocomplete(false)}
+    onInputChange={handleInputChange}
+    filterOptions={filterOptions}
+    id="tags-filled"
+    options={props.AllTags}
+    value={props.SelectedTags}
+    onChange={(_event:ChangeEvent<unknown>, newValue) => {
+      props.setSelectedTags(newValue as string[]);
+    }}
+    defaultValue={["2"]}
+    filterSelectedOptions
+    renderTags={(value, getTagProps) =>
+      value.map((option, index) => (
+        <Chip variant="outlined" key={option as string} label={option as string} {...getTagProps({ index })} />
+      ))
+    }
+    renderInput={(params) => (
+      <TextField {...params} variant="outlined" label="Tags" placeholder="Tags" />
+    )}
+  />)
+}
+
+export default function Import(props:{err:boolean,AllTags:string[]}) {
+  if (props.err) {
+    return <ErrorPage statusCode={404} />
+  }
+  const classes = useStyles();
+  // const router = useRouter()
   const [URL, setUrl] = useState("");
   const [Source_URL, setSource_URL] = useState("");
+  const [SelectedTags, setSelectedTags] = useState(["safe"]);
   const [fileObjects, setFileObjects] = useState([]);
   const [open, setOpen] = useState(false);
-  const send_image = (token: string,mode:string) => {
+  
+  const upload_image = () => {
     setOpen(true)
     const formData = new FormData();
     formData.append("image", (fileObjects[0] as any).file);
-    formData.append("g-recaptcha-response", token);
     formData.append("mode", mode);
-    axios(`${config.reverse_search_url}/reverse_search`, {
+    axios(`${config.domain}/import`, {
       method: "post",
       data: formData,
       headers: {
@@ -59,7 +131,6 @@ export default function ReverseSearch() {
     }).then((resp) => {
       setOpen(false)
       console.log(resp.data.ids)
-      router.push("/show?ids=" + resp.data.ids)
     }).catch((err) => {
       setOpen(false)
       console.log(err)
@@ -93,14 +164,14 @@ export default function ReverseSearch() {
       }
     })
   }
-  const _send_image = (mode:string) => {
-    /*global grecaptcha*/ // defined in pages/_document.tsx
-    grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
-        send_image(token,mode)
-      });
-    })
-  }
+  // const _upload_image = () => {
+  //   /*global grecaptcha*/ // defined in pages/_document.tsx
+  //   grecaptcha.ready(function () {
+  //     grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
+  //       upload_image(token)
+  //     });
+  //   })
+  // }
   const get_image_by_url= async ()=>{ 
     if(!isValidURL(URL)){
       alert("invalid url")
@@ -124,16 +195,15 @@ export default function ReverseSearch() {
       console.log(err)
       if(!err.response){
         grecaptcha.ready(function () {
-          grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
+          grecaptcha.execute(config.recaptcha_site_key, { action: 'import_image' }).then(function (token) {
             proxy_get_image(token,URL)
           });
         })
       }
-      
       // alert("error")
     }
   }
-
+ 
   return (
     <div>
       <AppBar />
@@ -144,17 +214,20 @@ export default function ReverseSearch() {
       <div className={classes.url_div}>
       <TextField
         value ={Source_URL}
+        onChange={(e)=>setSource_URL(e.target.value)}
         type="text"
         label="Source url"
+        className={classes.url_text_field}
         placeholder="https://somesite.com/image.png"
-        margin="normal"
         variant="outlined"
         size="small"
         // onChange={(e) => setID(parseInt(e.target.value)||0)}
         // onKeyPress={(e) => handleKeyPress(e)}
       />
       </div>
-      <div className={classes.url_div}>
+      <Paper  className={classes.upload_interface} elevation={6}>
+      <h4 style={{margin:0}}>Image</h4>
+      <div className={classes.fetch_img_div}>
         <TextField onChange={(e)=>setUrl(e.target.value)} value={URL} 
         className={classes.url_text_field} label="url"
         placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
@@ -176,11 +249,32 @@ export default function ReverseSearch() {
           });
           setFileObjects(remainingFileObjs)
           }}
-          maxFileSize={49000000}
+          maxFileSize={120000000}
         />
+        </Paper>
       </Box>
-      {/* <Button onClick={() => { _send_image("1") }} variant="contained" color="primary" >Reverse Search (fast, less accurate)</Button>
-      <div style={{marginTop:"10px"}}><Button onClick={() => { _send_image("2") }} variant="contained" color="primary" >Reverse Search (slow, more accurate)</Button></div> */}
+     <AutoCompleteTagTextField AllTags={props.AllTags} SelectedTags={SelectedTags} setSelectedTags={setSelectedTags}/>
+     <Button style={{marginLeft:10}} onClick={() => { upload_image() }} variant="contained" color="primary" >Upload</Button>
     </div>
   );
+}
+export async function getServerSideProps(context: any) {
+  if (context.req.session.authed && context.req.session.user_id) {
+    const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
+    if (user[0].isAdmin) {
+      const imgs = await db_ops.image_ops.get_all_images() 
+      const tags:Set<string>=new Set()
+      for (const img of imgs) {
+        for (const tag of img.tags) {
+          tags.add(tag)
+        }
+      }
+      return {
+        props: {AllTags:[...tags]},
+      }
+    }
+  }
+  return {
+    props: { err: true },
+  }
 }
