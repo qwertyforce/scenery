@@ -54,7 +54,10 @@ async function get_phash(image:Buffer|string){
     return x
 }
 async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
-  const img_mat = await cv.imdecodeAsync(image)
+  let img_mat = await cv.imdecodeAsync(image)
+  if(img_mat.channels===1){
+    img_mat=img_mat.cvtColor(cv.COLOR_GRAY2BGR)
+   }
   let rgb_hist = await cv.calcHistAsync(img_mat, histAxes)
   rgb_hist = rgb_hist.convertTo(cv.CV_32F);
   rgb_hist = rgb_hist.flattenFloat(BIN_SIZE * BIN_SIZE * BIN_SIZE, 1)
