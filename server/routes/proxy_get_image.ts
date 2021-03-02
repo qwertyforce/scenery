@@ -36,6 +36,7 @@ async function proxy_get_image(req:Request,res:Response) {
                 const size=parseInt(headers["content-length"])
                 if(!isNaN(size) && size<50*10**6){ //50mb
                     const img_resp= await axios.get(image_url,{responseType: 'stream'})
+                    res.setHeader("Content-Type",headers["content-type"])
                     return img_resp.data.pipe(res)
                     // const img = img_resp.data
                     // return res.send(img)
