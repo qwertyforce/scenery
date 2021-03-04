@@ -95,10 +95,11 @@ interface ImageProps{
                 <CalendarTodayIcon />
                 <p>&nbsp;Date: {props.date}</p>
               </div>
-              <div className={classes.icon_container}>
-                <LinkIcon />
+              {(props.booru ? (
+                  <div className={classes.icon_container}>
+                    <LinkIcon />
               &nbsp;<a href={props.booru_link} target="_blank" rel="noreferrer">{props.booru} link</a>
-              </div>
+                  </div>) : null)}
               <div className={classes.icon_container}>
                 <LinkIcon />
               &nbsp;<a href={props.source_link} target="_blank" rel="noreferrer">Source</a>
