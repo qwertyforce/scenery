@@ -80,16 +80,14 @@ next_app.prepare().then(() => {
     windowMs: 15 * 60,  // 15 minutes
     max: 200 // limit each IP to w00 requests per windowMs
   });
-
+  const cors_options = {
+    "origin": config.domain,
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+  }
  ///////////////////////////////////////////////PUBLIC_API_ROUTER 
   const public_api_router=express.Router()
-  // const cors_options = {
-  //   "origin": config.domain,
-  //   "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  //   "credentials": true,
-  //   "preflightContinue": false,
-  //   "optionsSuccessStatus": 204
-  // }
   public_api_router.use(cors());
  /////////////////////////////////////////////// 
 
@@ -128,9 +126,9 @@ next_app.prepare().then(() => {
   app.post('/import_image',[upload_150MB.single('image')], import_image)
 /////////////////////////////////////////////////////////////////////////////////////
 
-  app.post('/reverse_search', [limiter,upload_50MB.single('image'),recaptcha.middleware.verify], reverse_search)
+  app.post('/reverse_search', [cors(cors_options),limiter,upload_50MB.single('image'),recaptcha.middleware.verify], reverse_search)
   app.post('/proxy_get_image', [limiter,check('image_url').isURL(),recaptcha.middleware.verify,], proxy_get_image)
-  
+
   app.use("/public_api",public_api_router)
 
   app.all('*', (req, res) => {
