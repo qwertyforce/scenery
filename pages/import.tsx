@@ -7,7 +7,6 @@ import Button from '@material-ui/core/Button';
 import config from '../config/config'
 import axios from "axios"
 import db_ops from '../server/helpers/db_ops'
-import { useRouter } from 'next/router'
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
@@ -109,19 +108,19 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
     return <ErrorPage statusCode={404} />
   }
   const classes = useStyles();
-  // const router = useRouter()
   const [URL, setUrl] = useState("");
   const [Source_URL, setSource_URL] = useState("");
-  const [SelectedTags, setSelectedTags] = useState(["safe"]);
+  const [SelectedTags, setSelectedTags] = useState<string[]>([]);
   const [fileObjects, setFileObjects] = useState([]);
   const [open, setOpen] = useState(false);
   
   const upload_image = () => {
     setOpen(true)
     const formData = new FormData();
-    formData.append("image", (fileObjects[0] as any).file);
-    formData.append("mode", mode);
-    axios(`${config.domain}/import`, {
+    formData.append("image", (fileObjects[0] as any).file)
+    formData.append("source_url", Source_URL)
+    formData.append("tags", JSON.stringify(SelectedTags))
+    axios(`${config.domain}/import_image`, {
       method: "post",
       data: formData,
       headers: {
@@ -130,9 +129,14 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
       timeout:5*60000   //5min
     }).then((resp) => {
       setOpen(false)
-      console.log(resp.data.ids)
+      setUrl("")
+      setSource_URL("")
+      setSelectedTags([])
+      setFileObjects([])
+      alert(JSON.stringify(resp.data))
     }).catch((err) => {
       setOpen(false)
+      alert('check console for error message')
       console.log(err)
     })
   }
@@ -143,6 +147,7 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
       data: login_data,
       responseType:"blob"
     }).then((resp) => {
+      console.log(resp.data)
       const file = new File([resp.data], "image.png", {type:"image/png"});
       const reader = new FileReader();
       reader.readAsDataURL(resp.data);
@@ -210,7 +215,7 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
       <Backdrop className={classes.backdrop} open={open}>
         <CircularProgress color="inherit" />
       </Backdrop>
-      <Box my={4}>
+      <Box my={2}>
       <div className={classes.url_div}>
       <TextField
         value ={Source_URL}
@@ -218,18 +223,16 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
         type="text"
         label="Source url"
         className={classes.url_text_field}
-        placeholder="https://somesite.com/image.png"
+        placeholder="https://somesite.com/artist/"
         variant="outlined"
         size="small"
-        // onChange={(e) => setID(parseInt(e.target.value)||0)}
-        // onKeyPress={(e) => handleKeyPress(e)}
       />
       </div>
       <Paper  className={classes.upload_interface} elevation={6}>
-      <h4 style={{margin:0}}>Image</h4>
+      <h4 style={{margin:0,marginBottom:"5px"}}>Image</h4>
       <div className={classes.fetch_img_div}>
         <TextField onChange={(e)=>setUrl(e.target.value)} value={URL} 
-        className={classes.url_text_field} label="url"
+        className={classes.url_text_field} label="Image url"
         placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
       <Button onClick={get_image_by_url} size="small" variant="outlined">Fetch</Button>
       </div>

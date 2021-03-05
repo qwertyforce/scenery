@@ -240,10 +240,10 @@ async function add_image_by_object(image:any){
 }
 
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
-    size:string,booru_link:string, 
+    size:number,booru_link:string|false, 
     booru_likes:number,booru_dislikes:number,
-    booru_id:number,booru_date:Date,source_url:string,tags:Array<string>,
-    wilson_score:number,sha512:string,phash:string,description:string,booru:string){
+    booru_id:number|false,booru_date:Date|false,source_url:string,tags:Array<string>,
+    wilson_score:number,sha512:string,phash:string,description:string,booru:string|false){
     insertDocuments("images", [{
         id:id,
         file_ext:file_ext,
