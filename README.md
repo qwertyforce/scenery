@@ -10,4 +10,4 @@ Search by tags (supports logical expressions) (https://onlycomfy.art/search_synt
 You can find images with similar tags. <br>
 You can find images with similar color palette. <br>
 You can find visually similar images (ResNet50). <br>
-Reverse image search (phash/SIFT)
+Reverse image search (phash/SIFT) (sift - https://github.com/qwertyforce/sift_reverse_search_microservice)
