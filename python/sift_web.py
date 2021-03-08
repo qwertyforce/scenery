@@ -10,7 +10,8 @@ import io
 
 sift = cv2.SIFT_create(nfeatures=500)
 bf = cv2.BFMatcher()
-PATH="./features"
+PATH="./python/features"
+
 def read_img_file(image_data):
     img = Image.open(io.BytesIO(image_data))
     return img

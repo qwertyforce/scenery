@@ -4,6 +4,7 @@ module.exports = {
       name: 'scenery_python_microservice',
       script: './python/sift_web.py',
       log_file: 'scenery_python_microservice.txt',
+      interpreter: "python3",
       time: true
     },
     {
