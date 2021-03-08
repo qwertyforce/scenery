@@ -1,4 +1,5 @@
 import db_ops from './../helpers/db_ops'
+import image_ops from './../helpers/image_ops'
 import { Request, Response } from 'express';
 import config from '../../config/config'
 import fs from 'fs'
@@ -11,7 +12,7 @@ async function delete_image(req: Request, res: Response) {
             db_ops.image_ops.delete_image_by_id(id)
             db_ops.image_search.delete_color_hist_by_id(id)
             db_ops.image_search.delete_id_from_color_similarities(id)
-            db_ops.image_search.delete_sift_feature_by_id(id) 
+            image_ops.delete_sift_feature_by_id(id)
             fs.unlink(`${config.root_path}/public/images/${id}.${image.file_ext}`, function (err) {
                 if (err) return console.log(err);
                 console.log('main image deleted successfully');
