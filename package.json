@@ -32,6 +32,7 @@
     "express-recaptcha": "^5.0.2",
     "express-session": "^1.17.1",
     "express-validator": "^6.9.2",
+    "form-data": "^4.0.0",
     "material-ui-dropzone": "^3.5.0",
     "mongodb": "^3.6.1",
     "multer": "^1.4.2",
