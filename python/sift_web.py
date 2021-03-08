@@ -67,16 +67,16 @@ def sift_reverse_search(image):
 
 app = FastAPI()
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
 @app.post("/sift_reverse_search")
-def sift_reverse_search_handler(image: bytes = File(...)):
+async def sift_reverse_search_handler(image: bytes = File(...)):
     images=sift_reverse_search(image)
     return images
 
 @app.post("/calculate_sift_features")
-def calculate_sift_features_handler(image_id: str = Form(...),image: bytes = File(...)):
+async def calculate_sift_features_handler(image_id: str = Form(...),image: bytes = File(...)):
     _,descs=calculate_descr(image)
     pk.dump(descs, open(f"{PATH}/{image_id}","wb"))
     return {"status":"200"}
@@ -85,7 +85,7 @@ def calculate_sift_features_handler(image_id: str = Form(...),image: bytes = Fil
 class Item(BaseModel):
     image_id: str
 @app.post("/delete_sift_features")
-def delete_sift_features_handler(item:Item):
+async def delete_sift_features_handler(item:Item):
     remove(f"{PATH}/{item.image_id}")
     return {"status":"200"}
     

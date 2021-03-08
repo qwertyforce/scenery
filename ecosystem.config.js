@@ -1,7 +1,18 @@
 module.exports = {
-  name: 'scenery',
-  script: './dist/server/index.js',
-  env: {"NODE_ENV": "production"},
-  log_file: 'log.txt',
-  time: true
+  "apps": [
+    {
+      name: 'scenery_python_microservice',
+      script: './python/sift_web.py',
+      log_file: 'scenery_python_microservice.txt',
+      time: true
+    },
+    {
+      name: 'scenery',
+      script: './dist/server/index.js',
+      env: { "NODE_ENV": "production" },
+      log_file: 'log.txt',
+      time: true
+    },
+
+  ],
 };
