@@ -91,38 +91,6 @@ async function generate_id() {
     return id;
 }
 /////////////////////////////////////////////////IMAGE SEARCH OPS
-
-async function delete_sift_feature_by_id(id:number){
-    removeDocument("sift_reverse_search",{id:id})
-}
-
-async function add_sift_features_by_id(id:number,sift_features:Array<any>){
-    insertDocuments("sift_reverse_search", [{
-        id:id,
-        sift_features:sift_features
-    }])
-}
-
-async function get_sift_features_batch(skip:number,limit:number){
-    const collection = client.db(db_main).collection("sift_reverse_search");
-    // collection.find().skip(skip).limit(limit).project({_id:0}).explain((_err,exp)=>console.log(exp))
-    const similarities = collection.find().skip(skip).limit(limit).project({_id:0}).toArray()
-    return similarities
-}
-
-
-async function get_sift_features_by_id(id:number){
-    const collection = client.db(db_main).collection("sift_reverse_search");
-    const similarities = collection.find({id:id}).project({_id:0,id:0}).toArray()
-    return similarities
-}
-async function get_number_of_images_sift_reverse_search(){
-    const collection = client.db(db_main).collection("sift_reverse_search");
-    const number_of_images_in_collection = collection.countDocuments()
-    return number_of_images_in_collection
-}
-
-
 async function get_color_similarities_by_id(id:number){
 const collection = client.db(db_main).collection("color_similarities");
 // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
@@ -400,11 +368,6 @@ export default {
         add_tags_to_image_by_id
     },
     image_search:{
-        delete_sift_feature_by_id,
-        add_sift_features_by_id,
-        get_sift_features_batch,
-        get_sift_features_by_id,
-        get_number_of_images_sift_reverse_search,
         get_all_color_hists,
         get_color_hist_by_id,
         add_color_hist_by_id,
