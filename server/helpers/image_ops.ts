@@ -4,7 +4,7 @@ import * as cv from 'opencv4nodejs'
 import { HistAxes } from 'opencv4nodejs';
 import db_ops from './db_ops';
 import sharp from 'sharp'
-import  { bmvbhash } from 'blockhash-core'
+import { bmvbhash } from 'blockhash-core'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
@@ -27,21 +27,21 @@ const histAxes: HistAxes[] = [
   }),
 ]
 
-async function get_phash(image:Buffer|string){
+async function get_phash(image: Buffer | string) {
   const { data, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    const imageData = {
-        width: info.width,
-        height: info.height,
-        data: data
-    };
-    const x=bmvbhash(imageData,16)
-    return x
+  const imageData = {
+    width: info.width,
+    height: info.height,
+    data: data
+  };
+  const x = bmvbhash(imageData, 16)
+  return x
 }
 async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
   let img_mat = await cv.imdecodeAsync(image)
-  if(img_mat.channels===1){
-    img_mat=img_mat.cvtColor(cv.COLOR_GRAY2BGR)
-   }
+  if (img_mat.channels === 1) {
+    img_mat = img_mat.cvtColor(cv.COLOR_GRAY2BGR)
+  }
   let rgb_hist = await cv.calcHistAsync(img_mat, histAxes)
   rgb_hist = rgb_hist.convertTo(cv.CV_32F);
   rgb_hist = rgb_hist.flattenFloat(BIN_SIZE * BIN_SIZE * BIN_SIZE, 1)
@@ -61,38 +61,43 @@ async function calculate_color_hist_and_similarities(new_image_id: number, image
   await db_ops.image_search.add_color_similarities_by_id(new_image_id, similarities)
 }
 
-async function calculate_sift_features(image_id:number,image: Buffer) {
+async function calculate_sift_features(image_id: number, image: Buffer) {
   const form = new FormData();
-  form.append('image',image);
-  form.append('image_id',image_id.toString());
-  console.log(form)
-  const status=await axios.post(`${config.python_microservice_url}/calculate_sift_features`, form.getBuffer(), {
-    headers: {
-        ...form.getHeaders()
-    }})
-    return status.data
-}
-async function get_similar_images_by_sift(image: Buffer) {
-  const form = new FormData();
-  form.append('image',image,{ filename : 'document' }); //hack to make nodejs buffer work with form-data
-  try{
-    const similar=await axios.post(`${config.python_microservice_url}/sift_reverse_search`, form.getBuffer(), {
-      headers: {
-          ...form.getHeaders()
-      }})
-      return similar.data
-  }catch(err){
-    console.log(err)
-  }
-}
-async function delete_sift_feature_by_id(image_id: number) {
+  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image_id', image_id.toString())
   try {
-    const status = await axios.post(`${config.python_microservice_url}/delete_sift_features`, {image_id:image_id.toString()})
+    const status = await axios.post(`${config.python_microservice_url}/calculate_sift_features`, form.getBuffer(), {
+      headers: {
+        ...form.getHeaders()
+      }
+    })
     return status.data
   } catch (err) {
     console.log(err)
   }
-  
+}
+async function get_similar_images_by_sift(image: Buffer) {
+  const form = new FormData();
+  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  try {
+    const similar = await axios.post(`${config.python_microservice_url}/sift_reverse_search`, form.getBuffer(), {
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return similar.data
+  } catch (err) {
+    console.log(err)
+    return []
+  }
+}
+async function delete_sift_feature_by_id(image_id: number) {
+  try {
+    const status = await axios.post(`${config.python_microservice_url}/delete_sift_features`, { image_id: image_id.toString() })
+    return status.data
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 function hamming_distance(str1: string, str2: string) {
@@ -115,8 +120,8 @@ async function get_similar_images_by_phash(image: Buffer) {
     }
   }
   images.sort((a, b) => a.dist - b.dist)
-  images=images.slice(0,30)
+  images = images.slice(0, 30)
   const ids = images.map((el) => el.id)
   return ids
 }
-export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features,get_phash,delete_sift_feature_by_id }
+export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features, get_phash, delete_sift_feature_by_id }
