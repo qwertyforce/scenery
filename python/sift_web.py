@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 from os import listdir,remove
 import pickle as pk
+import math
 from fastapi import FastAPI, File, UploadFile,Body,Form
 from pydantic import BaseModel
 import uvicorn
@@ -77,7 +78,7 @@ async def sift_reverse_search_handler(image: bytes = File(...)):
     return images
 
 @app.post("/calculate_sift_features")
-async def calculate_sift_features_handler(image_id: str = Form(...),image: bytes = File(...)):
+async def calculate_sift_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     _,descs=calculate_descr(image)
     pk.dump(descs, open(f"{PATH}/{image_id}","wb"))
     return {"status":"200"}
