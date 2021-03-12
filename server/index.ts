@@ -93,6 +93,12 @@ next_app.prepare().then(() => {
 
   ///////////////////////////////////////PUBLIC_API
   public_api_router.get('/image/:image_id', temp_image)
+  public_api_router.get("/reverse_search_global",(req, res) => {
+    if(req.query.url){
+      return reverse_search_global(req,res)
+    }
+    return next_app.render(req, res, '/public_api/reverse_search_global')
+  })
   public_api_router.post('/reverse_search_global',[upload_50MB.single('image')], reverse_search_global)
   public_api_router.get('/get_all_images',get_all_images)
   /////////////////////////////////////////////////

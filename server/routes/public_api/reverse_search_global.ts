@@ -54,6 +54,22 @@ function get_random_hex(size: number) {
     }
     return result.join('');
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const process_results=(data:any)=>{
+    const response_obj = data
+    const search_results: string[] = []
+    for (const booru in response_obj) {
+      if (response_obj[booru] !== "error") {
+        for (const img of response_obj[booru].images) {
+          search_results.push(`${booru}/${img.id}`)
+        }
+      }
+    }
+    if (search_results.length === 0) {
+        search_results.push("not_found")
+    } 
+    return search_results
+}
 
 async function reverse_search_global(req: Request, res: Response) {
     const image_url = req.query.url?.toString()
@@ -64,6 +80,9 @@ async function reverse_search_global(req: Request, res: Response) {
         const url = `${config.api_domain}/image/${image_id}`
         const response_obj = await send_req_to_boorus(url)
         temp_images.delete(image_id)
+        if(req.body.briefly){
+           return res.json(process_results(response_obj))
+        }
         res.json(response_obj)
     } else {
         if (!image_url || !isValidURL(image_url)) {
@@ -71,6 +90,9 @@ async function reverse_search_global(req: Request, res: Response) {
         }
         console.log(image_url)
         const response_obj = await send_req_to_boorus(image_url)
+        if(req.query.briefly){
+            return res.json(process_results(response_obj))
+         }
         res.json(response_obj)
     }
 }
