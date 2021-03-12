@@ -73,6 +73,7 @@ async function import_from_derpi(req: Request, res: Response) {
                 booru_link, booru_image_data.upvotes, booru_image_data.downvotes, booru_image_data.id, booru_image_data.created_at,
                     booru_image_data.source_url, booru_image_data.tags, booru_image_data.wilson_score, booru_image_data.sha512_hash,
                      phash, booru_image_data.description,booru)
+                image_ops.rebuilt_vp_tree()
                 console.log(`OK. New image_id: ${new_image_id}`)
                 res.json({ message: `OK. New image_id: ${new_image_id}`})
                 return

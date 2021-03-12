@@ -9,10 +9,11 @@ async function delete_image(req: Request, res: Response) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
         if (user[0].isAdmin) {
             const image = (await db_ops.image_ops.find_image_by_id(id))[0]
-            db_ops.image_ops.delete_image_by_id(id)
+            await db_ops.image_ops.delete_image_by_id(id)
             db_ops.image_search.delete_color_hist_by_id(id)
             db_ops.image_search.delete_id_from_color_similarities(id)
             image_ops.delete_sift_feature_by_id(id)
+            image_ops.rebuilt_vp_tree()
             fs.unlink(`${config.root_path}/public/images/${id}.${image.file_ext}`, function (err) {
                 if (err) return console.log(err);
                 console.log('main image deleted successfully');

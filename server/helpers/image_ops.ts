@@ -8,6 +8,16 @@ import { bmvbhash } from 'blockhash-core'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
+let IMAGES_IDS_PHASHES:any
+const VPTreeFactory: any = require("vptree");
+let vptree:any;
+rebuilt_vp_tree()
+
+async function rebuilt_vp_tree(){
+  IMAGES_IDS_PHASHES = await db_ops.image_ops.get_ids_and_phashes()   
+  const phashes=IMAGES_IDS_PHASHES.map((el:any)=>el.phash)
+  vptree=VPTreeFactory.build(phashes, hamming_distance)
+}
 const BIN_SIZE = 16
 const histAxes: HistAxes[] = [
   new HistAxes({
@@ -27,6 +37,16 @@ const histAxes: HistAxes[] = [
   }),
 ]
 
+function hamming_distance(str1: string, str2: string) {
+  let distance = 0;
+  for (let i = 0; i < str1.length; i += 1) {
+    if (str1[i] !== str2[i]) {
+      distance += 1;
+    }
+  }
+  return distance;
+}
+
 async function get_phash(image: Buffer | string) {
   const { data, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const imageData = {
@@ -37,6 +57,7 @@ async function get_phash(image: Buffer | string) {
   const x = bmvbhash(imageData, 16)
   return x
 }
+
 async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
   let img_mat = await cv.imdecodeAsync(image)
   if (img_mat.channels === 1) {
@@ -100,28 +121,10 @@ async function delete_sift_feature_by_id(image_id: number) {
   }
 }
 
-function hamming_distance(str1: string, str2: string) {
-  let distance = 0;
-  for (let i = 0; i < str1.length; i += 1) {
-    if (str1[i] !== str2[i]) {
-      distance += 1;
-    }
-  }
-  return distance;
-}
-
 async function get_similar_images_by_phash(image: Buffer) {
   const phash = await get_phash(image)
-  let images = await db_ops.image_ops.get_ids_and_phashes()
-  for (let i = 0; i < images.length; i++) {
-    images[i].dist = hamming_distance(phash, images[i].phash)
-    if (images[i].dist === 0) {
-      return [images[i].id]
-    }
-  }
-  images.sort((a, b) => a.dist - b.dist)
-  images = images.slice(0, 30)
-  const ids = images.map((el) => el.id)
+  const nearest=vptree.search(phash,30);
+  const ids= nearest.map((el:any) => IMAGES_IDS_PHASHES[el.i].id)
   return ids
 }
-export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features, get_phash, delete_sift_feature_by_id }
+export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features, get_phash, delete_sift_feature_by_id,rebuilt_vp_tree }

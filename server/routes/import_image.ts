@@ -63,6 +63,7 @@ async function import_image(req: Request, res: Response) {
                 await db_ops.image_ops.add_image(new_image_id, file_ext, width, height, parsed_author, size,
                 false, 0, 0, false, false,source_url, tags, 0, sha512_hash,phash, "",false)
                 console.log(`OK. New image_id: ${new_image_id}`)
+                image_ops.rebuilt_vp_tree()
                 res.json({ message: `OK. New image_id: ${new_image_id}`})
                 return
             } catch (error) {
