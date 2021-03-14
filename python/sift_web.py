@@ -12,6 +12,7 @@ import io
 sift = cv2.SIFT_create(nfeatures=500)
 bf = cv2.BFMatcher()
 PATH="./python/features"
+# PATH="./features"
 
 def read_img_file(image_data):
     img = Image.open(io.BytesIO(image_data))
@@ -49,8 +50,7 @@ def match_descriptors(IMAGE_SIMILARITIES,filename,matches):
     bestN=5
     topBestNSum=1e-323
     good_matches.sort(key=lambda match: match.distance)
-    good_matches=good_matches[:bestN]
-    for match in good_matches:
+    for match in good_matches[:bestN]:
         topBestNSum+=match.distance
     IMAGE_SIMILARITIES.append({"id": filename, "avg_distance": -((bestN/topBestNSum)*(len(good_matches)/(good_matches_sum)))-(len(good_matches))})
 
@@ -65,6 +65,7 @@ def sift_reverse_search(image):
         matches = bf.knnMatch(target_descriptors,descs, k=2)
         match_descriptors(IMAGE_SIMILARITIES,file_name,matches)
     IMAGE_SIMILARITIES.sort(key=lambda image: image["avg_distance"])
+    print(IMAGE_SIMILARITIES[:20])
     return list(map(lambda el: el["id"],IMAGE_SIMILARITIES[:20]))
 
 app = FastAPI()

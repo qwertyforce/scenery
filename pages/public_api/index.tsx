@@ -33,7 +33,7 @@ export default function Api() {
             <h4>{`Reverse search by link, returns all info - GET${config.api_domain}/reverse_search_global?url=https://sitename.com/image.jpg`}</h4>
             <h4>{`Reverse search by link, returns only links - GET ${config.api_domain}/reverse_search_global?briefly=1&url=https://sitename.com/image.jpg`}</h4>
             <h4>{`Reverse search by image file - POST ${config.api_domain}/reverse_search_global`}</h4>
-            <h4>multipart/form-data; put image data (binary) in `image` field, put {"1"} in  briefly field if you  only want to get links</h4>
+            <h4>multipart/form-data; put image data (binary) in `image` field, put {"1"} in briefly field if you only want to get links</h4>
             </Paper>
             <Paper className={classes.api_route}>
             <h3>Get all images</h3>
