@@ -8,31 +8,6 @@ import pickle as pk
 import json
 from pathlib import Path
 
-def read_img_file(f):
-    img = Image.open(f)
-    if img.mode != 'RGB':
-        img = img.convert('RGB')
-    return img
-
-def resize_img_to_array(img, img_shape):
-    img_array = np.array(
-        img.resize(
-            img_shape, 
-            Image.ANTIALIAS
-        )
-    )    
-    return img_array
-
-def get_features(f):
-    img_width, img_height = 224, 224
-    img = read_img_file(f)
-    
-    np_img = resize_img_to_array(img, img_shape=(img_width, img_height))
-    expanded_img_array = np.expand_dims(np_img, axis=0)
-    preprocessed_img = preprocess_input(expanded_img_array)
-    X_conv = model.predict(preprocessed_img)
-    return X_conv[0]
-
 model = ResNet50(weights='imagenet', include_top=False,input_shape=(224, 224, 3),pooling='max')
 image_features=pk.load( open("image_features.pkl", "rb"))
 features=[]
