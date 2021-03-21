@@ -88,6 +88,8 @@ async function calculate_sift_features(image_id: number, image: Buffer) {
   form.append('image_id', image_id.toString())
   try {
     const status = await axios.post(`${config.python_microservice_url}/calculate_sift_features`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
       headers: {
         ...form.getHeaders()
       }
@@ -102,6 +104,8 @@ async function get_similar_images_by_sift(image: Buffer) {
   form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
   try {
     const similar = await axios.post(`${config.python_microservice_url}/sift_reverse_search`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
       headers: {
         ...form.getHeaders()
       }
