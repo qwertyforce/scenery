@@ -2,7 +2,6 @@ import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
-import { Tab, Tabs } from "@material-ui/core";
 import db_ops from '../../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
 import { GetStaticProps, GetStaticPaths } from 'next'
@@ -19,12 +18,7 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center'
   }
 }));
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
+
 interface LastAddedPageProps{
   photos: PhotoInterface,
   current_page: number,
@@ -43,17 +37,6 @@ export default function LastAddedPage(props: LastAddedPageProps){
   return (
     <div>
       <AppBar />
-      <Tabs
-        value={0}
-        indicatorColor="primary"
-        textColor="primary"
-        variant="fullWidth"
-        aria-label="full width tabs example"
-      >
-        <Tab href="/last_added/1" label="Last Added" {...a11yProps(0)} />
-        <Tab href="/top_rated/1" label="Top Rated"  {...a11yProps(1)} />
-      </Tabs>
-
       {/* 
   // @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
