@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { fade,makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import SearchIcon from '@material-ui/icons/Search';
-import InputBase from '@material-ui/core/InputBase';
+import React, { useState } from 'react'
+import { fade,makeStyles } from '@material-ui/core/styles'
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import SearchIcon from '@material-ui/icons/Search'
+import InputBase from '@material-ui/core/InputBase'
 import Link from './Link'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import ImageSearchIcon from '@material-ui/icons/ImageSearch';
-import { IconButton } from '@material-ui/core';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
+import ImageSearchIcon from '@material-ui/icons/ImageSearch'
+import { IconButton } from '@material-ui/core'
 import config from '../config/config'
-
+import Switch from '@material-ui/core/Switch';
 import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
@@ -54,6 +54,10 @@ const useStyles = makeStyles((theme) => ({
   inputRoot: {
     color: 'inherit',
   },
+  search_mode_switch:{
+    display:"inline-flex",
+    alignItems:"center"
+  },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
@@ -69,7 +73,14 @@ const useStyles = makeStyles((theme) => ({
 export default function DenseAppBar() {
   const classes = useStyles();
   const router = useRouter()
+  const placeholders=["tag1&&(tag2||tag3)","fluttershy in the forest"]
   const [tags, setTags] = useState(router.query.q||'');
+  const [searchPlaceholer, setSearchPlaceholer] = useState("tag1&&(tag2||tag3)");
+  const [semanticModeChecked, setSemanticModeChecked] = useState(false)
+  const toggleSemanticModeChecked = () => {
+    setSearchPlaceholer(placeholders[Number(!semanticModeChecked)])
+    setSemanticModeChecked(!semanticModeChecked)
+  }
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
        router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}`)
@@ -90,7 +101,7 @@ export default function DenseAppBar() {
               <SearchIcon />
             </div>
             <InputBase
-              placeholder="tag1&&(tag2||tag3)"
+              placeholder={searchPlaceholer}
               onChange={(e)=>setTags(e.target.value)}
               onKeyPress={(e)=>handleKeyPress(e)}
               classes={{
@@ -101,12 +112,18 @@ export default function DenseAppBar() {
               value={tags}
             />
           </div>
+          <div className={classes.search_mode_switch}>
+           <span>tags</span> 
+          <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
+          <span>semantic</span> 
+        </div>
           <IconButton  component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
             <HelpOutlineIcon />
           </IconButton>
           <IconButton  component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
             <ImageSearchIcon />
           </IconButton>
+   
         </Toolbar>
       </AppBar>
     </div>
