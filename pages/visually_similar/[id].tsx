@@ -52,18 +52,18 @@ export default function VisuallySimilar(props: VisuallySimilarProps) {
 }
 
 interface ImageSimilarities {
-  [key: string]: number[];
+  [key: string]: (number[])|(string[]);
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const photos = []
   if (typeof context.params?.id === "string") {
-    const all_images_similaties: ImageSimilarities = JSON.parse(await fs.readFile("find_visually_similar_images/data.txt", "utf-8"))
+    const all_images_similaties: ImageSimilarities = JSON.parse(await fs.readFile("python/data.txt", "utf-8"))
     const similar_images_ids = all_images_similaties[context.params.id]
     if (similar_images_ids) {
       const similar_images = []
       for (const image_id of similar_images_ids) {
-        const img = (await db_ops.image_ops.find_image_by_id(image_id))[0]
+        const img = (await db_ops.image_ops.find_image_by_id(Number(image_id)))[0]
         if (img) {
           similar_images.push({ id: img.id, width: img.width, height: img.height })
         }

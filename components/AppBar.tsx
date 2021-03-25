@@ -67,6 +67,12 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       width: '20ch',
     },
+  },
+  sub:{
+    verticalAlign: "baseline",
+    position: 'relative',
+    top: "0.5em",
+    left: "0.05em",
   }
 }));
 
@@ -75,15 +81,15 @@ export default function DenseAppBar() {
   const router = useRouter()
   const placeholders=["tag1&&(tag2||tag3)","fluttershy in the forest"]
   const [tags, setTags] = useState(router.query.q||'');
-  const [searchPlaceholer, setSearchPlaceholer] = useState("tag1&&(tag2||tag3)");
-  const [semanticModeChecked, setSemanticModeChecked] = useState(false)
+  const [searchPlaceholer, setSearchPlaceholer] = useState(placeholders[Number(router.query.semantic)||0]);
+  const [semanticModeChecked, setSemanticModeChecked] = useState(Boolean(Number(router.query.semantic))||false)
   const toggleSemanticModeChecked = () => {
     setSearchPlaceholer(placeholders[Number(!semanticModeChecked)])
     setSemanticModeChecked(!semanticModeChecked)
   }
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-       router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}`)
+       router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&&semantic=${Number(semanticModeChecked).toString()}`)
     }
   };
 
@@ -115,7 +121,7 @@ export default function DenseAppBar() {
           <div className={classes.search_mode_switch}>
            <span>tags</span> 
           <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
-          <span>semantic</span> 
+          <span>semantic<sub className={classes.sub}>beta</sub></span> 
         </div>
           <IconButton  component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
             <HelpOutlineIcon />

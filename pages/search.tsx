@@ -10,7 +10,8 @@ import Photo from '../components/Photo'
 import Link from '../components/Link'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 import PhotoInterface from '../types/photo'
-
+import axios from "axios"
+import config from "../config/config"
 const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
@@ -303,14 +304,52 @@ function build_ast(str: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
-  if (context.query.q) {
+  if (typeof context.query.q === "string") {
     if (context.query.q.includes("$")) {  //anti - nosql injection or something
       return {
         props: { err: true }
       }
     }
-    console.log(context.query.q)
+    
+    const photos:PhotoInterface[] = []
+    if(context.query.semantic==="1"){
+      const images = await db_ops.image_ops.find_images_by_tags(context.query.q)
+      if(context.query.q.length>100){
+        return {
+          props: { err: true }
+        }
+      }
+      try{
+        const found_images=[]
+        const res = await axios.post(`${config.nn_microservice_url}/find_similar_by_text`,{query:context.query.q})
+        console.log(res.data)
+        for(const image of images){
+          if (res.data.includes(image.id.toString())){
+            found_images.push({
+              src: `/thumbnails/${image.id}.jpg`,
+              key: `/image/${image.id}`,
+              width: image.width,
+              height: image.height
+            })
+          }
+        }
+        return {
+          props: {
+            total_images:found_images.length,
+            photos: found_images,
+            search_query: context.query.q,
+            current_page: 1,
+            max_page: 1
+          }
+        }
+      }catch(e){
+        console.log(e)
+      }
+    }
+    
+    console.log([context.query.q,context.query.semantic])
     const query = build_ast(context.query.q)
+    console.log(query)
     if (query.error) {
       return {
         props: { err: true }
@@ -318,7 +357,6 @@ export async function getServerSideProps(context: any) {
     }
     const images = await db_ops.image_ops.find_images_by_tags(query)
     const images_on_page = 30
-    const photos:PhotoInterface[] = []
     let page:number;
     if (context.query.page) {
       page = parseInt(context.query.page)
