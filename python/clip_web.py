@@ -14,7 +14,7 @@ from sklearn.neighbors import NearestNeighbors
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32")
-IMAGES_PATH="../public/images"
+IMAGES_PATH="./public/images"
 
 def get_features(image_path):
     image =  preprocess(Image.open(image_path)).unsqueeze(0).to(device)
@@ -28,7 +28,7 @@ def generate_clip_features():
     image_filenames=listdir(IMAGES_PATH)
     image_ids=set(map(lambda el: splitext(el)[0],image_filenames))
     try:
-       all_image_features=pk.load(open("clip_image_features.pkl", "rb"))
+       all_image_features=pk.load(open("./python/clip_image_features.pkl", "rb"))
     except (OSError, IOError) as e:
        print("file_not_found")
 
@@ -62,14 +62,14 @@ def generate_clip_features():
         # print(image_filename)
         # print(image_features)
         all_image_features.append({'image_id':image_id,'features':image_features})
-    pk.dump(all_image_features, open("clip_image_features.pkl","wb"))
+    pk.dump(all_image_features, open("./python/clip_image_features.pkl","wb"))
 
 def calculate_similarities():
     all_image_features=[]
     image_filenames=listdir(IMAGES_PATH)
     image_ids=set(map(lambda el: splitext(el)[0],image_filenames))
     try:
-       all_image_features=pk.load(open("clip_image_features.pkl", "rb"))
+       all_image_features=pk.load(open("./python/clip_image_features.pkl", "rb"))
     except (OSError, IOError) as e:
        print("file_not_found")
     features=[]
@@ -96,7 +96,7 @@ def find_similar_by_text(text):
     with torch.no_grad():
         text_features = model.encode_text(text_tokenized)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-    image_features=pk.load( open("clip_image_features.pkl", "rb"))
+    image_features=pk.load( open("./python/clip_image_features.pkl", "rb"))
     features=[]
     for image in image_features:
         features.append(np.array(image['features']))
