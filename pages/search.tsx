@@ -310,7 +310,7 @@ export async function getServerSideProps(context: any) {
         props: { err: true }
       }
     }
-    
+    console.log([context.query.q,context.query.semantic])
     const photos:PhotoInterface[] = []
     if(context.query.semantic==="1"){
       const images = await db_ops.image_ops.find_images_by_tags(context.query.q)
@@ -322,7 +322,6 @@ export async function getServerSideProps(context: any) {
       try{
         const found_images=[]
         const res = await axios.post(`${config.nn_microservice_url}/find_similar_by_text`,{query:context.query.q})
-        console.log(res.data)
         for(const image of images){
           if (res.data.includes(image.id.toString())){
             found_images.push({
@@ -347,9 +346,7 @@ export async function getServerSideProps(context: any) {
       }
     }
     
-    console.log([context.query.q,context.query.semantic])
     const query = build_ast(context.query.q)
-    console.log(query)
     if (query.error) {
       return {
         props: { err: true }
