@@ -7,7 +7,8 @@ https://onlycomfy.art
  
 Features: <br>
 Search by tags (supports logical expressions) (https://onlycomfy.art/search_syntax) <br>
+Semantic search (using [CLIP](https://github.com/openai/CLIP)) (https://onlycomfy.art/search_syntax) <br>
 You can find images with similar tags. <br>
 You can find images with similar color palette. <br>
-You can find visually similar images (ResNet50). <br>
+You can find visually similar images ([CLIP](https://github.com/openai/CLIP)). <br>
 Reverse image search (phash+vp_tree/SIFT) (sift - https://github.com/qwertyforce/sift_reverse_search_microservice)
