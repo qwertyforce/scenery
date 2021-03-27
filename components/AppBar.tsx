@@ -12,6 +12,9 @@ import { IconButton } from '@material-ui/core'
 import config from '../config/config'
 import Switch from '@material-ui/core/Switch';
 import { useRouter } from 'next/router'
+import MoreIcon from '@material-ui/icons/MoreVert';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
 
 const useStyles = makeStyles((theme) => ({
   app_bar:{
@@ -73,12 +76,26 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     top: "0.5em",
     left: "0.05em",
+  },
+  sectionDesktop: {
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'flex',
+    },
+  },
+  sectionMobile: {
+    display: 'flex',
+    [theme.breakpoints.up('sm')]: {
+      display: 'none',
+    },
   }
 }));
 
 export default function DenseAppBar() {
   const classes = useStyles();
   const router = useRouter()
+  const mobileMenuId = 'menu-mobile';
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<Element|null>(null);
   const placeholders=["tag1&&(tag2||tag3)","fluttershy in the forest"]
   const [tags, setTags] = useState(router.query.q||'');
   const [searchPlaceholer, setSearchPlaceholer] = useState(placeholders[Number(router.query.semantic)||0]);
@@ -92,6 +109,43 @@ export default function DenseAppBar() {
        router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&&semantic=${Number(semanticModeChecked).toString()}`)
     }
   };
+  const handleMobileMenuOpen = (event:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setMobileMoreAnchorEl(event.currentTarget);
+  };
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+  };
+
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const renderMobileMenu = (
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+    >
+      <MenuItem component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
+        <HelpOutlineIcon />
+        <p style={{ paddingLeft: "5px" }}>Search syntax</p>
+      </MenuItem>
+      <MenuItem>
+      <div className={classes.search_mode_switch}>
+              <span>tags</span>
+              <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
+              <span>semantic<sub className={classes.sub}>beta</sub></span>
+            </div>
+      </MenuItem>
+      <MenuItem component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
+        <ImageSearchIcon />
+        <p style={{ paddingLeft: "5px" }}>Reverse Image Search</p>
+      </MenuItem>
+    </Menu>
+  );
+
+
 
   return (
     <div className={classes.root}>
@@ -118,20 +172,33 @@ export default function DenseAppBar() {
               value={tags}
             />
           </div>
-          <div className={classes.search_mode_switch}>
-           <span>tags</span> 
-          <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
-          <span>semantic<sub className={classes.sub}>beta</sub></span> 
-        </div>
-          <IconButton  component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
-            <HelpOutlineIcon />
-          </IconButton>
-          <IconButton  component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
-            <ImageSearchIcon />
-          </IconButton>
-   
+          <div className={classes.sectionDesktop}>
+            <div className={classes.search_mode_switch}>
+              <span>tags</span>
+              <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
+              <span>semantic<sub className={classes.sub}>beta</sub></span>
+            </div>
+            <IconButton component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
+              <HelpOutlineIcon />
+            </IconButton>
+            <IconButton component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
+              <ImageSearchIcon />
+            </IconButton>
+          </div>
+          <div className={classes.sectionMobile}>
+            <IconButton
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
+          </div>
         </Toolbar>
       </AppBar>
+      {renderMobileMenu}
     </div>
   );
 }
