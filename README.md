@@ -11,4 +11,6 @@ Semantic search (using [CLIP](https://github.com/openai/CLIP)) (https://onlycomf
 You can find images with similar tags. <br>
 You can find images with similar color palette. <br>
 You can find visually similar images ([CLIP](https://github.com/openai/CLIP)). <br>
-Reverse image search (phash+vp_tree/SIFT) (sift - https://github.com/qwertyforce/sift_reverse_search_microservice)
+Reverse image search (phash+vp_tree/SIFT) <br>
+(sift  microservice - https://github.com/qwertyforce/sift_reverse_search_microservice)<br>
+(clip microservice - https://github.com/qwertyforce/clip_reverse_search_microservice)
