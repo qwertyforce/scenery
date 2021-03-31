@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 /waifu_2x
+/testing
 /python/features
 /python/__pycache__
 /python/data.txt
