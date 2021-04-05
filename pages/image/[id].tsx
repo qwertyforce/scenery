@@ -140,7 +140,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   if (typeof context.params?.id === "string") {
     const img = await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
     if (img.length === 1) {
-      const all_images_similaties:ImageSimilarities= JSON.parse(await fs.readFile("find_visually_similar_images/data.txt","utf-8"))
+      const all_images_similaties:ImageSimilarities= JSON.parse(await fs.readFile("python/data.txt","utf-8"))
        let visually_similar_link=""
       if(all_images_similaties[(context.params.id as string)]!==undefined){
         visually_similar_link=`/visually_similar/${img[0].id}`
