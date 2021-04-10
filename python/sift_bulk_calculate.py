@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from PIL import Image
 from os import listdir
-import pickle as pk
 import math
 sift = cv2.SIFT_create(nfeatures=500)
 
@@ -64,7 +63,6 @@ def add_descriptor(id,sift_features):
 
 create_table()
 
-
 def read_img_file(f):
     img = Image.open(f)
     return img
@@ -99,15 +97,15 @@ def sync_db():
         delete_descriptor_by_id(id)   #Fix this
         print(f"deleting {id}")
 
-path="./../public/images"
-file_names=listdir(path)
+IMAGE_PATH="./../public/images"
+file_names=listdir(IMAGE_PATH)
 sync_db()
 # descs = []
 for file_name in file_names:
     file_id=int(file_name[:file_name.index('.')])
     if check_if_exists_by_id(file_id):
         continue
-    keyp,descs=calculate_descr(path+"/"+file_name)
+    keyp,descs=calculate_descr(IMAGE_PATH+"/"+file_name)
     if descs is None:
         continue
     descs_bin=adapt_array(descs)
