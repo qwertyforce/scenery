@@ -19,7 +19,7 @@
 /node_modules
 /.pnp
 .pnp.js
-
+*.db
 # testing
 /coverage
 
