@@ -22,26 +22,20 @@ def create_table():
 
 def check_if_exists_by_id(id):
     cursor = conn.cursor()
-    query = '''
-    SELECT EXISTS(SELECT 1 FROM sift WHERE id=(?))
-    '''
+    query = '''SELECT EXISTS(SELECT 1 FROM sift WHERE id=(?))'''
     cursor.execute(query,(id,))
     all_rows = cursor.fetchone()
     return all_rows[0] == 1    
 
 def delete_descriptor_by_id(id):
 	cursor = conn.cursor()
-	query = '''
-	    DELETE FROM sift WHERE id=(?)	'''
+	query = '''DELETE FROM sift WHERE id=(?)'''
 	cursor.execute(query,(id,))
 	conn.commit()
 
 def get_all_ids():
     cursor = conn.cursor()
-    query = '''
-    SELECT id
-    FROM sift
-    '''
+    query = '''SELECT id FROM sift'''
     cursor.execute(query)
     all_rows = cursor.fetchall()
     return list(map(lambda el:el[0],all_rows))
@@ -54,18 +48,10 @@ def adapt_array(arr):
 
 def add_descriptor(id,sift_features):
 	cursor = conn.cursor()
-	query = '''
-	    INSERT INTO sift(id, sift_features )
-	    	        VALUES (?,?)
-	'''
+	query = '''INSERT INTO sift(id, sift_features) VALUES (?,?)'''
 	cursor.execute(query,(id,sift_features))
 	conn.commit()
 
-create_table()
-
-def read_img_file(f):
-    img = Image.open(f)
-    return img
 def resize_img_to_array(img):
     height,width=img.size
     if height*width>2000*2000:
@@ -77,9 +63,9 @@ def resize_img_to_array(img):
     img_array = np.array(img)
     return img_array
 
-def calculate_descr(f):
+def calculate_descr(image_path):
     eps=1e-7
-    img=read_img_file(f)
+    img=Image.open(image_path)
     img=resize_img_to_array(img)
     key_points, descriptors = sift.detectAndCompute(img, None)
     descriptors /= (descriptors.sum(axis=1, keepdims=True) + eps) #RootSift
@@ -99,8 +85,9 @@ def sync_db():
 
 IMAGE_PATH="./../public/images"
 file_names=listdir(IMAGE_PATH)
+create_table()
 sync_db()
-# descs = []
+
 for file_name in file_names:
     file_id=int(file_name[:file_name.index('.')])
     if check_if_exists_by_id(file_id):
@@ -111,4 +98,3 @@ for file_name in file_names:
     descs_bin=adapt_array(descs)
     add_descriptor(file_id,descs_bin)
     print(file_name)
-    # pk.dump(descs, open(f"./features/{}","wb"))

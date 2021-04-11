@@ -1,45 +1,59 @@
 import cv2
-import numpy as np
 from PIL import Image
-from os import listdir,remove
-import pickle as pk
+from os import listdir
+import numpy as np
 import math
 from fastapi import FastAPI, File, UploadFile,Body,Form
 from pydantic import BaseModel
 import uvicorn
-import io
 
 import sqlite3
 import io
 conn = sqlite3.connect('sift.db')
+# conn = sqlite3.connect('./python/sift.db')
 
 sift = cv2.SIFT_create(nfeatures=500)
 bf = cv2.BFMatcher()
-PATH="./python/features"
-# PATH="./features"
+
+def create_table():
+	cursor = conn.cursor()
+	query = '''
+	    CREATE TABLE IF NOT EXISTS sift(
+	    	id INTEGER NOT NULL UNIQUE PRIMARY KEY, 
+	    	sift_features BLOB NOT NULL
+	    )
+	'''
+	cursor.execute(query)
+	conn.commit()
+
+def sync_db():
+    IMAGE_PATH="./../public/images"
+    ids_in_db=set(get_all_ids())
+    file_names=listdir(IMAGE_PATH)
+    for file_name in file_names:
+        file_id=int(file_name[:file_name.index('.')])
+        if file_id in ids_in_db:
+            ids_in_db.remove(file_id)
+    for id in ids_in_db:
+        delete_descriptor_by_id(id)   #Fix this
+        print(f"deleting {id}")
+    print("db synced")
 
 def add_descriptor(id,sift_features):
 	cursor = conn.cursor()
-	query = '''
-	    INSERT INTO sift(id, sift_features )
-	    	        VALUES (?,?)
-	'''
+	query = '''INSERT INTO sift(id, sift_features )VALUES (?,?)'''
 	cursor.execute(query,(id,sift_features))
 	conn.commit()
 
 def delete_descriptor_by_id(id):
 	cursor = conn.cursor()
-	query = '''
-	    DELETE FROM sift WHERE id=(?)	'''
+	query = '''DELETE FROM sift WHERE id=(?)'''
 	cursor.execute(query,(id,))
 	conn.commit()
 
 def get_all_ids():
     cursor = conn.cursor()
-    query = '''
-    SELECT id
-    FROM sift
-    '''
+    query = '''SELECT id FROM sift'''
     cursor.execute(query)
     all_rows = cursor.fetchall()
     return list(map(lambda el:el[0],all_rows))  
@@ -68,10 +82,7 @@ def get_sift_features_by_id(id):
 
 def add_descriptor(id,sift_features):
 	cursor = conn.cursor()
-	query = '''
-	    INSERT INTO sift(id, sift_features )
-	    	        VALUES (?,?)
-	'''
+	query = '''INSERT INTO sift(id, sift_features) VALUES (?,?)'''
 	cursor.execute(query,(id,sift_features))
 	conn.commit()
 
@@ -90,9 +101,9 @@ def resize_img_to_array(img):
     img_array = np.array(img)
     return img_array
 
-def calculate_descr(f):
+def calculate_descr(image_buffer):
     eps=1e-7
-    img=read_img_file(f)
+    img=read_img_file(image_buffer)
     img=resize_img_to_array(img)
     key_points, descriptors = sift.detectAndCompute(img, None)
     descriptors /= (descriptors.sum(axis=1, keepdims=True) + eps) #RootSift
@@ -115,19 +126,14 @@ def match_descriptors(IMAGE_SIMILARITIES,image_id,matches):
         topBestNSum+=match.distance
     IMAGE_SIMILARITIES.append({"id": image_id, "avg_distance": -((bestN/topBestNSum)*(len(good_matches)/(good_matches_sum)))-(len(good_matches))})
 
-from timeit import default_timer as timer
-
 def sift_reverse_search(image):
     IMAGE_SIMILARITIES=[]
     _,target_descriptors=calculate_descr(image)
     ids=get_all_ids()
-    start = timer()
     for id in ids:
         descs=convert_array(get_sift_features_by_id(id))
         matches = bf.knnMatch(target_descriptors,descs, k=2)
         match_descriptors(IMAGE_SIMILARITIES,id,matches)
-    end = timer()
-    print(end - start) # Time in seconds, e.g. 5.38091952400282
     IMAGE_SIMILARITIES.sort(key=lambda image: image["avg_distance"])
     print(IMAGE_SIMILARITIES[:20])
     return list(map(lambda el: el["id"],IMAGE_SIMILARITIES[:20]))
@@ -156,4 +162,6 @@ async def delete_sift_features_handler(item:Item):
     return {"status":"200"}
     
 if __name__ == '__main__':
+    create_table()
+    sync_db()
     uvicorn.run('sift_web:app', host='127.0.0.1', port=33333, log_level="info")

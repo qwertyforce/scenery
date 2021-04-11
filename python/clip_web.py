@@ -1,12 +1,9 @@
-import os
 import torch
 import clip
 from os import listdir
-from os.path import splitext
 import numpy as np
 import json
 from PIL import Image
-import pickle as pk
 from fastapi import FastAPI, File, UploadFile,Body,Form
 from pydantic import BaseModel
 import uvicorn
@@ -14,79 +11,125 @@ from sklearn.neighbors import NearestNeighbors
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32")
-IMAGES_PATH="./public/images"
+IMAGE_PATH="./public/images"
 
-def get_features(image_path):
-    image =  preprocess(Image.open(image_path)).unsqueeze(0).to(device)
+import sqlite3
+import io
+conn = sqlite3.connect('NN_features.db')
+# conn = sqlite3.connect('./python/NN_features.db')
+
+def read_img_file(image_data):
+    img = Image.open(io.BytesIO(image_data))
+    return img
+
+def get_features(image_buffer):
+    image =  preprocess(read_img_file(image_buffer)).unsqueeze(0).to(device)
     with torch.no_grad():
         image_features = model.encode_image(image)
         image_features /= image_features.norm(dim=-1, keepdim=True)
     return image_features.numpy()
 
+def create_table():
+	cursor = conn.cursor()
+	query = '''
+	    CREATE TABLE IF NOT EXISTS clip(
+	    	id INTEGER NOT NULL UNIQUE PRIMARY KEY, 
+	    	clip_features BLOB NOT NULL
+	    )
+	'''
+	cursor.execute(query)
+	conn.commit()
+
+def check_if_exists_by_id(id):
+    cursor = conn.cursor()
+    query = '''SELECT EXISTS(SELECT 1 FROM clip WHERE id=(?))'''
+    cursor.execute(query,(id,))
+    all_rows = cursor.fetchone()
+    return all_rows[0] == 1    
+
+def delete_descriptor_by_id(id):
+	cursor = conn.cursor()
+	query = '''DELETE FROM clip WHERE id=(?)'''
+	cursor.execute(query,(id,))
+	conn.commit()
+
+def get_all_ids():
+    cursor = conn.cursor()
+    query = '''SELECT id FROM clip'''
+    cursor.execute(query)
+    all_rows = cursor.fetchall()
+    return list(map(lambda el:el[0],all_rows))
+    
+def convert_array(text):
+    out = io.BytesIO(text)
+    out.seek(0)
+    return np.load(out)
+
+def get_all_data():
+    cursor = conn.cursor()
+    query = '''
+    SELECT id, clip_features
+    FROM clip
+    '''
+    cursor.execute(query)
+    all_rows = cursor.fetchall()
+    return list(map(lambda el:{"image_id":el[0],"features":convert_array(el[1])},all_rows))
+
+def adapt_array(arr):
+    out = io.BytesIO()
+    np.save(out, arr)
+    out.seek(0)
+    return sqlite3.Binary(out.read())
+
+def add_descriptor(id,clip_features):
+	cursor = conn.cursor()
+	query = '''INSERT INTO clip(id, clip_features) VALUES (?,?)'''
+	cursor.execute(query,(id,clip_features))
+	conn.commit()
+
+def sync_db():
+    IMAGE_PATH="./../public/images"
+    ids_in_db=set(get_all_ids())
+    file_names=listdir(IMAGE_PATH)
+    for file_name in file_names:
+        file_id=int(file_name[:file_name.index('.')])
+        if file_id in ids_in_db:
+            ids_in_db.remove(file_id)
+    for id in ids_in_db:
+        delete_descriptor_by_id(id)   #Fix this
+        print(f"deleting {id}")
+    print("db synced")
+
 def generate_clip_features():
-    all_image_features=[]
-    image_filenames=listdir(IMAGES_PATH)
-    image_ids=set(map(lambda el: splitext(el)[0],image_filenames))
-    try:
-       all_image_features=pk.load(open("./python/clip_image_features.pkl", "rb"))
-    except (OSError, IOError) as e:
-       print("file_not_found")
-
-    def exists_in_all_image_features(image_id):
-        for image in all_image_features:
-            if image['image_id'] == image_id:
-                # print("skipping "+ str(image_id))
-                return True
-        return False
-
-    def exists_in_image_folder(image_id):
-        if image_id in image_ids:
-                return True
-        return False   
-
-    def sync_clip_image_features():
-        for_deletion=[]
-        for i in range(len(all_image_features)):
-            if not exists_in_image_folder(all_image_features[i]['image_id']):
-                print("deleting "+ str(all_image_features[i]['image_id']))
-                for_deletion.append(i)
-        for i in reversed(for_deletion):
-            del all_image_features[i]
-
-    sync_clip_image_features()
-    for image_filename in image_filenames:
-        image_id=splitext(image_filename)[0]
-        if exists_in_all_image_features(image_id):
+    file_names=listdir(IMAGE_PATH)
+    sync_db()
+    for file_name in file_names:
+        file_id=int(file_name[:file_name.index('.')])
+        if check_if_exists_by_id(file_id):
             continue
-        image_features=get_features(IMAGES_PATH+"/"+image_filename)
-        # print(image_filename)
-        # print(image_features)
-        all_image_features.append({'image_id':image_id,'features':image_features})
-    pk.dump(all_image_features, open("./python/clip_image_features.pkl","wb"))
+        image_features=get_features(IMAGE_PATH+"/"+file_name) 
+        image_features_bin=adapt_array(image_features)
+        add_descriptor(file_id,image_features_bin)
+        print(file_name)
+
 
 def calculate_similarities():
-    all_image_features=[]
-    image_filenames=listdir(IMAGES_PATH)
-    image_ids=set(map(lambda el: splitext(el)[0],image_filenames))
-    try:
-       all_image_features=pk.load(open("./python/clip_image_features.pkl", "rb"))
-    except (OSError, IOError) as e:
-       print("file_not_found")
+    image_data=get_all_data()
     features=[]
-    for image in all_image_features:
-        features.append(np.array(image['features']))
+    for image in image_data:
+        features.append(image['features'])
     features=np.array(features)
     features=np.squeeze(features)
+
     knn = NearestNeighbors(n_neighbors=20,algorithm='brute',metric='euclidean')
     knn.fit(features)
-    file_names=listdir(IMAGES_PATH)
     ALL_SIMILAR_IMAGES={}
-    for image in all_image_features:
-        # print(image['image_id'])
+    for image in image_data:
+        print(image['image_id'])
         indices = knn.kneighbors(image['features'], return_distance=False)
         similar_images=[]
         for i in range(indices[0].size):
-            similar_images.append(all_image_features[indices[0][i]]['image_id'])
+            similar_images.append(image_data[indices[0][i]]['image_id'])
         ALL_SIMILAR_IMAGES[image['image_id']]=similar_images
     with open('data.txt', 'w') as outfile:
         json.dump(ALL_SIMILAR_IMAGES, outfile)
@@ -96,28 +139,38 @@ def find_similar_by_text(text):
     with torch.no_grad():
         text_features = model.encode_text(text_tokenized)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-    image_features=pk.load( open("./python/clip_image_features.pkl", "rb"))
+    image_data=get_all_data()
     features=[]
-    for image in image_features:
-        features.append(np.array(image['features']))
+    for image in image_data:
+        features.append(image['features'])
     features=np.array(features)
-    file_names=listdir(IMAGES_PATH)
-    ALL_SIMILAR_IMAGES=[]
-    for image in image_features:
-        orig_img_id=image['image_id']
-        similarity = (image["features"] @ text_features.numpy().T)[0][0]
-        ALL_SIMILAR_IMAGES.append({"image_id":image['image_id'],"similarity":similarity})
-        # print(image['image_id'])  
-    ALL_SIMILAR_IMAGES.sort(key=lambda image: image["similarity"],reverse=True)
-    return(list(map(lambda el: el["image_id"],ALL_SIMILAR_IMAGES[:20])))    
+    features=np.squeeze(features)
+
+    knn = NearestNeighbors(n_neighbors=20,algorithm='brute',metric='euclidean')
+    knn.fit(features)
+    indices = knn.kneighbors(text_features, return_distance=False) 
+    similar_images=[]
+    for i in range(indices[0].size):
+        similar_images.append(image_data[indices[0][i]]['image_id'])
+    print(similar_images)
+    return similar_images
+
 app = FastAPI()
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
 
-@app.get("/generate_clip_features")
-async def generate_clip_features_handler():
-    generate_clip_features()
+@app.post("/calculate_NN_features")
+async def calculate_NN_features_handler(image: bytes = File(...),image_id: str = Form(...)):
+    features=get_features(image)
+    add_descriptor(int(image_id),adapt_array(features))
+    return {"status":"200"}
+
+class Item_image_id(BaseModel):
+    image_id: str
+@app.post("/delete_NN_features")
+async def delete_nn_features_handler(item:Item_image_id):
+    delete_descriptor_by_id(int(item.image_id))
     return {"status":"200"}
 
 @app.get("/calculate_similarities")
@@ -125,14 +178,16 @@ async def calculate_similarities_handler():
     calculate_similarities()
     return {"status":"200"}
 
-class Item(BaseModel):
+class Item_query(BaseModel):
     query: str
 @app.post("/find_similar_by_text")
-async def find_similar_by_text_handler(item:Item):
+async def find_similar_by_text_handler(item:Item_query):
     similarities=find_similar_by_text(item.query)
     return similarities
     
 if __name__ == '__main__':
+    create_table()
+    sync_db()
     uvicorn.run('clip_web:app', host='127.0.0.1', port=33334, log_level="info")
 
    
