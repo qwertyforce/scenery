@@ -99,7 +99,7 @@ export default function Import_from_derpi(props:{err:boolean}) {
 export async function getServerSideProps(context: any) {
   if (context.req.session.authed && context.req.session.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
-    if (user[0].isAdmin) {
+    if (user?.isAdmin) {
       return {
         props: {},
       }

@@ -1,44 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import * as cv from 'opencv4nodejs'
-import { HistAxes } from 'opencv4nodejs';
 import db_ops from './db_ops';
 import sharp from 'sharp'
 import { bmvbhash } from 'blockhash-core'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
-let IMAGES_IDS_PHASHES:any
+const IMAGES_IDS_PHASHES:any={}
 const VPTreeFactory: any = require("vptree");
 let vptree:any;
-rebuilt_vp_tree()
+build_vp_tree()
 
-async function rebuilt_vp_tree(){
-  IMAGES_IDS_PHASHES = await db_ops.image_ops.get_ids_and_phashes()   
-  const phashes=IMAGES_IDS_PHASHES.map((el:any)=>el.phash)
-  vptree=VPTreeFactory.build(phashes, hamming_distance)
-}
-const BIN_SIZE = 16
-const histAxes: HistAxes[] = [
-  new HistAxes({
-    channel: 0,
-    bins: BIN_SIZE,
-    ranges: [0, 255]
-  }),
-  new HistAxes({
-    channel: 1,
-    bins: BIN_SIZE,
-    ranges: [0, 255]
-  }),
-  new HistAxes({
-    channel: 2,
-    bins: BIN_SIZE,
-    ranges: [0, 255]
-  }),
-]
-
-function hamming_distance(str1: string, str2: string) {
+function hamming_distance(img1: any[], img2: any[]) {
   let distance = 0;
+  const str1=img1[1]
+  const str2=img2[1]
   for (let i = 0; i < str1.length; i += 1) {
     if (str1[i] !== str2[i]) {
       distance += 1;
@@ -46,8 +22,30 @@ function hamming_distance(str1: string, str2: string) {
   }
   return distance;
 }
+async function build_vp_tree(){
+  const ids_phashes=await db_ops.image_ops.get_ids_and_phashes()
+  for (const img of ids_phashes){
+    IMAGES_IDS_PHASHES[img.id]=img.phash
+  }
+  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
+}
 
-async function get_phash(image: Buffer | string) {
+async function add_to_vp_tree(id:number,phash:string){
+  IMAGES_IDS_PHASHES[id]=phash
+  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
+}
+
+async function remove_from_vp_tree(id:number){
+  delete IMAGES_IDS_PHASHES[id]
+  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
+}
+
+// async function modify_vp_tree(id:number,phash:string){
+//   IMAGES_IDS_PHASHES[id]=phash
+//   vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
+// }
+
+async function calculate_phash(image: Buffer | string) {
   const { data, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const imageData = {
     width: info.width,
@@ -58,30 +56,14 @@ async function get_phash(image: Buffer | string) {
   return x
 }
 
-async function calculate_color_hist_and_similarities(new_image_id: number, image: Buffer) {
-  let img_mat = await cv.imdecodeAsync(image)
-  if (img_mat.channels === 1) {
-    img_mat = img_mat.cvtColor(cv.COLOR_GRAY2BGR)
-  }
-  let rgb_hist = await cv.calcHistAsync(img_mat, histAxes)
-  rgb_hist = rgb_hist.convertTo(cv.CV_32F);
-  rgb_hist = rgb_hist.flattenFloat(BIN_SIZE * BIN_SIZE * BIN_SIZE, 1)
-  rgb_hist = rgb_hist.div(img_mat.sizes[0] * img_mat.sizes[1])
-  const arr = rgb_hist.getDataAsArray()
-  db_ops.image_search.add_color_hist_by_id(new_image_id, arr)
-  const similarities = []
-  const ids = (await db_ops.image_search.get_image_ids_from_color_similarities()).map((el) => el.id)
-  for (const _id of ids) {
-    const _image = (await db_ops.image_search.get_color_hist_by_id(_id))[0]
-    const color_hist_mat = new cv.Mat(_image.color_hist, cv.CV_32F);
-    const similarity = await rgb_hist.compareHistAsync(color_hist_mat, cv.HISTCMP_INTERSECT)
-    color_hist_mat.release()
-    similarities.push({ id: _id, similarity: similarity })
-    db_ops.image_search.add_color_similarity_to_other_image(_id, { id: new_image_id, similarity: similarity })
-  }
-  await db_ops.image_search.add_color_similarities_by_id(new_image_id, similarities)
+async function get_similar_images_by_phash(image: Buffer) {
+  const phash = await calculate_phash(image)
+  const nearest=vptree.search([0,phash],30);
+  const ids= nearest.map((el:any) => el.data[0])
+  return ids
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////SIFT
 async function calculate_sift_features(image_id: number, image: Buffer) {
   const form = new FormData();
   form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
@@ -116,7 +98,7 @@ async function get_similar_images_by_sift(image: Buffer) {
     return []
   }
 }
-async function delete_sift_feature_by_id(image_id: number) {
+async function delete_sift_features_by_id(image_id: number) {
   try {
     const status = await axios.post(`${config.sift_microservice_url}/delete_sift_features`, { image_id: image_id.toString() })
     return status.data
@@ -124,11 +106,129 @@ async function delete_sift_feature_by_id(image_id: number) {
     console.log(err)
   }
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-async function get_similar_images_by_phash(image: Buffer) {
-  const phash = await get_phash(image)
-  const nearest=vptree.search(phash,30);
-  const ids= nearest.map((el:any) => IMAGES_IDS_PHASHES[el.i].id)
-  return ids
+//////////////////////////////////////////////////////////////////////////////////////////////NN(CLIP)
+async function calculate_NN_features(image_id: number, image: Buffer) {
+  const form = new FormData();
+  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image_id', image_id.toString())
+  try {
+    const status = await axios.post(`${config.nn_microservice_url}/calculate_NN_features`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return status.data
+  } catch (err) {
+    console.log(err)
+  }
 }
-export default { calculate_color_hist_and_similarities, get_similar_images_by_sift, get_similar_images_by_phash, calculate_sift_features, get_phash, delete_sift_feature_by_id,rebuilt_vp_tree }
+
+async function NN_get_similar_images_by_id(image_id: number) {
+  try {
+    const res = await axios.post(`${config.nn_microservice_url}/get_similar_images_by_id`, { image_id: image_id })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function delete_NN_features_by_id(image_id: number) {
+  try {
+    const status = await axios.post(`${config.nn_microservice_url}/delete_NN_features`, { image_id: image_id })
+    return status.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function get_similar_images_by_text(query: string) {
+  try {
+    const res = await axios.post(`${config.nn_microservice_url}/find_similar_by_text`, { query: query })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////RGB_HISTOGRAM
+async function HIST_get_similar_images_by_id(image_id: number) {
+  try {
+    const res = await axios.post(`${config.hist_microservice_url}/get_similar_images_by_id`, { image_id: image_id })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function calculate_HIST_features(image_id: number, image: Buffer) {
+  const form = new FormData();
+  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image_id', image_id.toString())
+  try {
+    const status = await axios.post(`${config.hist_microservice_url}/calculate_HIST_features`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return status.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function delete_HIST_features_by_id(image_id: number) {
+  try {
+    const status = await axios.post(`${config.hist_microservice_url}/delete_HIST_features`, { image_id: image_id })
+    return status.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+async function calculate_image_features(image_id: number, image_buffer: Buffer, phash: string) {
+  return Promise.all([
+    await calculate_sift_features(image_id, image_buffer),
+    await calculate_NN_features(image_id, image_buffer),
+    await calculate_HIST_features(image_id, image_buffer),
+    await add_to_vp_tree(image_id, phash),
+  ])
+}
+
+async function delete_image_features(image_id: number){
+  return Promise.all([
+    await delete_sift_features_by_id(image_id),
+    await delete_NN_features_by_id(image_id),
+    await delete_HIST_features_by_id(image_id),
+    await remove_from_vp_tree(image_id)
+  ])
+}
+
+function get_orientation(height: number, width: number) {
+  if (height > width) {
+    return "vertical"
+  } else if (height < width) {
+    return "horizontal"
+  } else {
+    return "square"
+  }
+}
+
+export default {
+  get_orientation,
+  calculate_phash,
+  get_similar_images_by_sift,
+  NN_get_similar_images_by_id,
+  get_similar_images_by_text,
+  get_similar_images_by_phash,
+  HIST_get_similar_images_by_id,
+  calculate_image_features,
+  delete_image_features
+}

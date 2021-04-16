@@ -20,8 +20,8 @@ async function signup(req:Request,res:Response) {
     }
     const email = req.body.email;
     const password = req.body.password
-    const users = await db_ops.activated_user.find_user_by_email(email);
-    if (users.length === 0) { //if no user with this email is registered
+    const user_exists = await db_ops.activated_user.check_if_user_exists_by_email(email);
+    if (!user_exists) { //if no user with this email is registered
         const token = await crypto_ops.generate_activation_token() //always unique
         const hashed_pass = await crypto_ops.hash_password(password);
         db_ops.not_activated_user.create_new_user_not_activated(email, hashed_pass, token)
@@ -32,7 +32,6 @@ async function signup(req:Request,res:Response) {
             message: 'Registered successfully,please confirm your email.'
         })
     } else {
-        console.log(users)
         res.status(403).json({
             message: 'User with same email is already registered'
         })

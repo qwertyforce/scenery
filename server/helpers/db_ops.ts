@@ -15,62 +15,19 @@ client.connect(function(err) {
         console.log("Connected successfully to db server");
     }
 });
-client.db(db_main).listCollections({
-    name: "not_activated_users"
-}).toArray().then(function(items) {
-    if (items.length === 0) {
-        client.db(db_main).collection("not_activated_users").createIndex({
-            "createdAt": 1
-        }, {
-            expireAfterSeconds: 86400
-        });
-    }
-});
+//////////////////////////////////////////////////////////////////////////////////////////////////COLLECTIONS
+const IMAGES_COLLECTION=client.db(db_main).collection("images");
+const USERS_COLLECTION=client.db(db_main).collection("users");
+const NOT_ACTIVATED_USERS_COLLECTION=client.db(db_main).collection("not_activated_users");
+const PASSWORD_RECOVERY_COLLECTION=client.db(db_main).collection("password_recovery");
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-client.db(db_main).listCollections({
-    name: "password_recovery"
-}).toArray().then(function(items) {
-    if (items.length === 0) {
-        client.db(db_main).collection("password_recovery").createIndex({
-            "createdAt": 1
-        }, {
-            expireAfterSeconds: 86400
-        });
-    }
-});
-
-async function findDocuments(collection_name:string, selector:Record<string,unknown>) {
-    const collection = client.db(db_main).collection(collection_name);
-    // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
-    const result = collection.find(selector).project({_id:0}).toArray()
-    return result
-}
-async function removeDocument(collection_name:string, selector:Record<string,unknown>) {
-    const collection = client.db(db_main).collection(collection_name);
-    return collection.deleteOne(selector)
-
-}
-
-async function insertDocuments(collection_name:string, documents:Array<any>) {
-    const collection = client.db(db_main).collection(collection_name);
-    return collection.insertMany(documents)
-    // const result = await collection.insertMany(documents);
-    // return result
-}
-async function updateDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
-  const collection = client.db(db_main).collection(collection_name);
-  return collection.updateOne(selector, { $set: update })
-  //const result= await collection.updateOne(selector, { $set: update })
- // console.log(result)
-}
-async function addToArrayInDocument(collection_name:string,selector:Record<string,unknown>,update:Record<string,unknown>) {
-    const collection = client.db(db_main).collection(collection_name);
-    const result = collection.updateOne(selector, { $push: update })
-    return result
-}
-
- 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////CREATE INDEXES
+client.db(db_main).collection("images").createIndex({"id": 1}, {unique: true});
+client.db(db_main).collection("images").createIndex({"tags": 1});
+client.db(db_main).collection("not_activated_users").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400});
+client.db(db_main).collection("password_recovery").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400});
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function generate_id() {
     const id:Promise<string> = new Promise((resolve, reject) => {
@@ -79,8 +36,8 @@ async function generate_id() {
                 reject("error");
             }
             const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
-            const users = await find_user_by_id(id) //check if id exists
-            if (users.length === 0) {
+            const user = await find_user_by_id(id) //check if id exists
+            if (user) {
                 resolve(id);
             } else {
                 const id_1 = await generate_id()
@@ -90,121 +47,56 @@ async function generate_id() {
     });
     return id;
 }
-/////////////////////////////////////////////////IMAGE SEARCH OPS
-async function get_color_similarities_by_id(id:number){
-const collection = client.db(db_main).collection("color_similarities");
-// collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
-const similarities = collection.find({id:id}).project({_id:0,id:0}).toArray()
-return similarities
+
+/////////////////////////////////////////////////////////////////////////////////////IMAGES OPS
+
+async function check_if_image_exists_by_id(id:number){
+    return Boolean(IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
 }
-
-async function delete_id_from_color_similarities(id:number){
-    const collection = client.db(db_main).collection("color_similarities");
-    await collection.deleteOne({id:id})
-    await collection.updateMany({}, { $pull: {similarities:{id:id}} })
-}
-
-async function get_image_ids_from_color_similarities(){
-    const collection = client.db(db_main).collection("color_similarities");
-    // collection.find(selector).project({_id:0}).explain((_err,exp)=>console.log(exp))
-     const ids =  collection.find({}).project({_id:0,similarities: 0}).toArray()
-   return ids
-    }
-async function add_color_similarity_to_other_image(id:number,similarity:Record<string,unknown>){
-    addToArrayInDocument("color_similarities",{id:id},{similarities:similarity })
-}
-async function add_color_similarities_by_id(id:number,similarities:Array<Record<string,unknown>>){
-    insertDocuments("color_similarities", [{
-        id:id,
-        similarities:similarities
-    }])
-}
- 
-async function get_color_hist_by_id(id:number){
-    const color_hists = findDocuments("color_hist", {id:id})
-    return color_hists
-}
-async function get_all_color_hists(){
-    const color_hists = findDocuments("color_hist", {})
-    return color_hists
-}
-
-async function delete_color_hist_by_id(id:number){
-    removeDocument("color_hist",{id:id})
-}
-
-async function add_color_hist_by_id(id:number, color_hist:number[][]){
-    insertDocuments("color_hist", [{
-        id:id,
-        color_hist:color_hist
-    }])
-}
-
-////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////IMAGES OPS
-
-
 async function add_tags_to_image_by_id(id:number,tags:string[]){
-    await addToArrayInDocument("images",{id:id},{tags:{ $each:tags}})
+    await IMAGES_COLLECTION.updateOne({id:id}, { $push: {tags:{ $each:tags}}})
 }
 
 async function get_ids_and_phashes(){
-    const collection = client.db(db_main).collection("images");
-    const data = collection.aggregate([{ $project : { id : 1, phash : 1,_id : 0} }]).toArray()
+    const data = IMAGES_COLLECTION.aggregate([{ $project : { id : 1, phash : 1,_id : 0} }]).toArray()
     return data
 }
 
 async function update_image_data_by_id(id:number,update:Record<string,unknown>){
-    return updateDocument("images", {id: id},update)
+    return IMAGES_COLLECTION.updateOne({id: id}, { $set: update })
 }
 
 async function get_all_images(){
-    const imgs = findDocuments("images", {})
+    const imgs = IMAGES_COLLECTION.find({}).project({_id:0}).toArray()
     return imgs
 }
 
-async function find_images_by_tags(query:any){
-    const imgs = findDocuments("images",query)
+async function find_images_by_tags(query:Record<string,unknown>){
+    const imgs = IMAGES_COLLECTION.find(query).project({_id:0}).toArray()
     return imgs
 }
 async function find_image_by_sha512(hash:string){
-    const img = findDocuments("images", {
-        sha512: hash
-    })
+    const img = IMAGES_COLLECTION.find({sha512: hash}).project({_id:0}).next()
     return img
 }
 async function find_image_by_id(id:number){
-    const img = findDocuments("images", {
-        id: id
-    })
+    const img = IMAGES_COLLECTION.find({id: id}).project({_id:0}).next()
     return img
 }
 async function find_image_by_booru_id(booru:string,id:number){
-    const img = findDocuments("images", {
-        booru:booru,
-        booru_id: id
-    })
-    return img
-}
-async function find_image_by_phash(hash:string){
-    const img = findDocuments("images", {
-        phash: hash
-    })
+    const img = IMAGES_COLLECTION.find({booru:booru,booru_id: id}).project({_id:0}).next()
     return img
 }
 
 async function get_max_image_id(){
-    const collection = client.db(db_main).collection("images");
-    const result = await collection.find({}).sort({id:-1}).limit(1).toArray()
-    return result[0]?.id
+    const result = await IMAGES_COLLECTION.find({}).sort({id:-1}).limit(1).next()
+    return result.id
 }
 async function delete_image_by_id(id:number){
-    return removeDocument("images",{id:id})
+    return IMAGES_COLLECTION.deleteOne({id:id})
 }
 async function add_image_by_object(image:any){
-    return insertDocuments("images", [image])
+    return IMAGES_COLLECTION.insertOne(image)
 }
 
 async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
@@ -212,7 +104,7 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
     booru_likes:number,booru_dislikes:number,
     booru_id:number|false,booru_date:Date|false,source_url:string,tags:Array<string>,
     wilson_score:number,sha512:string,phash:string,description:string,booru:string|false){
-    insertDocuments("images", [{
+    const image={
         id:id,
         file_ext:file_ext,
         created_at: new Date(),
@@ -232,125 +124,125 @@ async function add_image(id:number,file_ext:string,width:number,height:number,au
         booru_date:booru_date,
         source_url:source_url,
         wilson_score:wilson_score
-    }])
+    }
+    IMAGES_COLLECTION.insertOne(image)
 }
-/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////PASSWORD RECOVERY
+/////////////////////////////////////////////////////////////////////////////PASSWORD RECOVERY
 async function update_user_password_by_id(id:string,password:string):Promise<void> {
-    updateDocument("users", {id: id},{password:password})
+    USERS_COLLECTION.updateOne({id: id}, { $set: {password:password} })
 }
 
 async function delete_password_recovery_token(token:string):Promise<void> {
-    removeDocument("password_recovery", {
-        token: token
-    })
+    PASSWORD_RECOVERY_COLLECTION.deleteOne({token: token})
 }
 
 async function save_password_recovery_token(token:string, user_id:string):Promise<void> {
-    insertDocuments("password_recovery", [{
+    PASSWORD_RECOVERY_COLLECTION.insertOne({
         "createdAt": new Date(),
         token: token,
         user_id: user_id,
-    }])
+    })
 }
 
 async function find_user_id_by_password_recovery_token(token:string) {
-    const user = findDocuments("password_recovery", {
-        token: token
-    })
+    const user = PASSWORD_RECOVERY_COLLECTION.find({token: token}).limit(1).project({_id:0}).next()
     return user
 }
-//////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////ACTIVATED USER
+//////////////////////////////////////////////////////////////////////////////////ACTIVATED USER
+async function check_if_user_exists_by_id(id:number){
+    return Boolean(USERS_COLLECTION.countDocuments({id:id},{limit:1}))
+}
+
+async function check_if_user_exists_by_email(email:string){
+    return Boolean(USERS_COLLECTION.countDocuments({email:email},{limit:1}))
+}
+
 
 async function find_user_by_email(email:string) {
-    const user = findDocuments("users", {
-        email: email
-    })
+    const user = USERS_COLLECTION.find({email: email}).limit(1).project({_id:0}).next()
     return user
 }
 
 async function find_user_by_oauth_id(oauth_id:string) {
-    const user = findDocuments("users", {
-        oauth_id: oauth_id
-    })
+    const user = USERS_COLLECTION.find({oauth_id: oauth_id}).limit(1).project({_id:0}).next()
     return user
 }
 
  async function find_user_by_id(id:string) {
-    const user = findDocuments("users", {
-        id: id
-    })
+    const user = USERS_COLLECTION.find({id: id}).limit(1).project({_id:0}).next()
     return user
 }
 
 async function create_new_user_activated(email:string, pass:string) {
     const id=await generate_id()
-    insertDocuments("users", [{
+    const user={
         email: email,
         id: id,
         password: pass,
         username:"",
         links:0,
         activated: true
-    }])
+    }
+    IMAGES_COLLECTION.insertOne(user)
 }
 
 
 async function create_new_user_activated_github(oauth_id:string) {
     const id=await generate_id()
-    insertDocuments("users", [{
+    USERS_COLLECTION.insertOne({
         oauth_id: oauth_id,
         id: id,
         username:"",
         links:0,
         activated: true
-    }])
+    })
     return id
 }
 
 async function create_new_user_activated_google(oauth_id:string,email:string) {
     const id=await generate_id()
-    insertDocuments("users", [{
+    USERS_COLLECTION.insertOne({
         oauth_id: oauth_id,
         email_google:email,
         id: id,
         username:"",
         links:0,
         activated: true
-    }])
+    })
     return id
 }
-/////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////NOT ACTIVATED USER
+////////////////////////////////////////////////////////////////NOT ACTIVATED USER
 async function find_not_activated_user_by_token(token:string) {
-    const user = findDocuments("not_activated_users", {
-        token: token
-    })
+    const user = NOT_ACTIVATED_USERS_COLLECTION.find({token: token}).limit(1).project({_id:0}).next()
     return user
 }
 
 async function delete_not_activated_user_by_token(token:string) {
-    removeDocument("not_activated_users", {
-        token: token
-    })
+    NOT_ACTIVATED_USERS_COLLECTION.deleteOne({token:token})
 }
 
 async function create_new_user_not_activated(email:string, pass:string, token:string) {
-    insertDocuments("not_activated_users", [{
+    NOT_ACTIVATED_USERS_COLLECTION.insertOne({
         "createdAt": new Date(),
         email: email,
         token: token,
         password: pass,
         activated: false
-    }])
+    })
 }
-/////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////
+// async function test(){
+//     const x =await find_image_by_id(3)
+//     console.log(x)
+// }
+// test()
 export default {
     image_ops: {
         add_image,
@@ -361,22 +253,11 @@ export default {
         delete_image_by_id,
         find_images_by_tags,
         get_ids_and_phashes,
-        find_image_by_phash,
         find_image_by_sha512,
+        check_if_image_exists_by_id,
         find_image_by_booru_id,
         update_image_data_by_id,
-        add_tags_to_image_by_id
-    },
-    image_search:{
-        get_all_color_hists,
-        get_color_hist_by_id,
-        add_color_hist_by_id,
-        delete_color_hist_by_id,
-        get_color_similarities_by_id,
-        add_color_similarities_by_id,
-        delete_id_from_color_similarities,
-        add_color_similarity_to_other_image,
-        get_image_ids_from_color_similarities,
+        add_tags_to_image_by_id,
     },
     password_recovery:{
         update_user_password_by_id,
@@ -385,6 +266,8 @@ export default {
         find_user_id_by_password_recovery_token
     },
     activated_user:{
+        check_if_user_exists_by_id,
+        check_if_user_exists_by_email,
         find_user_by_email,
         find_user_by_oauth_id,
         find_user_by_id,

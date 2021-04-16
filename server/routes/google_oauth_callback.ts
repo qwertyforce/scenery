@@ -21,12 +21,12 @@ async function google_oauth_callback(req:Request, res:Response) {
         const google_email = result2.data.emailAddresses[0].value;
         console.log(result2.data.resourceName);
         console.log(result2.data.emailAddresses[0].value);
-        const users = await db_ops.activated_user.find_user_by_oauth_id(google_id)
-        if (users.length === 0) {
+        const user = await db_ops.activated_user.find_user_by_oauth_id(google_id)
+        if (!user) {  //if no users with same oauth_id
             const usr_id = await db_ops.activated_user.create_new_user_activated_google(google_id, google_email)
             req.session.user_id = usr_id;
         } else {
-            req.session.user_id = users[0].id;
+            req.session.user_id = user.id;
         }
         req.session.authed = true;
         res.redirect(config.domain)

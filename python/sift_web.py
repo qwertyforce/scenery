@@ -5,7 +5,6 @@ import numpy as np
 import math
 from fastapi import FastAPI, File, UploadFile,Body,Form
 from pydantic import BaseModel
-import uvicorn
 
 import sqlite3
 import io
@@ -160,8 +159,8 @@ class Item(BaseModel):
 async def delete_sift_features_handler(item:Item):
     delete_descriptor_by_id(int(item.image_id))
     return {"status":"200"}
-    
-if __name__ == '__main__':
-    create_table()
+
+print(__name__)
+if __name__ == 'sift_web':
     sync_db()
-    uvicorn.run('sift_web:app', host='127.0.0.1', port=33333, log_level="info")
+

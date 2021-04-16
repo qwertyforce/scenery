@@ -1,6 +1,6 @@
 {
   "name": "scenery",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "scripts": {
     "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",

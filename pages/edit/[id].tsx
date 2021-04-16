@@ -47,15 +47,15 @@ export default function Image(props: any) {
 export async function getServerSideProps(context: any) {
   if (context.req.session.authed && context.req.session.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
-    if (!user[0].isAdmin) {
+    if (!user.isAdmin) {
       return {
         props: { err: true },
       }
     }
     const img = await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
-    if (img.length === 1) {
+    if (img) {
       return {
-        props: { id: img[0].id, img_data: JSON.stringify(img[0]), err: false }, // will be passed to the page component as props
+        props: { id: img.id, img_data: JSON.stringify(img), err: false }, // will be passed to the page component as props
       }
     }
   }

@@ -1,12 +1,10 @@
 import torch
+from pydantic import BaseModel
+from fastapi import FastAPI, File,Body,Form, HTTPException
 import clip
 from os import listdir
 import numpy as np
-import json
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile,Body,Form
-from pydantic import BaseModel
-import uvicorn
 from sklearn.neighbors import NearestNeighbors
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -16,8 +14,24 @@ IMAGE_PATH="./public/images"
 import sqlite3
 import io
 conn = sqlite3.connect('NN_features.db')
-# conn = sqlite3.connect('./python/NN_features.db')
 
+import hnswlib
+dim=512
+index = hnswlib.Index(space='l2', dim=dim)
+index.init_index(max_elements=5000, ef_construction=200, M=32)
+
+def init_index():
+    image_data=get_all_data()
+    features=[]
+    ids=[]
+    for image in image_data:
+        features.append(image['features'])
+        ids.append(image['image_id'])
+    ids=np.array(ids)
+    features=np.array(features).squeeze()
+    index.add_items(features,ids)
+    print("Index is ready")
+       
 def read_img_file(image_data):
     img = Image.open(io.BytesIO(image_data))
     return img
@@ -100,60 +114,11 @@ def sync_db():
         print(f"deleting {id}")
     print("db synced")
 
-def generate_clip_features():
-    file_names=listdir(IMAGE_PATH)
-    sync_db()
-    for file_name in file_names:
-        file_id=int(file_name[:file_name.index('.')])
-        if check_if_exists_by_id(file_id):
-            continue
-        image_features=get_features(IMAGE_PATH+"/"+file_name) 
-        image_features_bin=adapt_array(image_features)
-        add_descriptor(file_id,image_features_bin)
-        print(file_name)
-
-
-def calculate_similarities():
-    image_data=get_all_data()
-    features=[]
-    for image in image_data:
-        features.append(image['features'])
-    features=np.array(features)
-    features=np.squeeze(features)
-
-    knn = NearestNeighbors(n_neighbors=20,algorithm='brute',metric='euclidean')
-    knn.fit(features)
-    ALL_SIMILAR_IMAGES={}
-    for image in image_data:
-        print(image['image_id'])
-        indices = knn.kneighbors(image['features'], return_distance=False)
-        similar_images=[]
-        for i in range(indices[0].size):
-            similar_images.append(image_data[indices[0][i]]['image_id'])
-        ALL_SIMILAR_IMAGES[image['image_id']]=similar_images
-    with open('data.txt', 'w') as outfile:
-        json.dump(ALL_SIMILAR_IMAGES, outfile)
-
-def find_similar_by_text(text):
+def get_text_features(text):
     text_tokenized = clip.tokenize([text]).to(device)
     with torch.no_grad():
         text_features = model.encode_text(text_tokenized)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-    image_data=get_all_data()
-    features=[]
-    for image in image_data:
-        features.append(image['features'])
-    features=np.array(features)
-    features=np.squeeze(features)
-
-    knn = NearestNeighbors(n_neighbors=20,algorithm='brute',metric='euclidean')
-    knn.fit(features)
-    indices = knn.kneighbors(text_features, return_distance=False) 
-    similar_images=[]
-    for i in range(indices[0].size):
-        similar_images.append(image_data[indices[0][i]]['image_id'])
-    print(similar_images)
-    return similar_images
 
 app = FastAPI()
 @app.get("/")
@@ -164,30 +129,41 @@ async def read_root():
 async def calculate_NN_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
+    index.add_items(features,[int(image_id)])
     return {"status":"200"}
 
 class Item_image_id(BaseModel):
-    image_id: str
+    image_id: int
+
 @app.post("/delete_NN_features")
 async def delete_nn_features_handler(item:Item_image_id):
-    delete_descriptor_by_id(int(item.image_id))
+    delete_descriptor_by_id(item.image_id)
+    index.mark_deleted(item.image_id)
     return {"status":"200"}
 
-@app.get("/calculate_similarities")
-async def calculate_similarities_handler():
-    calculate_similarities()
-    return {"status":"200"}
+@app.post("/get_similar_images_by_id")
+async def get_similar_images_by_id_handler(item: Item_image_id):
+    try:
+       target_features = index.get_items([item.image_id])
+       labels, _ = index.knn_query(target_features, k=20)
+       return labels[0].tolist()
+    except RuntimeError:
+        raise HTTPException(status_code=500, detail="Image with this id is not found")
 
 class Item_query(BaseModel):
     query: str
 @app.post("/find_similar_by_text")
 async def find_similar_by_text_handler(item:Item_query):
-    similarities=find_similar_by_text(item.query)
-    return similarities
-    
-if __name__ == '__main__':
+    text_features=get_text_features(item.query)
+    labels, _ = index.knn_query(text_features, k=20)
+    return labels[0].tolist()
+
+print(__name__)
+if __name__ == 'clip_web':
     create_table()
     sync_db()
-    uvicorn.run('clip_web:app', host='127.0.0.1', port=33334, log_level="info")
+    init_index()
+
+
 
    

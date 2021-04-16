@@ -12,7 +12,6 @@ import ErrorPage from 'next/error'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
 import { useRouter } from 'next/router'
-import {promises as fs } from 'fs'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,9 +39,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface ImageSimilarities {
-  [key: string]: number[];
-} 
 interface ImageProps{
   filename: string,
   width:number,
@@ -139,30 +135,25 @@ interface ImageProps{
 export const getStaticProps: GetStaticProps = async (context) => {
   if (typeof context.params?.id === "string") {
     const img = await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
-    if (img.length === 1) {
-      const all_images_similaties:ImageSimilarities= JSON.parse(await fs.readFile("python/data.txt","utf-8"))
-       let visually_similar_link=""
-      if(all_images_similaties[(context.params.id as string)]!==undefined){
-        visually_similar_link=`/visually_similar/${img[0].id}`
-      }
-      const date = new Date(img[0].created_at)
+    if (img) {
+      const date = new Date(img.created_at)
       const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
-      const upscaled = (img[0].tags.includes('upscaled')?(`/upscaled/${img[0].id}.png`):null)
+      const upscaled = (img.tags.includes('upscaled')?(`/upscaled/${img.id}.png`):null)
       return {
         props: {
-          filename: `${img[0].id}.${img[0].file_ext}`,
-          width: img[0].width,
-          height: img[0].height,
-          size: (img[0].size / (10 ** 6)).toFixed(2),
-          author: img[0].author,
-          tags: img[0].tags,
-          booru:img[0].booru,
-          booru_link: img[0].booru_link,
-          source_link: img[0].source_url,
+          filename: `${img.id}.${img.file_ext}`,
+          width: img.width,
+          height: img.height,
+          size: (img.size / (10 ** 6)).toFixed(2),
+          author: img.author,
+          tags: img.tags,
+          booru:img.booru,
+          booru_link: img.booru_link,
+          source_link: img.source_url,
           date: date_str,
-          similar_by_tags_link:`/similar_by_tags/${img[0].id}`,
-          similar_by_color_link:`/similar_by_color/${img[0].id}`,
-          visually_similar_link:visually_similar_link,
+          similar_by_tags_link:`/similar_by_tags/${img.id}`,
+          similar_by_color_link:`/similar_by_color/${img.id}`,
+          visually_similar_link:`/visually_similar/${img.id}`,
           upscaled:upscaled
         },
         revalidate: 5*60 //5 min

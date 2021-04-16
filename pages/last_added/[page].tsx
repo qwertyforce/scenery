@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';

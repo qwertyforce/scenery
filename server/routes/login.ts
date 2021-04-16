@@ -21,18 +21,18 @@ async function login(req:Request,res:Response) {
 
     const email = req.body.email;
     const password = req.body.password
-    const users = await db_ops.activated_user.find_user_by_email(email);
-    if (users.length === 0) {
+    const user = await db_ops.activated_user.find_user_by_email(email);
+    if (!user) { //if user doesn't exists
         await crypto_ops.check_password("Random_text_qwfqwfg", "$2b$10$xKgSc736RxzT76ZMGyXMLe1Dge99d4PLyUOv60jpywAWJwftYcgjK"); // PROTECTION AGAINST TIMING ATTACK
         res.status(403).json({
             message: MESSAGE_FOR_AUTH_ERROR
         })
     } else {
-        const match = await crypto_ops.check_password(password, users[0].password);
+        const match = await crypto_ops.check_password(password, user.password);
         if (match) {
-            if (users[0].activated === true) {
+            if (user.activated === true) {
                 req.session.authed = true;
-                req.session.user_id = users[0].id;
+                req.session.user_id = user.id;
                 res.json({
                     message: "success"
                 })

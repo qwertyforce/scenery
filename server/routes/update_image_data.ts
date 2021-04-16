@@ -6,7 +6,7 @@ async function update_image_data(req:Request,res:Response) {
     const image_data = req.body.image_data;
     if(!isNaN(id) && req.session?.user_id){
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
-        if(user[0].isAdmin){
+        if(user.isAdmin){
             db_ops.image_ops.update_image_data_by_id(id,image_data)
             res.json({message:"OK"})
             return 

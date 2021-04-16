@@ -264,7 +264,7 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
 export async function getServerSideProps(context: any) {
   if (context.req.session.authed && context.req.session.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
-    if (user[0].isAdmin) {
+    if (user?.isAdmin) {
       const imgs = await db_ops.image_ops.get_all_images() 
       const tags:Set<string>=new Set()
       for (const img of imgs) {

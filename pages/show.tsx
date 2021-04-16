@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import AppBar from '../components/AppBar'
@@ -18,7 +19,7 @@ export default function Show(props: ShowProps) {
     <div>
       <AppBar />
       {/* 
-  // @ts-ignore */ }
+// @ts-ignore */ }
       <Gallery targetRowHeight={250} photos={props.photos} renderImage={PhotoComponent} />   {/* FIX THIS SHIT */}
     </div>
   )
@@ -31,7 +32,7 @@ export async function getServerSideProps(context: any) {
     const images: Array<Record<string, unknown>> = []
     for (const id of ids) {
       const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
-      if(img_data[0]){images.push(img_data[0])}
+      if(img_data){images.push(img_data)}
     }
     const photos:PhotoInterface[] = []
     for (const image of images) {

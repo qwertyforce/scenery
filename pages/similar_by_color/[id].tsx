@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
+import image_ops from '../../server/helpers/image_ops'
 import { GetStaticPaths,GetStaticProps } from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
@@ -53,27 +55,20 @@ export default function SimilarByColor(props: SimilarByColorProps){
   )
 }
 
-interface  Similarity{
-  id:number,
-  similarity:number
-}
-
-interface Similarities{
-  id: number,
-  similarities:Similarity[];
-}
-
 export const getStaticProps: GetStaticProps = async (context) => {
-  const images_on_page = 120
   const photos = []
   if (typeof context.params?.id === "string") {
-    const id = parseInt(context.params.id)
-    const similarities_by_color:Array<Similarities> = await db_ops.image_search.get_color_similarities_by_id(id)
-    if (similarities_by_color.length !== 0) {
-      const similar_by_color=similarities_by_color[0]
-      const similar_images = similar_by_color.similarities.filter((el: Similarity) => el.similarity > 0.2).sort((a, b) => b.similarity - a.similarity).slice(0, images_on_page)
-      for (const img of similar_images) {
-        const image = (await db_ops.image_ops.find_image_by_id(img.id))[0]
+    const similar_images_ids = await image_ops.HIST_get_similar_images_by_id(parseInt(context.params.id))
+    // console.log(similar_images_ids)
+    if (similar_images_ids) {
+      const similar_images = []
+      for (const image_id of similar_images_ids) {
+        const img = await db_ops.image_ops.find_image_by_id(image_id)
+        if (img) {
+          similar_images.push({ id: img.id, width: img.width, height: img.height })
+        }
+      }
+      for (const image of similar_images) {
         photos.push({
           src: `/thumbnails/${image.id}.jpg`,
           key: `/image/${image.id}`,

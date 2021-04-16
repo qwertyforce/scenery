@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,7 +10,7 @@ import Link from '../../components/Link'
 import ErrorPage from 'next/error'
 import db_ops from '../../server/helpers/db_ops'
 import PhotoInterface from '../../types/photo'
-import { promises as fs } from 'fs'
+import image_ops from "server/helpers/image_ops";
 
 const useStyles = makeStyles(() => ({
   pagination: {
@@ -51,19 +52,15 @@ export default function VisuallySimilar(props: VisuallySimilarProps) {
   )
 }
 
-interface ImageSimilarities {
-  [key: string]: (number[])|(string[]);
-}
-
 export const getStaticProps: GetStaticProps = async (context) => {
   const photos = []
   if (typeof context.params?.id === "string") {
-    const all_images_similaties: ImageSimilarities = JSON.parse(await fs.readFile("python/data.txt", "utf-8"))
-    const similar_images_ids = all_images_similaties[context.params.id]
+    const similar_images_ids = await image_ops.NN_get_similar_images_by_id(parseInt(context.params.id))
+    // console.log(similar_images_ids)
     if (similar_images_ids) {
       const similar_images = []
       for (const image_id of similar_images_ids) {
-        const img = (await db_ops.image_ops.find_image_by_id(Number(image_id)))[0]
+        const img = await db_ops.image_ops.find_image_by_id(image_id)
         if (img) {
           similar_images.push({ id: img.id, width: img.width, height: img.height })
         }
@@ -84,7 +81,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
       }
     }
   }
-
   return {
     props: { err: true },
     revalidate: 5 * 60 //5 min

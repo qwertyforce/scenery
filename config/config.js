@@ -21,4 +21,5 @@ export default {
     reverse_search_url:"http://localhost",
     sift_microservice_url:"http://localhost:33333",
     nn_microservice_url:"http://localhost:33334",
+    hist_microservice_url:"http://localhost:33335",
 }

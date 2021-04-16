@@ -22,7 +22,6 @@ async function reverse_search(req: Request, res: Response) {
             // console.log(ids)
             res.json({ids:ids.join(',')})
         }
-       
     }
 }
 

@@ -18,10 +18,10 @@ async function forgot_password(req:Request, res:Response) {
     }
     const MESSAGE_SUCCESS = "Link for password recovery has been sent, check your email.";
     const email = req.body.email;
-    const users = await db_ops.activated_user.find_user_by_email(email);
-    if (users.length === 1) {
+    const user = await db_ops.activated_user.find_user_by_email(email);
+    if (user) {
         const token = await crypto_ops.generate_password_recovery_token()
-        const user_id = users[0].id
+        const user_id = user.id
         db_ops.password_recovery.save_password_recovery_token(token, user_id)
         const link = `${config.domain}/change_pw?token=${token}`
         mail_ops.send_forgot_password_letter(email, link)
