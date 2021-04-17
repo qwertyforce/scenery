@@ -10,7 +10,7 @@ import Link from '../../components/Link'
 import ErrorPage from 'next/error'
 import db_ops from '../../server/helpers/db_ops'
 import PhotoInterface from '../../types/photo'
-import image_ops from "server/helpers/image_ops";
+import image_ops from "../../server/helpers/image_ops";
 
 const useStyles = makeStyles(() => ({
   pagination: {

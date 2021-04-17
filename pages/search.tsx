@@ -11,7 +11,7 @@ import Link from '../components/Link'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 import PhotoInterface from '../types/photo'
 import build_ast from "../components/parse"
-import image_ops from "server/helpers/image_ops";
+import image_ops from "../server/helpers/image_ops";
 
 const useStyles = makeStyles(() => ({
   pagination: {

@@ -160,6 +160,10 @@ async def delete_sift_features_handler(item:Item):
     delete_descriptor_by_id(int(item.image_id))
     return {"status":"200"}
 
+import uvicorn
+if __name__ == '__main__':
+    uvicorn.run('sift_web:app', host='127.0.0.1', port=33333, log_level="info")
+
 print(__name__)
 if __name__ == 'sift_web':
     sync_db()

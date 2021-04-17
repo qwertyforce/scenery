@@ -2,24 +2,27 @@ module.exports = {
   "apps": [
     {
       name: 'scenery_sift_microservice',
-      script: './python/sift_web_start.py',
+      script: 'sift_web.py',
       log_file: 'scenery_sift_microservice.txt',
       interpreter: "python3",
-      time: true
+      time: true,
+      cwd:"./python"
     },
     {
       name: 'scenery_NN_microservice',
-      script: './python/clip_web_start.py',
+      script: 'clip_web.py',
       log_file: 'scenery_NN_microservice.txt',
       interpreter: "python3",
-      time: true
+      time: true,
+      cwd:"./python"
     },
     {
       name: 'scenery_RGB_HIST_microservice',
-      script: './python/clip_web_start.py',
-      log_file: 'scenery_NN_microservice.txt',
+      script: 'rgb_histogram_web.py',
+      log_file: 'scenery_RGB_HIST_microservice.txt',
       interpreter: "python3",
-      time: true
+      time: true,
+      cwd:"./python"
     }
   ],
 };

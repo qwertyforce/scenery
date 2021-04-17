@@ -119,7 +119,8 @@ def get_text_features(text):
     with torch.no_grad():
         text_features = model.encode_text(text_tokenized)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-
+    return text_features
+    
 app = FastAPI()
 @app.get("/")
 async def read_root():
@@ -159,6 +160,9 @@ async def find_similar_by_text_handler(item:Item_query):
     return labels[0].tolist()
 
 print(__name__)
+import uvicorn
+if __name__ == '__main__':
+    uvicorn.run('clip_web:app', host='127.0.0.1', port=33334, log_level="info")
 if __name__ == 'clip_web':
     create_table()
     sync_db()

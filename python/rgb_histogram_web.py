@@ -201,6 +201,10 @@ async def delete_hist_features_handler(item:Item_image_id):
     return {"status":"200"}
 
 print(__name__)
+import uvicorn
+if __name__ == '__main__':
+    uvicorn.run('rgb_histogram_web:app', host='127.0.0.1', port=33335, log_level="info")
+
 if __name__ == 'rgb_histogram_web':
     create_table()
     sync_db()

@@ -1,3 +1,4 @@
+require('sharp'); //https://github.com/lovell/sharp/issues/2655#issuecomment-815684743
 module.exports = {
     poweredByHeader: false,
     async rewrites() {
