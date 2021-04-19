@@ -195,19 +195,19 @@ async function delete_HIST_features_by_id(image_id: number) {
 
 async function calculate_image_features(image_id: number, image_buffer: Buffer, phash: string) {
   return Promise.all([
-    await calculate_sift_features(image_id, image_buffer),
-    await calculate_NN_features(image_id, image_buffer),
-    await calculate_HIST_features(image_id, image_buffer),
-    await add_to_vp_tree(image_id, phash),
+    calculate_sift_features(image_id, image_buffer),
+    calculate_NN_features(image_id, image_buffer),
+    calculate_HIST_features(image_id, image_buffer),
+    add_to_vp_tree(image_id, phash),
   ])
 }
 
 async function delete_image_features(image_id: number){
   return Promise.all([
-    await delete_sift_features_by_id(image_id),
-    await delete_NN_features_by_id(image_id),
-    await delete_HIST_features_by_id(image_id),
-    await remove_from_vp_tree(image_id)
+    delete_sift_features_by_id(image_id),
+    delete_NN_features_by_id(image_id),
+    delete_HIST_features_by_id(image_id),
+    remove_from_vp_tree(image_id)
   ])
 }
 
