@@ -1,7 +1,8 @@
 Next.js <br>
 Express <br>
 Material UI <br>
-Typescript <br>
+Typescript <br> 
+Python + FastAPI + OpenCV + pytorch <br>
 https://onlycomfy.art
  
  
