@@ -1,7 +1,7 @@
 import cv2
 from os import listdir
 import numpy as np
-from PIL import Image
+from joblib import Parallel, delayed
 
 import sqlite3
 import io
@@ -63,7 +63,11 @@ def sync_db():
         print(f"deleting {id}")
 
 def get_features(image_path):
-    query_image=np.array(Image.open(image_path).convert('RGB'))
+    query_image=cv2.imread(image_path)
+    if query_image.shape[2]==1:
+        query_image=cv2.cvtColor(query_image,cv2.COLOR_GRAY2RGB)
+    else:
+        query_image=cv2.cvtColor(query_image,cv2.COLOR_BGR2RGB)
     query_hist_combined=cv2.calcHist([query_image],[0,1,2],None,[16,16,16],[0,256,0,256,0,256])
     query_hist_combined = query_hist_combined.flatten()
     query_hist_combined=cv2.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1])
@@ -71,13 +75,23 @@ def get_features(image_path):
 
 IMAGE_PATH="../public/images"
 file_names=listdir(IMAGE_PATH)
+
 create_table()
 sync_db()
+new_images=[]
 for file_name in file_names:
     file_id=int(file_name[:file_name.index('.')])
     if check_if_exists_by_id(file_id):
         continue
+    new_images.append(file_name)
+
+def calc_hist(file_name):
+    file_id=int(file_name[:file_name.index('.')])
     image_features=get_features(IMAGE_PATH+"/"+file_name) 
     image_features_bin=adapt_array(image_features)
-    add_descriptor(file_id,image_features_bin)
     print(file_name)
+    return (file_id,image_features_bin)
+
+hists=Parallel(n_jobs=-1)(delayed(calc_hist)(file_name) for file_name in new_images)
+conn.executemany('''INSERT INTO rgb_hists(id, rgb_histogram) VALUES (?,?)''', hists)
+conn.commit()
