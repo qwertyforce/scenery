@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 import db_ops from "./db_ops"
+const cryptoAsync = require('@ronomon/crypto-async');
 const SALTROUNDS = 10
 
 async function generate_activation_token(): Promise<string> {
@@ -48,5 +50,8 @@ async function check_password(password: string, hash: string): Promise<boolean> 
     const result = bcrypt.compare(password, hash);
     return result
 }
+async function image_buffer_sha512_hash(image_buffer:Buffer){
+    return cryptoAsync.hash("sha512",image_buffer).toString('hex')
+}
 
-export default {generate_activation_token,generate_password_recovery_token,hash_password,check_password}
+export default {generate_activation_token,generate_password_recovery_token,hash_password,check_password,image_buffer_sha512_hash}
