@@ -49,6 +49,7 @@ export default function LastAddedPage(props: LastAddedPageProps){
           return (<PaginationItem
             component={Link}
             href={`/last_added/${item.page}`}
+            prefetch={false}
             underline="none"
             {...item}
           />)
@@ -82,13 +83,13 @@ export const getStaticProps: GetStaticProps = async (context) => {
           current_page: page,
           max_page: Math.ceil(images.length / images_on_page)
         },
-        revalidate: 5 * 60 //5 min
+        revalidate: 1 * 60 //1 min
       }
     }
   }
   return {
     props: { err: true },
-    revalidate: 5 * 60 //5 min
+    revalidate: 1 * 60 //1 min
   }
 }
 
