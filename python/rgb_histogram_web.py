@@ -29,7 +29,6 @@ def init_index():
     for image in image_data:
         ids.append(image['image_id'])
         features.append(image['features'])
-        # IN_MEMORY_HISTS[image['image_id']]=image['features']
     ids=np.array(ids)
     features=np.array(features).squeeze()
     index.addDataPointBatch(features,ids)
@@ -137,7 +136,6 @@ async def read_root():
 async def calculate_HIST_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
-    # IN_MEMORY_HISTS[int(image_id)]=features
     index.addDataPoint(int(image_id),features)
     index.createIndex(index_time_params) 
     return {"status":"200"}
@@ -158,46 +156,7 @@ async def get_similar_images_by_id_handler(item: Item_image_id):
     except RuntimeError:
        raise HTTPException(
            status_code=500, detail="Image with this id is not found")
-
-import heapq
-# def find_bruteforce(target_image_id,k):
-#     query_hist=IN_MEMORY_HISTS[target_image_id]
-#     # print(query_hist[0])
-#     # print(query_hist[1])
-#     # heap=[]
-#     # for key in IN_MEMORY_HISTS:
-#     #     # similarity=np.sum(np.minimum(query_hist,IN_MEMORY_HISTS[key]))
-#     #     similarity=cv2.compareHist(query_hist,IN_MEMORY_HISTS[key],cv2.HISTCMP_INTERSECT)
-#     #     if len(heap) < k or similarity > heap[0][0]:
-#     #         # If the heap is full, remove the smallest element on the heap.
-#     #         if len(heap) == k: heapq.heappop(heap)
-#     #         # add the current element as the new smallest.
-#     #         heapq.heappush( heap, (similarity,key) )
-#     # heap=[heapq.heappop(heap) for i in range(len(heap))]
-#     # heap.reverse()
-#     # print(heap)
-#     # found_images_filenames=list(map(lambda el: el[1],heap))
-#     found_images=[]
-#     for key in IN_MEMORY_HISTS:
-#         # similarity=cv2.compareHist(query_hist,IN_MEMORY_HISTS[key],cv2.HISTCMP_INTERSECT)
-#         similarity=np.abs(query_hist-IN_MEMORY_HISTS[key]).sum()
-#         found_images.append({"similarity":similarity,"file_name":key})
-#     found_images.sort(key=lambda item: item["similarity"],reverse=False)
-    
-#     found_images=found_images[:20]
-#     found_images_filenames=list(map(lambda el: el["file_name"],found_images))
-#     return found_images_filenames
-
-
-
-# @app.post("/get_similar_images_by_id")
-# async def get_similar_images_by_id_handler(item: Item_image_id):
-#     start = timer()
-#     similar=find_bruteforce(item.image_id,10)
-#     end = timer()
-#     print((end - start)*1000) # Time in seconds, e.g. 5.38091952400282
-#     return similar
-
+           
 @app.post("/delete_HIST_features")
 async def delete_hist_features_handler(item:Item_image_id):
     delete_descriptor_by_id(item.image_id)
