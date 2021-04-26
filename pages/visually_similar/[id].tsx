@@ -3,7 +3,7 @@ import React from "react";
 import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
-import { GetStaticPaths, GetStaticProps } from 'next'
+import {GetServerSideProps} from 'next'
 import { useRouter } from 'next/router'
 import Photo from '../../components/Photo'
 import Link from '../../components/Link'
@@ -52,7 +52,7 @@ export default function VisuallySimilar(props: VisuallySimilarProps) {
   )
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const photos = []
   if (typeof context.params?.id === "string") {
     const similar_images_ids = await image_ops.NN_get_similar_images_by_id(parseInt(context.params.id))
@@ -76,26 +76,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
       return {
         props: {
           photos: photos
-        },
-        revalidate: 5 * 60 //5 min
+        }
       }
     }
   }
   return {
-    props: { err: true },
-    revalidate: 5 * 60 //5 min
+    notFound: true
   }
 }
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const images = await db_ops.image_ops.get_all_images()
-  const paths = []
-  for (const image of images) {
-    paths.push({ params: { id: image.id.toString() } })
-  }
-  return {
-    paths: paths,
-    fallback: true
-  };
-}
-
