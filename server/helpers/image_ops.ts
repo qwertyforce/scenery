@@ -1,11 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import db_ops from './db_ops';
+import crypto_ops from './crypto_ops';
+import thumbnail_ops from './thumbnail_ops'
 import sharp from 'sharp'
 import { bmvbhash } from 'blockhash-core'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
+import {promises as fs} from 'fs'
+import {unlink as fs_unlink_callback} from 'fs'
+
+import FileType from 'file-type'
+import path from "path"
+const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
 const IMAGES_IDS_PHASHES:any={}
 const VPTreeFactory: any = require("vptree");
 let vptree:any;
@@ -22,6 +30,7 @@ function hamming_distance(img1: any[], img2: any[]) {
   }
   return distance;
 }
+
 async function build_vp_tree(){
   const ids_phashes=await db_ops.image_ops.get_ids_and_phashes()
   for (const img of ids_phashes){
@@ -68,18 +77,14 @@ async function calculate_sift_features(image_id: number, image: Buffer) {
   const form = new FormData();
   form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
   form.append('image_id', image_id.toString())
-  try {
-    const status = await axios.post(`${config.sift_microservice_url}/calculate_sift_features`, form.getBuffer(), {
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: {
-        ...form.getHeaders()
-      }
-    })
-    return status.data
-  } catch (err) {
-    console.log(err)
-  }
+  const status = await axios.post(`${config.sift_microservice_url}/calculate_sift_features`, form.getBuffer(), {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    headers: {
+      ...form.getHeaders()
+    }
+  })
+  return status.data
 }
 async function get_similar_images_by_sift(image: Buffer) {
   const form = new FormData();
@@ -99,32 +104,25 @@ async function get_similar_images_by_sift(image: Buffer) {
   }
 }
 async function delete_sift_features_by_id(image_id: number) {
-  try {
     const status = await axios.post(`${config.sift_microservice_url}/delete_sift_features`, { image_id: image_id.toString() })
     return status.data
-  } catch (err) {
-    console.log(err)
-  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////NN(CLIP)
 async function calculate_NN_features(image_id: number, image: Buffer) {
   const form = new FormData();
-  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
   form.append('image_id', image_id.toString())
-  try {
-    const status = await axios.post(`${config.nn_microservice_url}/calculate_NN_features`, form.getBuffer(), {
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: {
-        ...form.getHeaders()
-      }
-    })
-    return status.data
-  } catch (err) {
-    console.log(err)
-  }
+  const status = await axios.post(`${config.nn_microservice_url}/calculate_NN_features`, form.getBuffer(), {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    headers: {
+      ...form.getHeaders()
+    }
+  })
+  return status.data
+
 }
 
 async function NN_get_similar_images_by_id(image_id: number) {
@@ -137,12 +135,8 @@ async function NN_get_similar_images_by_id(image_id: number) {
 }
 
 async function delete_NN_features_by_id(image_id: number) {
-  try {
     const status = await axios.post(`${config.nn_microservice_url}/delete_NN_features`, { image_id: image_id })
     return status.data
-  } catch (err) {
-    console.log(err)
-  }
 }
 
 async function get_similar_images_by_text(query: string) {
@@ -169,32 +163,24 @@ async function calculate_HIST_features(image_id: number, image: Buffer) {
   const form = new FormData();
   form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
   form.append('image_id', image_id.toString())
-  try {
-    const status = await axios.post(`${config.hist_microservice_url}/calculate_HIST_features`, form.getBuffer(), {
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: {
-        ...form.getHeaders()
-      }
-    })
-    return status.data
-  } catch (err) {
-    console.log(err)
-  }
+  const status = await axios.post(`${config.hist_microservice_url}/calculate_HIST_features`, form.getBuffer(), {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    headers: {
+      ...form.getHeaders()
+    }
+  })
+  return status.data
 }
 
 async function delete_HIST_features_by_id(image_id: number) {
-  try {
     const status = await axios.post(`${config.hist_microservice_url}/delete_HIST_features`, { image_id: image_id })
     return status.data
-  } catch (err) {
-    console.log(err)
-  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function calculate_image_features(image_id: number, image_buffer: Buffer, phash: string) {
-  return Promise.all([
+  return Promise.allSettled([
     calculate_sift_features(image_id, image_buffer),
     calculate_NN_features(image_id, image_buffer),
     calculate_HIST_features(image_id, image_buffer),
@@ -203,7 +189,7 @@ async function calculate_image_features(image_id: number, image_buffer: Buffer, 
 }
 
 async function delete_image_features(image_id: number){
-  return Promise.all([
+  return Promise.allSettled([
     delete_sift_features_by_id(image_id),
     delete_NN_features_by_id(image_id),
     delete_HIST_features_by_id(image_id),
@@ -221,7 +207,89 @@ function get_orientation(height: number, width: number) {
   }
 }
 
+async function parse_author(tags: string[]) {
+  for (const tag of tags) {
+      const idx = tag.indexOf("artist:")
+      if (idx === 0) {    //tag starts with "artist:" 
+          return tag.slice(7) //strip off "artist:" 
+      }
+  }
+  return "???"
+}
+
+async function import_image(image_buffer:Buffer,tags:string[]=[],source_url=""){
+  try {
+    const mime_type = (await FileType.fromBuffer(image_buffer))?.mime
+    let file_ext = ""
+    switch (mime_type) {
+      case "image/png":
+        file_ext = "png"
+        break
+      case "image/jpeg":
+        file_ext = "jpg"
+        break
+    }
+    const metadata = await sharp(image_buffer).metadata()
+    const size = metadata.size || 10
+    const height = metadata.height || 10
+    const width = metadata.width || 10
+    const orientation = get_orientation(height, width)
+    tags.push(orientation)
+
+    const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
+    const sha512_hash = await crypto_ops.image_buffer_sha512_hash(image_buffer)
+    const parsed_author = await parse_author(tags)
+    const phash = await calculate_phash(image_buffer)
+    await db_ops.image_ops.add_image(new_image_id, file_ext, width, height, parsed_author, size,
+      false, 0, 0, false, false, source_url, tags, 0, sha512_hash, phash, "", false)
+    await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
+    await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
+    const res=await calculate_image_features(new_image_id, image_buffer, phash)
+    console.log(`SIFT calc=${res[0].status}`)
+    console.log(`NN calc=${res[1].status}`)
+    console.log(`HIST calc=${res[2].status}`)
+    console.log(`VP calc=${res[3].status}`)
+    console.log(`OK. New image_id: ${new_image_id}`)
+    return true
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function delete_image(id: number) {
+  try {
+    const image = await db_ops.image_ops.get_image_file_extension_by_id(id)
+    if (!image) {
+      console.log("image_not_found")
+      return "not_found"
+    }
+    fs_unlink_callback(`${config.root_path}/public/images/${id}.${image.file_ext}`, function (err) {
+      if (err) return console.log(err);
+      console.log('main image deleted successfully');
+    });
+    fs_unlink_callback(`${config.root_path}/public/thumbnails/${id}.jpg`, function (err) {
+      if (err) return console.log(err);
+      console.log('thumbnail file deleted successfully');
+    });
+    fs_unlink_callback(`${config.root_path}/public/upscaled/${id}.png`, function (err) {
+      if (err) return console.log(err);
+      console.log('upscaled file deleted successfully');
+    });
+    const res=await delete_image_features(id)
+    console.log(`SIFT del=${res[0].status}`)
+    console.log(`NN del=${res[1].status}`)
+    console.log(`HIST del=${res[2].status}`)
+    console.log(`VP del=${res[3].status}`)
+    await db_ops.image_ops.delete_image_by_id(id)
+    console.log(`OK. Deleted image_id: ${id}`)
+    return true
+  } catch (error) {
+    console.error(error);
+  }
+}
 export default {
+  import_image,
+  delete_image,
   get_orientation,
   calculate_phash,
   get_similar_images_by_sift,

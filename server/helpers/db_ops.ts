@@ -71,6 +71,11 @@ async function get_all_images(){
     return imgs
 }
 
+async function get_image_file_extension_by_id(id:number){
+    const img = IMAGES_COLLECTION.find({id: id}).project({file_ext:1,_id:0}).next()
+    return img
+}
+
 async function find_images_by_tags(query:Record<string,unknown>){
     const imgs = IMAGES_COLLECTION.find(query).project({_id:0}).toArray()
     return imgs
@@ -253,6 +258,7 @@ export default {
         delete_image_by_id,
         find_images_by_tags,
         get_ids_and_phashes,
+        get_image_file_extension_by_id,
         find_image_by_sha512,
         check_if_image_exists_by_id,
         find_image_by_booru_id,
