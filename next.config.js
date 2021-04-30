@@ -8,5 +8,6 @@ module.exports = {
             destination: '/last_added/1'
           }
         ]
-      }
+      },
+    distDir: '_next'
 }
