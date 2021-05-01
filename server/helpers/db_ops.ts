@@ -49,6 +49,14 @@ async function generate_id() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////IMAGES OPS
+async function get_number_of_images_returned_by_search_query(query:Record<string,unknown>){
+    return IMAGES_COLLECTION.countDocuments(query)
+}
+
+async function batch_find_images(query:Record<string,unknown>,skip:number,limit:number){
+    const data = IMAGES_COLLECTION.find(query).sort({"$natural":-1}).skip(skip).limit(limit).project({_id:0}).toArray()
+    return data
+}
 
 async function check_if_image_exists_by_id(id:number){
     return Boolean(IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
@@ -250,6 +258,8 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 // test()
 export default {
     image_ops: {
+        get_number_of_images_returned_by_search_query,
+        batch_find_images,
         add_image,
         add_image_by_object,
         get_all_images,

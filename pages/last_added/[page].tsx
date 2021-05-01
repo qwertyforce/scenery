@@ -66,22 +66,23 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const images_on_page = 30
   const photos = []
   if (typeof context.params?.page === "string") {
-    const images = (await db_ops.image_ops.get_all_images()).reverse()
     const page = parseInt(context.params.page)
-    if (page >= 1 && page <= Math.ceil(images.length / images_on_page)) {
-      for (let i = (page - 1) * images_on_page; (i < (page) * images_on_page) && (i < images.length); i++) {
+    const total_num_of_images=await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
+    if (page >= 1 && page <= Math.ceil(total_num_of_images / images_on_page)) {
+      const images= await db_ops.image_ops.batch_find_images({},images_on_page*(page-1),images_on_page)
+      for (const image of images){
         photos.push({
-          src: `/thumbnails/${images[i].id}.jpg`,
-          key: `/image/${images[i].id}`,
-          width: images[i].width,
-          height: images[i].height
-        })
+              src: `/thumbnails/${image.id}.jpg`,
+              key: `/image/${image.id}`,
+              width: image.width,
+              height: image.height
+            })
       }
       return {
         props: {
           photos: photos,
           current_page: page,
-          max_page: Math.ceil(images.length / images_on_page)
+          max_page: Math.ceil(total_num_of_images / images_on_page)
         },
         revalidate: 1 * 60 //1 min
       }
