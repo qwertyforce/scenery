@@ -7,31 +7,24 @@ from fastapi import FastAPI, File,Body,Form, HTTPException
 from os import listdir
 import numpy as np
 from PIL import Image
-from sklearn.neighbors import NearestNeighbors
+from tqdm import tqdm
 import cv2
-IMAGE_PATH="./../public/images"
-
 import sqlite3
 import io
 conn = sqlite3.connect('rgb_histograms.db')
 
 import nmslib
 # dim=4096
+IMAGE_PATH="./../public/images"
 index = nmslib.init(method='hnsw', space="l1", data_type=nmslib.DataType.DENSE_VECTOR) 
 index_time_params = {'M': 32,'efConstruction': 200}
 
-IN_MEMORY_HISTS={}
-
 def init_index():
-    image_data=get_all_data()
-    features=[]
-    ids=[]
-    for image in image_data:
-        ids.append(image['image_id'])
-        features.append(image['features'])
-    ids=np.array(ids)
-    features=np.array(features).squeeze()
-    index.addDataPointBatch(features,ids)
+    all_ids=get_all_ids()
+    for id in tqdm(all_ids):
+        image_features = convert_array(get_rgb_histogram_by_id(id))
+        # print(image_features)
+        index.addDataPoint(id,image_features)
     index.createIndex(index_time_params) 
     print("Index is ready")
        
@@ -54,7 +47,7 @@ def get_features(image_buffer):
     query_image=np.array(read_img_file(image_buffer).convert('RGB'))
     query_hist_combined=cv2.calcHist([query_image],[0,1,2],None,[16,16,16],[0,256,0,256,0,256])
     query_hist_combined = query_hist_combined.flatten()
-    query_hist_combined=cv2.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1])
+    query_hist_combined=np.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1],dtype=np.float32)
     return query_hist_combined
 
 def create_table():
@@ -87,21 +80,11 @@ def get_all_ids():
     cursor.execute(query)
     all_rows = cursor.fetchall()
     return list(map(lambda el:el[0],all_rows))
-    
+
 def convert_array(text):
     out = io.BytesIO(text)
     out.seek(0)
     return np.load(out)
-
-def get_all_data():
-    cursor = conn.cursor()
-    query = '''
-    SELECT id, rgb_histogram
-    FROM rgb_hists
-    '''
-    cursor.execute(query)
-    all_rows = cursor.fetchall()
-    return list(map(lambda el:{"image_id":el[0],"features":convert_array(el[1])},all_rows))
 
 def adapt_array(arr):
     out = io.BytesIO()

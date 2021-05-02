@@ -68,9 +68,9 @@ def get_features(image_path):
         query_image=cv2.cvtColor(query_image,cv2.COLOR_GRAY2RGB)
     else:
         query_image=cv2.cvtColor(query_image,cv2.COLOR_BGR2RGB)
-    query_hist_combined=cv2.calcHist([query_image],[0,1,2],None,[16,16,16],[0,255,0,255,0,255])
+    query_hist_combined=cv2.calcHist([query_image],[0,1,2],None,[16,16,16],[0,256,0,256,0,256])
     query_hist_combined = query_hist_combined.flatten()
-    query_hist_combined=cv2.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1])
+    query_hist_combined=np.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1],dtype=np.float32)
     return query_hist_combined
 
 IMAGE_PATH="../public/images"
