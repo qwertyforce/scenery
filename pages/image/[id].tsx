@@ -6,12 +6,10 @@ import LabelIcon from '@material-ui/icons/Label';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import AspectRatioIcon from '@material-ui/icons/AspectRatio';
 import LinkIcon from '@material-ui/icons/Link';
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetServerSideProps} from 'next'
 import db_ops from '../../server/helpers/db_ops'
-import ErrorPage from 'next/error'
 import CreateIcon from '@material-ui/icons/Create';
 import Chip from '@material-ui/core/Chip';
-import { useRouter } from 'next/router'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,16 +55,7 @@ interface ImageProps{
   err:boolean
 }
  export default function Image(props: ImageProps) {
-  const router = useRouter()
-
-  if (router.isFallback) {
-    return <ErrorPage statusCode={404} />
-  }
-  if (props.err) {
-    return <ErrorPage statusCode={404} />
-  }
   const classes = useStyles();
-
 
   const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}`} clickable />);
   return (
@@ -132,7 +121,7 @@ interface ImageProps{
 }
 
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   if (typeof context.params?.id === "string") {
     const img = await db_ops.image_ops.find_image_by_id(parseInt(context.params.id))
     if (img) {
@@ -155,23 +144,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
           similar_by_color_link:`/similar_by_color/${img.id}`,
           visually_similar_link:`/visually_similar/${img.id}`,
           upscaled:upscaled
-        },
-        revalidate: 5*60 //5 min
+        }
       }
     }
   }
   return {
-    props: {err: true},
-    revalidate: 5*60 //5 min
+    notFound: true
   }
-
-}
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  const images = await db_ops.image_ops.get_all_images()
-  const paths = images.map((image) => ({ params: { id: image.id.toString() } }))
-  return {
-    paths: paths,
-    fallback: true
-  };
 }
