@@ -7,17 +7,18 @@ async function delete_image(req: Request, res: Response) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
         if (user.isAdmin) {
             const result = await image_ops.delete_image(id)
+            if (result === "not_found") {
+                return res.json({ message: "image not found" })
+            }
             if (result) {
                 res.json({ message: "OK" })
-            } else if(result==="not_found") {
-                res.json({ message: "image not found" })
-            }else{
+            } else {
                 res.json({ message: "unknown error" })
             }
-            return
         }
+    } else {
+        res.sendStatus(404);
     }
-    res.sendStatus(404);
 }
 
 export default delete_image;

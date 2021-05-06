@@ -12,21 +12,36 @@ client.connect(function(err) {
     if (err) {
         console.log(err)
     } else {
-        console.log("Connected successfully to db server");
+        console.log("Connected successfully to db server")
     }
 });
+//////////////////////////////////////////////////////////////////////////////////////////////////
+interface Image{
+    id:number,
+    description:string
+    source_url:string,
+    file_ext:string,
+    width:number,
+    height:number,
+    author:string,
+    size:number,
+    tags:Array<string>,
+    sha256:string,
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////COLLECTIONS
-const IMAGES_COLLECTION=client.db(db_main).collection("images");
-const USERS_COLLECTION=client.db(db_main).collection("users");
-const NOT_ACTIVATED_USERS_COLLECTION=client.db(db_main).collection("not_activated_users");
-const PASSWORD_RECOVERY_COLLECTION=client.db(db_main).collection("password_recovery");
+const IMAGES_COLLECTION=client.db(db_main).collection("images")
+const USERS_COLLECTION=client.db(db_main).collection("users")
+const NOT_ACTIVATED_USERS_COLLECTION=client.db(db_main).collection("not_activated_users")
+const PASSWORD_RECOVERY_COLLECTION=client.db(db_main).collection("password_recovery")
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////CREATE INDEXES
-client.db(db_main).collection("images").createIndex({"id": 1}, {unique: true});
-client.db(db_main).collection("images").createIndex({"tags": 1});
-client.db(db_main).collection("not_activated_users").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400});
-client.db(db_main).collection("password_recovery").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400});
+client.db(db_main).collection("images").createIndex({"id": 1}, {unique: true})
+client.db(db_main).collection("images").createIndex({"sha256": 1}, {unique: true})
+client.db(db_main).collection("images").createIndex({"tags": 1})
+client.db(db_main).collection("not_activated_users").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})
+client.db(db_main).collection("password_recovery").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function generate_id() {
@@ -38,7 +53,7 @@ async function generate_id() {
             const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const user = await find_user_by_id(id) //check if id exists
             if (user) {
-                resolve(id);
+                resolve(id)
             } else {
                 const id_1 = await generate_id()
                 resolve(id_1)
@@ -61,13 +76,9 @@ async function batch_find_images(query:Record<string,unknown>,skip:number,limit:
 async function check_if_image_exists_by_id(id:number){
     return Boolean(IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
 }
+
 async function add_tags_to_image_by_id(id:number,tags:string[]){
     await IMAGES_COLLECTION.updateOne({id:id}, { $push: {tags:{ $each:tags}}})
-}
-
-async function get_ids_and_phashes(){
-    const data = IMAGES_COLLECTION.aggregate([{ $project : { id : 1, phash : 1,_id : 0} }]).toArray()
-    return data
 }
 
 async function update_image_data_by_id(id:number,update:Record<string,unknown>){
@@ -88,55 +99,36 @@ async function find_images_by_tags(query:Record<string,unknown>){
     const imgs = IMAGES_COLLECTION.find(query).project({_id:0}).toArray()
     return imgs
 }
-async function find_image_by_sha512(hash:string){
-    const img = IMAGES_COLLECTION.find({sha512: hash}).project({_id:0}).next()
+async function find_image_by_sha256(hash:string){
+    const img = IMAGES_COLLECTION.find({sha256: hash}).project({_id:0}).next()
     return img
 }
 async function find_image_by_id(id:number){
     const img = IMAGES_COLLECTION.find({id: id}).project({_id:0}).next()
     return img
 }
-async function find_image_by_booru_id(booru:string,id:number){
-    const img = IMAGES_COLLECTION.find({booru:booru,booru_id: id}).project({_id:0}).next()
-    return img
-}
 
 async function get_max_image_id(){
-    const result = await IMAGES_COLLECTION.find({}).sort({id:-1}).limit(1).next()
-    return result.id
+    const result:Image = await IMAGES_COLLECTION.find({}).sort({id:-1}).limit(1).next()
+    return result?.id||0
 }
 async function delete_image_by_id(id:number){
     return IMAGES_COLLECTION.deleteOne({id:id})
 }
-async function add_image_by_object(image:any){
-    return IMAGES_COLLECTION.insertOne(image)
-}
 
-async function add_image(id:number,file_ext:string,width:number,height:number,author:string,
-    size:number,booru_link:string|false, 
-    booru_likes:number,booru_dislikes:number,
-    booru_id:number|false,booru_date:Date|false,source_url:string,tags:Array<string>,
-    wilson_score:number,sha512:string,phash:string,description:string,booru:string|false){
+async function add_image(img:Image){
     const image={
-        id:id,
-        file_ext:file_ext,
+        id:img.id,
+        file_ext:img.file_ext,
         created_at: new Date(),
-        width:width,
-        height:height,
-        author: author,
-        description:description,
-        size:size,
-        phash:phash,
-        sha512:sha512,
-        tags:tags,
-        booru:booru,
-        booru_id:booru_id,
-        booru_likes:booru_likes,
-        booru_dislikes:booru_dislikes,
-        booru_link:booru_link,
-        booru_date:booru_date,
-        source_url:source_url,
-        wilson_score:wilson_score
+        width:img.width,
+        height:img.height,
+        author: img.author,
+        description:img.description,
+        size:img.size,
+        sha256:img.sha256,
+        tags:img.tags,
+        source_url:img.source_url
     }
     IMAGES_COLLECTION.insertOne(image)
 }
@@ -261,17 +253,14 @@ export default {
         get_number_of_images_returned_by_search_query,
         batch_find_images,
         add_image,
-        add_image_by_object,
         get_all_images,
         find_image_by_id,
         get_max_image_id,
         delete_image_by_id,
         find_images_by_tags,
-        get_ids_and_phashes,
         get_image_file_extension_by_id,
-        find_image_by_sha512,
+        find_image_by_sha256,
         check_if_image_exists_by_id,
-        find_image_by_booru_id,
         update_image_data_by_id,
         add_tags_to_image_by_id,
     },

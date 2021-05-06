@@ -19,9 +19,9 @@ async function import_image(req: Request, res: Response) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
         if (user.isAdmin) {
             req.setTimeout(5 * 60 * 1000)
-            const success=await image_ops.import_image(image_buffer,tags,source_url)
-            if(success){
-                res.json({ message: "success" })
+            const results=await image_ops.import_image(image_buffer,tags,source_url)
+            if(results){
+                res.json({ message: results})
             }else{
                 res.json({ message: "fail" })
             }

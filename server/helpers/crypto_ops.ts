@@ -50,8 +50,8 @@ async function check_password(password: string, hash: string): Promise<boolean> 
     const result = bcrypt.compare(password, hash);
     return result
 }
-async function image_buffer_sha512_hash(image_buffer:Buffer){
-    return cryptoAsync.hash("sha512",image_buffer).toString('hex')
+async function image_buffer_sha256_hash(image_buffer:Buffer){
+    return cryptoAsync.hash("sha256",image_buffer).toString('hex')
 }
 
-export default {generate_activation_token,generate_password_recovery_token,hash_password,check_password,image_buffer_sha512_hash}
+export default {generate_activation_token,generate_password_recovery_token,hash_password,check_password,image_buffer_sha256_hash}

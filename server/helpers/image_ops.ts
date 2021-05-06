@@ -197,11 +197,11 @@ async function parse_author(tags: string[]) {
   return "???"
 }
 
-async function import_image(image_buffer:Buffer,tags:string[]=[],source_url=""){
-  const sha512_hash = await crypto_ops.image_buffer_sha512_hash(image_buffer)
-  const found_img= await db_ops.image_ops.find_image_by_sha512(sha512_hash)
-  if(found_img){
-    return `Image with the same sha512 is already in the db. Image id = ${found_img.id} `
+async function import_image(image_buffer: Buffer, tags: string[] = [], source_url = "") {
+  const sha256_hash = await crypto_ops.image_buffer_sha256_hash(image_buffer)
+  const found_img = await db_ops.image_ops.find_image_by_sha256(sha256_hash)
+  if (found_img) {
+    return `Image with the same sha256 is already in the db. Image id = ${found_img.id} `
   }
   try {
     const mime_type = (await FileType.fromBuffer(image_buffer))?.mime
@@ -222,12 +222,11 @@ async function import_image(image_buffer:Buffer,tags:string[]=[],source_url=""){
     tags.push(orientation)
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
-    const parsed_author = await parse_author(tags)
-    await db_ops.image_ops.add_image(new_image_id, file_ext, width, height, parsed_author, size,
-      false, 0, 0, false, false, source_url, tags, 0, sha512_hash, "", false)
+    const author = await parse_author(tags)
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
-    const res=await calculate_image_features(new_image_id, image_buffer)
+    const res = await calculate_image_features(new_image_id, image_buffer)
     console.log(`SIFT calc=${res[0].status}`)
     console.log(`NN calc=${res[1].status}`)
     console.log(`HIST calc=${res[2].status}`)
