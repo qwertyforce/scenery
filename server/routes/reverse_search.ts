@@ -14,11 +14,11 @@ async function reverse_search(req: Request, res: Response) {
         req.connection.setTimeout(5*60000)//5min
         res.setTimeout(5*60000)//5min
         if(Mode===1){
-            const ids=await image_ops.get_similar_images_by_phash(req.file.buffer)
+            const ids=await image_ops.phash_get_similar_images_by_image_buffer(req.file.buffer)
             // console.log(ids)
             res.json({ids:ids.join(',')})
         }else if(Mode===2){
-            const ids=await image_ops.get_similar_images_by_sift(req.file.buffer)
+            const ids=await image_ops.sift_get_similar_images_by_image_buffer(req.file.buffer)
             // console.log(ids)
             res.json({ids:ids.join(',')})
         }

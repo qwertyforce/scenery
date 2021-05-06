@@ -4,7 +4,6 @@ import db_ops from './db_ops';
 import crypto_ops from './crypto_ops';
 import thumbnail_ops from './thumbnail_ops'
 import sharp from 'sharp'
-import { bmvbhash } from 'blockhash-core'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
@@ -14,62 +13,43 @@ import {unlink as fs_unlink_callback} from 'fs'
 import FileType from 'file-type'
 import path from "path"
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
-const IMAGES_IDS_PHASHES:any={}
-const VPTreeFactory: any = require("vptree");
-let vptree:any;
-build_vp_tree()
 
-function hamming_distance(img1: any[], img2: any[]) {
-  let distance = 0;
-  const str1=img1[1]
-  const str2=img2[1]
-  for (let i = 0; i < str1.length; i += 1) {
-    if (str1[i] !== str2[i]) {
-      distance += 1;
+///////////////////////////////////////////////////////////////////////////////////////////////////PHASH
+async function calculate_phash_features(image_id: number, image: Buffer) {
+  const form = new FormData();
+  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image_id', image_id.toString())
+  const status = await axios.post(`${config.phash_microservice_url}/calculate_phash_features`, form.getBuffer(), {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    headers: {
+      ...form.getHeaders()
     }
+  })
+  return status.data
+}
+
+async function phash_get_similar_images_by_image_buffer(image: Buffer) {
+  const form = new FormData();
+  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  try {
+    const similar = await axios.post(`${config.phash_microservice_url}/phash_reverse_search`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return similar.data
+  } catch (err) {
+    console.log(err)
+    return []
   }
-  return distance;
 }
 
-async function build_vp_tree(){
-  const ids_phashes=await db_ops.image_ops.get_ids_and_phashes()
-  for (const img of ids_phashes){
-    IMAGES_IDS_PHASHES[img.id]=img.phash
-  }
-  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
-}
-
-async function add_to_vp_tree(id:number,phash:string){
-  IMAGES_IDS_PHASHES[id]=phash
-  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
-}
-
-async function remove_from_vp_tree(id:number){
-  delete IMAGES_IDS_PHASHES[id]
-  vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
-}
-
-// async function modify_vp_tree(id:number,phash:string){
-//   IMAGES_IDS_PHASHES[id]=phash
-//   vptree=VPTreeFactory.build(Object.entries(IMAGES_IDS_PHASHES), hamming_distance)
-// }
-
-async function calculate_phash(image: Buffer | string) {
-  const { data, info } = await sharp(image).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const imageData = {
-    width: info.width,
-    height: info.height,
-    data: data
-  };
-  const x = bmvbhash(imageData, 16)
-  return x
-}
-
-async function get_similar_images_by_phash(image: Buffer) {
-  const phash = await calculate_phash(image)
-  const nearest=vptree.search([0,phash],30);
-  const ids= nearest.map((el:any) => el.data[0])
-  return ids
+async function delete_phash_features_by_id(image_id: number) {
+    const status = await axios.post(`${config.phash_microservice_url}/delete_phash_features`, { image_id: image_id })
+    return status.data
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////SIFT
@@ -86,7 +66,7 @@ async function calculate_sift_features(image_id: number, image: Buffer) {
   })
   return status.data
 }
-async function get_similar_images_by_sift(image: Buffer) {
+async function sift_get_similar_images_by_image_buffer(image: Buffer) {
   const form = new FormData();
   form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
   try {
@@ -179,12 +159,12 @@ async function delete_HIST_features_by_id(image_id: number) {
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-async function calculate_image_features(image_id: number, image_buffer: Buffer, phash: string) {
+async function calculate_image_features(image_id: number, image_buffer: Buffer) {
   return Promise.allSettled([
     calculate_sift_features(image_id, image_buffer),
     calculate_NN_features(image_id, image_buffer),
     calculate_HIST_features(image_id, image_buffer),
-    add_to_vp_tree(image_id, phash),
+    calculate_phash_features(image_id, image_buffer),
   ])
 }
 
@@ -193,7 +173,7 @@ async function delete_image_features(image_id: number){
     delete_sift_features_by_id(image_id),
     delete_NN_features_by_id(image_id),
     delete_HIST_features_by_id(image_id),
-    remove_from_vp_tree(image_id)
+    delete_phash_features_by_id(image_id)
   ])
 }
 
@@ -218,6 +198,11 @@ async function parse_author(tags: string[]) {
 }
 
 async function import_image(image_buffer:Buffer,tags:string[]=[],source_url=""){
+  const sha512_hash = await crypto_ops.image_buffer_sha512_hash(image_buffer)
+  const found_img= await db_ops.image_ops.find_image_by_sha512(sha512_hash)
+  if(found_img){
+    return `Image with the same sha512 is already in the db. Image id = ${found_img.id} `
+  }
   try {
     const mime_type = (await FileType.fromBuffer(image_buffer))?.mime
     let file_ext = ""
@@ -237,20 +222,18 @@ async function import_image(image_buffer:Buffer,tags:string[]=[],source_url=""){
     tags.push(orientation)
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
-    const sha512_hash = await crypto_ops.image_buffer_sha512_hash(image_buffer)
     const parsed_author = await parse_author(tags)
-    const phash = await calculate_phash(image_buffer)
     await db_ops.image_ops.add_image(new_image_id, file_ext, width, height, parsed_author, size,
-      false, 0, 0, false, false, source_url, tags, 0, sha512_hash, phash, "", false)
+      false, 0, 0, false, false, source_url, tags, 0, sha512_hash, "", false)
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
-    const res=await calculate_image_features(new_image_id, image_buffer, phash)
+    const res=await calculate_image_features(new_image_id, image_buffer)
     console.log(`SIFT calc=${res[0].status}`)
     console.log(`NN calc=${res[1].status}`)
     console.log(`HIST calc=${res[2].status}`)
     console.log(`VP calc=${res[3].status}`)
     console.log(`OK. New image_id: ${new_image_id}`)
-    return true
+    return `Success! Image id = ${new_image_id}`
   } catch (error) {
     console.error(error);
   }
@@ -291,11 +274,10 @@ export default {
   import_image,
   delete_image,
   get_orientation,
-  calculate_phash,
-  get_similar_images_by_sift,
+  sift_get_similar_images_by_image_buffer,
   NN_get_similar_images_by_id,
   get_similar_images_by_text,
-  get_similar_images_by_phash,
+  phash_get_similar_images_by_image_buffer,
   HIST_get_similar_images_by_id,
   calculate_image_features,
   delete_image_features
