@@ -38,7 +38,7 @@ const PASSWORD_RECOVERY_COLLECTION=client.db(db_main).collection("password_recov
 
 //////////////////////////////////////////////////////////////////////////////////////////////////CREATE INDEXES
 client.db(db_main).collection("images").createIndex({"id": 1}, {unique: true})
-client.db(db_main).collection("images").createIndex({"sha256": 1}, {unique: true})
+// client.db(db_main).collection("images").createIndex({"sha256": 1}, {unique: true})
 client.db(db_main).collection("images").createIndex({"tags": 1})
 client.db(db_main).collection("not_activated_users").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})
 client.db(db_main).collection("password_recovery").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})
@@ -131,6 +131,49 @@ async function add_image(img:Image){
         source_url:img.source_url
     }
     IMAGES_COLLECTION.insertOne(image)
+}
+async function add_image_by_object(image:any){
+    return IMAGES_COLLECTION.insertOne(image)
+}
+
+async function get_number_of_unique_tags(){
+    return (await IMAGES_COLLECTION.distinct("tags")).length
+}
+
+async function get_number_of_unique_authors(){
+    return (await IMAGES_COLLECTION.distinct("author")).length
+}
+
+async function get_tags_stats() {
+    const x = IMAGES_COLLECTION.aggregate([
+        { $unwind: "$tags" },
+        {
+            $group: {
+                _id: { $toLower: '$tags' },
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $sort: { _id: 1 }
+        }
+    ]);
+    return x.toArray()
+}
+
+async function get_image_tags_by_id(image_id:number){
+    const data = IMAGES_COLLECTION.find({id:image_id}).project({_id:0,tags:1}).next()
+    return data
+}
+async function get_images_with_similar_tags(image_id:number,limit:number){
+    const target_tags= (await get_image_tags_by_id(image_id)).tags
+    const x = IMAGES_COLLECTION.aggregate([
+        { $unwind: "$tags" },
+        { $match: { tags: { $in: target_tags } } },
+        { $group: { _id: {id:"$id",height:"$height",width:"$width"}, count: { $sum: 1 }} },
+        { $sort: { count: -1 } },
+        {$limit:limit}
+    ]);
+    return x.toArray()
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -250,9 +293,14 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 // test()
 export default {
     image_ops: {
+        get_tags_stats,
+        get_images_with_similar_tags,
+        get_number_of_unique_tags,
+        get_number_of_unique_authors,
         get_number_of_images_returned_by_search_query,
         batch_find_images,
         add_image,
+        add_image_by_object,
         get_all_images,
         find_image_by_id,
         get_max_image_id,

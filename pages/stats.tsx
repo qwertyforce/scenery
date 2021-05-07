@@ -25,23 +25,17 @@ export default function Stats(props: StatsProps) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const imgs = await db_ops.image_ops.get_all_images()
-  const authors = new Set()
-  const tags = new Set()
-  const id_of_last_image = imgs[imgs.length - 1].id
-  for (const img of imgs) {
-    authors.add(img.author)
-    for (const tag of img.tags) {
-      tags.add(tag)
-    }
-  }
+  const number_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
+  const number_of_unique_tags = await db_ops.image_ops.get_number_of_unique_tags()
+  const number_of_unique_authors = await db_ops.image_ops.get_number_of_unique_authors()
+  const last_image_id=await db_ops.image_ops.get_max_image_id()
   return {
     props: {
-      number_of_images: imgs.length,
-      number_of_authors: authors.size,
-      number_of_tags: tags.size,
-      number_of_deleted: id_of_last_image - imgs.length,
-      last_image_id: id_of_last_image
+      number_of_images: number_of_images,
+      number_of_authors: number_of_unique_authors,
+      number_of_tags: number_of_unique_tags,
+      number_of_deleted: last_image_id - number_of_images,
+      last_image_id: last_image_id
     },
     revalidate: 5 * 60 //5 min
   }
