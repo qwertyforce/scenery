@@ -67,16 +67,16 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const photos = []
   if (typeof context.params?.page === "string") {
     const page = parseInt(context.params.page)
-    const total_num_of_images=await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
+    const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
     if (page >= 1 && page <= Math.ceil(total_num_of_images / images_on_page)) {
-      const images= await db_ops.image_ops.batch_find_images({},images_on_page*(page-1),images_on_page)
-      for (const image of images){
+      const images = await db_ops.image_ops.batch_find_images({}, images_on_page * (page - 1), images_on_page)
+      for (const image of images) {
         photos.push({
-              src: `/thumbnails/${image.id}.jpg`,
-              key: `/image/${image.id}`,
-              width: image.width,
-              height: image.height
-            })
+          src: `/thumbnails/${image.id}.jpg`,
+          key: `/image/${image.id}`,
+          width: image.width,
+          height: image.height
+        })
       }
       return {
         props: {

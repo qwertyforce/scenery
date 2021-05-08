@@ -27,12 +27,8 @@ export default function Tags(props: PropsTags) {
   const Tags=[]
   const Seasons_tags=[]
   const Orientation_tags=[]
-  let Author_tags=[]
-  console.log(props.tags)
-  
+  let Author_tags=[]  
   for (const {_id, count} of props.tags) {
-    console.log(_id)
-    console.log(count)
     const tag = <Chip label={`${_id} (${count})`} key={_id} className={classes.chip} component="a" href={`/search?q=${_id}`} clickable />
     if (Seasons.includes(_id)) {
       Seasons_tags.push(tag)
