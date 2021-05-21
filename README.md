@@ -1,20 +1,21 @@
-Next.js <br>
-Express <br>
-Material UI <br>
-Typescript <br> 
-Cython + Python + FastAPI + OpenCV + pytorch <br>
-https://onlycomfy.art
- 
- 
-Features: <br>
-Search by tags (supports logical expressions) (https://onlycomfy.art/search_syntax) <br>
-Semantic text search (using [CLIP](https://github.com/openai/CLIP)) (https://onlycomfy.art/search_syntax) <br>
-You can find images with similar tags. <br>
-You can find images with similar color palette. <br>
-You can find visually similar images ([CLIP](https://github.com/openai/CLIP)). <br>
-Reverse image search (phash/SIFT) <br>
-(logical expression parser - https://github.com/qwertyforce/mongodb_logical_expression_parser)<br>
-(phash  microservice - https://github.com/qwertyforce/phash_reverse_search_microservice)<br>
-(sift  microservice - https://github.com/qwertyforce/sift_reverse_search_microservice)<br>
-(nn features microservice - https://github.com/qwertyforce/clip_reverse_search_microservice)<br>
-(rgb histogram microservice - https://github.com/qwertyforce/histogram_reverse_search_microservice)
+# scenery
+a photo gallery with advanced search capabilities <br>
+https://onlycomfy.art (old version of engine) <br>
+Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
+
+## scenery
+Node.js + MongoDB + TypeScript + Next.js + Express + Material UI <br>
+
+## ambience
+Node.js + TypeScript (api gateway) <br>
+Python + SQLite + FastAPI + OpenCV + CLIP <br>
+hnswlib + faiss<br>
+
+## features <br>
+- Search by tags (supports logical expressions) (https://onlycomfy.art/search_syntax) ([logical expression parser](https://github.com/qwertyforce/ambience/))
+- Semantic text search (using [CLIP](https://github.com/openai/CLIP)) (https://onlycomfy.art/search_syntax) <br>
+- You can find images with similar tags. <br>
+- You can find images with similar color palette. <br>
+- You can find visually/semantically similar images ([CLIP](https://github.com/openai/CLIP)). <br>
+- Reverse image search (phash/AKAZE) <br>
+- Image anti-duplication mechanism (phash/AKAZE) <br>
