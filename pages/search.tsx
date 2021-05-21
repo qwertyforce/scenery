@@ -76,7 +76,7 @@ export async function getServerSideProps(context: any) {
       return ERROR
     }
     const found_images = []
-    const image_ids = await image_ops.get_similar_images_by_text(context.query.q)
+    const image_ids = await image_ops.nn_get_similar_images_by_text(context.query.q)
     if (!image_ids) {
       return {
         props: {

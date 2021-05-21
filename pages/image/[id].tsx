@@ -44,8 +44,6 @@ interface ImageProps{
   size: number,
   author: string,
   tags: string[],
-  booru:string,
-  booru_link: string,
   source_link: string,
   date: string,
   similar_by_tags_link: string,
@@ -80,11 +78,6 @@ interface ImageProps{
                 <CalendarTodayIcon />
                 <p>&nbsp;Date: {props.date}</p>
               </div>
-              {(props.booru ? (
-                  <div className={classes.icon_container}>
-                    <LinkIcon />
-              &nbsp;<a href={props.booru_link} target="_blank" rel="noreferrer">{props.booru} link</a>
-                  </div>) : null)}
               <div className={classes.icon_container}>
                 <LinkIcon />
               &nbsp;<a href={props.source_link} target="_blank" rel="noreferrer">Source</a>
@@ -136,8 +129,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           size: (img.size / (10 ** 6)).toFixed(2),
           author: img.author,
           tags: img.tags,
-          booru:img.booru,
-          booru_link: img.booru_link,
           source_link: img.source_url,
           date: date_str,
           similar_by_tags_link:`/similar_by_tags/${img.id}`,

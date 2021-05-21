@@ -1,0 +1,17 @@
+import db_ops from './helpers/db_ops'
+
+async function test() {
+    console.time("123")
+    const x = await db_ops.image_ops.get_images_with_similar_tags(1)
+    console.timeEnd("123")
+    console.log(x)
+    // console.log(JSON.stringify(x))
+}
+async function run(){
+    await test()
+    process.exit()
+}
+run()
+
+
+

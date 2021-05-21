@@ -10,18 +10,11 @@ async function reverse_search(req: Request, res: Response) {
         });
     }
     if(req.file){
-        const Mode=parseInt(req.body.mode)
         req.connection.setTimeout(5*60000)//5min
         res.setTimeout(5*60000)//5min
-        if(Mode===1){
-            const ids=await image_ops.phash_get_similar_images_by_image_buffer(req.file.buffer)
-            // console.log(ids)
-            res.json({ids:ids.join(',')})
-        }else if(Mode===2){
-            const ids=await image_ops.sift_get_similar_images_by_image_buffer(req.file.buffer)
-            // console.log(ids)
-            res.json({ids:ids.join(',')})
-        }
+        const ids=await image_ops.reverse_search(req.file.buffer)
+         // console.log(ids)
+        res.json({ids:ids.join(',')})
     }
 }
 

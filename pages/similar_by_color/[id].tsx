@@ -49,7 +49,7 @@ export default function SimilarByColor(props: SimilarByColorProps){
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const photos = []
   if (typeof context.params?.id === "string") {
-    const similar_images_ids = await image_ops.HIST_get_similar_images_by_id(parseInt(context.params.id))
+    const similar_images_ids = await image_ops.hist_get_similar_images_by_id(parseInt(context.params.id))
     // console.log(similar_images_ids)
     if (similar_images_ids) {
       const similar_images = []

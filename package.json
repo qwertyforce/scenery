@@ -7,8 +7,8 @@
     "build_pages": "next build",
     "build_server": "tsc --project tsconfig.server.json",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
-    "pm2_start_ms": "pm2 start ./python/microservices.config.js",
-    "pm2_start": "pm2 start ./python/microservices.config.js && pm2 start"
+    "pm2_start_ms": "pm2 start ./ambience/microservices.config.js",
+    "pm2_start": "pm2 start ./ambience/microservices.config.js && pm2 start"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",

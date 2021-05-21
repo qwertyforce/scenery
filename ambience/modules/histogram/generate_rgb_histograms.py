@@ -6,6 +6,7 @@ from joblib import Parallel, delayed
 import sqlite3
 import io
 conn = sqlite3.connect('rgb_histograms.db')
+IMAGE_PATH="../../public/images"
 
 def create_table():
 	cursor = conn.cursor()
@@ -73,7 +74,7 @@ def get_features(image_path):
     query_hist_combined=np.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1],dtype=np.float32)
     return query_hist_combined
 
-IMAGE_PATH="../public/images"
+
 file_names=listdir(IMAGE_PATH)
 
 create_table()

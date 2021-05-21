@@ -1,0 +1,32 @@
+{
+  "name": "ambience",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build_server": "tsc --project tsconfig.server.json",
+    "start": "cross-env NODE_ENV=production node dist/server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qwertyforce/ambience.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qwertyforce/ambience/issues"
+  },
+  "homepage": "https://github.com/qwertyforce/ambience#readme",
+  "dependencies": {
+    "@types/express": "^4.17.11",
+    "@types/http-proxy": "^1.17.6",
+    "@types/multer": "^1.4.5",
+    "@types/node": "^15.3.0",
+    "axios": "^0.21.1",
+    "cross-env": "^7.0.3",
+    "express": "^4.17.1",
+    "form-data": "^4.0.0",
+    "http-proxy": "^1.18.1",
+    "multer": "^1.4.2"
+  }
+}

@@ -19,8 +19,5 @@ export default {
     deviant_art_client_id:"client_id",
     deviant_art_client_secret:"client_secret",
     reverse_search_url:"http://localhost",
-    sift_microservice_url:"http://localhost:33333",
-    nn_microservice_url:"http://localhost:33334",
-    hist_microservice_url:"http://localhost:33335",
-    phash_microservice_url:"http://localhost:33336",
+    ambience_microservice_url:"http://localhost:44444",
 }

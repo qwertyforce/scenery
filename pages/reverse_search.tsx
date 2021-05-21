@@ -42,12 +42,11 @@ export default function ReverseSearch() {
   const [URL, setUrl] = useState("");
   const [fileObjects, setFileObjects] = useState([]);
   const [open, setOpen] = useState(false);
-  const send_image = (token: string,mode:string) => {
+  const send_image = (token: string) => {
     setOpen(true)
     const formData = new FormData();
     formData.append("image", (fileObjects[0] as any).file);
     formData.append("g-recaptcha-response", token);
-    formData.append("mode", mode);
     axios(`${config.reverse_search_url}/reverse_search`, {
       method: "post",
       data: formData,
@@ -92,11 +91,11 @@ export default function ReverseSearch() {
       }
     })
   }
-  const _send_image = (mode:string) => {
+  const _send_image = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
       grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
-        send_image(token,mode)
+        send_image(token)
       });
     })
   }
@@ -165,8 +164,7 @@ export default function ReverseSearch() {
           maxFileSize={49000000}
         />
       </Box>
-      <Button onClick={() => { _send_image("1") }} variant="contained" color="primary" >Reverse Search (fast, less accurate)</Button>
-      <div style={{marginTop:"10px"}}><Button onClick={() => { _send_image("2") }} variant="contained" color="primary" >Reverse Search (slow, more accurate)</Button></div>
+      <Button onClick={() => { _send_image() }} variant="contained" color="primary">Reverse Search</Button>
     </div>
   );
 }

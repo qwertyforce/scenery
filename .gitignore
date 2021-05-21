@@ -1,48 +1,14 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-/waifu_2x
 /testing
-/python/features
-/python/__pycache__
-/python/data.txt
-/python/clip_image_features.pkl
-/ESRGAN
-/upscaled
-/dist
+__pycache__/
+dist/
+/New folder
 /public
-/find_visually_similar_images/data.txt
-/find_visually_similar_images/image_features.pkl
 /images
-/import_from_derpi
-/webp_images
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+*.txt
+*.index
+node_modules/
 *.db
-# testing
-/coverage
+/_next
 
-# next.js
-/.next/
-/out/
 
-# production
-/build
 
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# vercel
-.vercel

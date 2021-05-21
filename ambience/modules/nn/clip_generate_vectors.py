@@ -7,6 +7,7 @@ from PIL import Image
 import sqlite3
 import io
 conn = sqlite3.connect('NN_features.db')
+IMAGE_PATH="../../public/images"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32")
@@ -73,7 +74,6 @@ def get_features(image_path):
         image_features /= image_features.norm(dim=-1, keepdim=True)
     return image_features.numpy()
 
-IMAGE_PATH="../public/images"
 file_names=listdir(IMAGE_PATH)
 create_table()
 sync_db()

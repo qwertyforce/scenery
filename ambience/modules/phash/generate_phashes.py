@@ -4,10 +4,10 @@ import numpy as np
 from numba import jit
 from os import listdir
 from joblib import Parallel, delayed
-import sys
 import sqlite3
 import io
 conn = sqlite3.connect('phashes.db')
+IMAGE_PATH="../../public/images"
 
 def create_table():
 	cursor = conn.cursor()
@@ -78,17 +78,17 @@ def fast_phash(image, hash_size=16, highfreq_factor=4):
     return diff(dct, hash_size)
 
 @jit(nopython=True)
-def bit_list_to_4_uint64(bit_list_256):
+def bit_list_to_32_uint8(bit_list_256):
     uint64_arr=[]
-    for i in range(4):
+    for i in range(32):
         bit_list=[]
-        for j in range(64):
-            if(bit_list_256[i*64+j]==True):
+        for j in range(8):
+            if(bit_list_256[i*8+j]==True):
                 bit_list.append(1)
             else:
                 bit_list.append(0)
         uint64_arr.append(bit_list_to_int(bit_list))
-    return np.array(uint64_arr,dtype=np.uint64)
+    return np.array(uint64_arr,dtype=np.uint8)
 
 @jit(nopython=True)
 def bit_list_to_int(bitlist):
@@ -100,12 +100,10 @@ def bit_list_to_int(bitlist):
 def get_phash(image_path):
     query_image=cv2.imread(image_path,cv2.IMREAD_GRAYSCALE)
     bit_list_256=fast_phash(query_image)
-    phash=bit_list_to_4_uint64(bit_list_256)
+    phash=bit_list_to_32_uint8(bit_list_256)
     return phash
 
-IMAGE_PATH="../public/images"
 file_names=listdir(IMAGE_PATH)
-
 create_table()
 sync_db()
 new_images=[]

@@ -4,16 +4,15 @@ if __name__ == '__main__':
 
 import torch
 from pydantic import BaseModel
-from fastapi import FastAPI, File,Body,Form, HTTPException
+from fastapi import FastAPI, File,Form, HTTPException
 import clip
 from os import listdir
 import numpy as np
 from PIL import Image
-from sklearn.neighbors import NearestNeighbors
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32")
-IMAGE_PATH="./public/images"
+IMAGE_PATH="./../../../public/images"
 
 import sqlite3
 import io
@@ -106,7 +105,6 @@ def add_descriptor(id,clip_features):
 	conn.commit()
 
 def sync_db():
-    IMAGE_PATH="./../public/images"
     ids_in_db=set(get_all_ids())
     file_names=listdir(IMAGE_PATH)
     for file_name in file_names:
@@ -130,7 +128,7 @@ app = FastAPI()
 async def read_root():
     return {"Hello": "World"}
 
-@app.post("/calculate_NN_features")
+@app.post("/calculate_nn_features")
 async def calculate_NN_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
@@ -140,13 +138,16 @@ async def calculate_NN_features_handler(image: bytes = File(...),image_id: str =
 class Item_image_id(BaseModel):
     image_id: int
 
-@app.post("/delete_NN_features")
+@app.post("/delete_nn_features")
 async def delete_nn_features_handler(item:Item_image_id):
     delete_descriptor_by_id(item.image_id)
-    index.mark_deleted(item.image_id)
+    try:
+    	index.mark_deleted(item.image_id)
+    except RuntimeError:
+    	print(f"err: no image with id {item.image_id}")
     return {"status":"200"}
 
-@app.post("/get_similar_images_by_id")
+@app.post("/nn_get_similar_images_by_id")
 async def get_similar_images_by_id_handler(item: Item_image_id):
     try:
        target_features = index.get_items([item.image_id])
@@ -155,9 +156,15 @@ async def get_similar_images_by_id_handler(item: Item_image_id):
     except RuntimeError:
         raise HTTPException(status_code=500, detail="Image with this id is not found")
 
+@app.post("/nn_get_similar_images_by_image_buffer")
+async def nn_get_similar_images_by_image_buffer_handler(image: bytes = File(...)):
+    target_features=get_features(image)
+    labels, _ = index.knn_query(target_features, k=20)
+    return labels[0].tolist()
+
 class Item_query(BaseModel):
     query: str
-@app.post("/find_similar_by_text")
+@app.post("/nn_get_similar_images_by_text")
 async def find_similar_by_text_handler(item:Item_query):
     text_features=get_text_features(item.query)
     labels, _ = index.knn_query(text_features, k=20)

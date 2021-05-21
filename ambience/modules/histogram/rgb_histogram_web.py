@@ -3,10 +3,10 @@ if __name__ == '__main__':
     uvicorn.run('rgb_histogram_web:app', host='127.0.0.1', port=33335, log_level="info")
     
 from pydantic import BaseModel
-from fastapi import FastAPI, File,Body,Form, HTTPException
+from fastapi import FastAPI, File,Form, HTTPException
+
 from os import listdir
 import numpy as np
-from PIL import Image
 from tqdm import tqdm
 import cv2
 import sqlite3
@@ -15,7 +15,7 @@ conn = sqlite3.connect('rgb_histograms.db')
 
 import nmslib
 # dim=4096
-IMAGE_PATH="./../public/images"
+IMAGE_PATH="./../../../public/images"
 index = nmslib.init(method='hnsw', space="l1", data_type=nmslib.DataType.DENSE_VECTOR) 
 index_time_params = {'M': 32,'efConstruction': 200}
 
@@ -29,8 +29,7 @@ def init_index():
     print("Index is ready")
        
 def read_img_file(image_data):
-    img = Image.open(io.BytesIO(image_data))
-    return img
+    return np.fromstring(image_data, np.uint8)
 
 def get_rgb_histogram_by_id(id):
     cursor = conn.cursor()
@@ -44,7 +43,7 @@ def get_rgb_histogram_by_id(id):
     return all_rows[0]    
 
 def get_features(image_buffer):
-    query_image=np.array(read_img_file(image_buffer).convert('RGB'))
+    query_image=cv2.cvtColor(cv2.imdecode(read_img_file(image_buffer),cv2.IMREAD_COLOR),cv2.COLOR_BGR2RGB)
     query_hist_combined=cv2.calcHist([query_image],[0,1,2],None,[16,16,16],[0,256,0,256,0,256])
     query_hist_combined = query_hist_combined.flatten()
     query_hist_combined=np.divide(query_hist_combined,query_image.shape[0]*query_image.shape[1],dtype=np.float32)
@@ -115,8 +114,8 @@ app = FastAPI()
 async def read_root():
     return {"Hello": "World"}
 
-@app.post("/calculate_HIST_features")
-async def calculate_HIST_features_handler(image: bytes = File(...),image_id: str = Form(...)):
+@app.post("/calculate_hist_features")
+async def calculate_hist_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
     index.addDataPoint(int(image_id),features)
@@ -126,21 +125,23 @@ async def calculate_HIST_features_handler(image: bytes = File(...),image_id: str
 class Item_image_id(BaseModel):
     image_id: int
 
-from timeit import default_timer as timer
-@app.post("/get_similar_images_by_id")
+@app.post("/hist_get_similar_images_by_id")
 async def get_similar_images_by_id_handler(item: Item_image_id):
     try:
-       start = timer()
        target_features = convert_array(get_rgb_histogram_by_id(item.image_id))
-       labels, _ = index.knnQuery(target_features, k=20)
-       end = timer()
-       print((end - start)*1000)
+       labels, _ = index.knnQuery(target_features, k=100)
        return labels.tolist()
     except RuntimeError:
        raise HTTPException(
            status_code=500, detail="Image with this id is not found")
-           
-@app.post("/delete_HIST_features")
+
+@app.post("/hist_get_similar_images_by_image_buffer")
+async def hist_get_similar_images_by_image_buffer_handler(image: bytes = File(...)):
+    target_features=get_features(image)
+    labels, _ = index.knnQuery(target_features, k=100)
+    return labels.tolist()
+
+@app.post("/delete_hist_features")
 async def delete_hist_features_handler(item:Item_image_id):
     delete_descriptor_by_id(item.image_id)
     init_index()
@@ -152,7 +153,3 @@ if __name__ == 'rgb_histogram_web':
     create_table()
     sync_db()
     init_index()
-
-
-
-   

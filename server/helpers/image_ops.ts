@@ -14,26 +14,57 @@ import FileType from 'file-type'
 import path from "path"
 const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
 
-///////////////////////////////////////////////////////////////////////////////////////////////////PHASH
-async function calculate_phash_features(image_id: number, image: Buffer) {
-  const form = new FormData();
-  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
-  form.append('image_id', image_id.toString())
-  const status = await axios.post(`${config.phash_microservice_url}/calculate_phash_features`, form.getBuffer(), {
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity,
-    headers: {
-      ...form.getHeaders()
-    }
-  })
-  return status.data
-}
-
-async function phash_get_similar_images_by_image_buffer(image: Buffer) {
+async function reverse_search(image: Buffer) {
   const form = new FormData();
   form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
   try {
-    const similar = await axios.post(`${config.phash_microservice_url}/phash_reverse_search`, form.getBuffer(), {
+    const res = await axios.post(`${config.ambience_microservice_url}/reverse_search`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return res.data
+  } catch (err) {
+    console.log(err)
+    return []
+  }
+}
+
+async function nn_get_similar_images_by_id(image_id: number) {
+  try {
+    const res = await axios.post(`${config.ambience_microservice_url}/nn_get_similar_images_by_id`, { image_id: image_id })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function nn_get_similar_images_by_text(query: string) {
+  try {
+    const res = await axios.post(`${config.ambience_microservice_url}/nn_get_similar_images_by_text`, { query: query })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function hist_get_similar_images_by_id(image_id: number) {
+  try {
+    const res = await axios.post(`${config.ambience_microservice_url}/hist_get_similar_images_by_id`, { image_id: image_id })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function calculate_all_image_features(image_id: number, image_buffer: Buffer) {
+  const form = new FormData();
+  form.append('image', image_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  form.append('image_id', image_id.toString())
+  try {
+    const similar = await axios.post(`${config.ambience_microservice_url}/calculate_all_image_features`, form.getBuffer(), {
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
       headers: {
@@ -47,134 +78,13 @@ async function phash_get_similar_images_by_image_buffer(image: Buffer) {
   }
 }
 
-async function delete_phash_features_by_id(image_id: number) {
-    const status = await axios.post(`${config.phash_microservice_url}/delete_phash_features`, { image_id: image_id })
-    return status.data
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////SIFT
-async function calculate_sift_features(image_id: number, image: Buffer) {
-  const form = new FormData();
-  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
-  form.append('image_id', image_id.toString())
-  const status = await axios.post(`${config.sift_microservice_url}/calculate_sift_features`, form.getBuffer(), {
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity,
-    headers: {
-      ...form.getHeaders()
-    }
-  })
-  return status.data
-}
-async function sift_get_similar_images_by_image_buffer(image: Buffer) {
-  const form = new FormData();
-  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+async function delete_all_image_features(image_id: number){
   try {
-    const similar = await axios.post(`${config.sift_microservice_url}/sift_reverse_search`, form.getBuffer(), {
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: {
-        ...form.getHeaders()
-      }
-    })
-    return similar.data
-  } catch (err) {
-    console.log(err)
-    return []
-  }
-}
-async function delete_sift_features_by_id(image_id: number) {
-    const status = await axios.post(`${config.sift_microservice_url}/delete_sift_features`, { image_id: image_id.toString() })
-    return status.data
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////////////////NN(CLIP)
-async function calculate_NN_features(image_id: number, image: Buffer) {
-  const form = new FormData();
-  form.append('image', image, { filename: 'document' }) //hack to make nodejs buffer work with form-data
-  form.append('image_id', image_id.toString())
-  const status = await axios.post(`${config.nn_microservice_url}/calculate_NN_features`, form.getBuffer(), {
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity,
-    headers: {
-      ...form.getHeaders()
-    }
-  })
-  return status.data
-
-}
-
-async function NN_get_similar_images_by_id(image_id: number) {
-  try {
-    const res = await axios.post(`${config.nn_microservice_url}/get_similar_images_by_id`, { image_id: image_id })
+    const res = await axios.post(`${config.ambience_microservice_url}/delete_all_image_features`, { image_id: image_id })
     return res.data
   } catch (err) {
     console.log(err)
   }
-}
-
-async function delete_NN_features_by_id(image_id: number) {
-    const status = await axios.post(`${config.nn_microservice_url}/delete_NN_features`, { image_id: image_id })
-    return status.data
-}
-
-async function get_similar_images_by_text(query: string) {
-  try {
-    const res = await axios.post(`${config.nn_microservice_url}/find_similar_by_text`, { query: query })
-    return res.data
-  } catch (err) {
-    console.log(err)
-  }
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////RGB_HISTOGRAM
-async function HIST_get_similar_images_by_id(image_id: number) {
-  try {
-    const res = await axios.post(`${config.hist_microservice_url}/get_similar_images_by_id`, { image_id: image_id })
-    return res.data
-  } catch (err) {
-    console.log(err)
-  }
-}
-
-async function calculate_HIST_features(image_id: number, image: Buffer) {
-  const form = new FormData();
-  form.append('image', image,{ filename: 'document' }) //hack to make nodejs buffer work with form-data
-  form.append('image_id', image_id.toString())
-  const status = await axios.post(`${config.hist_microservice_url}/calculate_HIST_features`, form.getBuffer(), {
-    maxContentLength: Infinity,
-    maxBodyLength: Infinity,
-    headers: {
-      ...form.getHeaders()
-    }
-  })
-  return status.data
-}
-
-async function delete_HIST_features_by_id(image_id: number) {
-    const status = await axios.post(`${config.hist_microservice_url}/delete_HIST_features`, { image_id: image_id })
-    return status.data
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-async function calculate_image_features(image_id: number, image_buffer: Buffer) {
-  return Promise.allSettled([
-    calculate_sift_features(image_id, image_buffer),
-    calculate_NN_features(image_id, image_buffer),
-    calculate_HIST_features(image_id, image_buffer),
-    calculate_phash_features(image_id, image_buffer),
-  ])
-}
-
-async function delete_image_features(image_id: number){
-  return Promise.allSettled([
-    delete_sift_features_by_id(image_id),
-    delete_NN_features_by_id(image_id),
-    delete_HIST_features_by_id(image_id),
-    delete_phash_features_by_id(image_id)
-  ])
 }
 
 function get_orientation(height: number, width: number) {
@@ -203,6 +113,12 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
   if (found_img) {
     return `Image with the same sha256 is already in the db. Image id = ${found_img.id} `
   }
+  if(!tags.includes("bypass_dup_check")){
+    const res=await reverse_search(image_buffer)
+    if(res.length!==0){
+      return `Image with the same phash/akaze descriptors is already in the db. Image id = ${res[0]} `
+    }
+  }
   try {
     const mime_type = (await FileType.fromBuffer(image_buffer))?.mime
     let file_ext = ""
@@ -226,8 +142,8 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
-    const res = await calculate_image_features(new_image_id, image_buffer)
-    console.log(`SIFT calc=${res[0].status}`)
+    const res = await calculate_all_image_features(new_image_id, image_buffer)
+    console.log(`Akaze calc=${res[0].status}`)
     console.log(`NN calc=${res[1].status}`)
     console.log(`HIST calc=${res[2].status}`)
     console.log(`VP calc=${res[3].status}`)
@@ -257,8 +173,8 @@ async function delete_image(id: number) {
       if (err) return console.log(err);
       console.log('upscaled file deleted successfully');
     });
-    const res=await delete_image_features(id)
-    console.log(`SIFT del=${res[0].status}`)
+    const res=await delete_all_image_features(id)
+    console.log(`Akaze del=${res[0].status}`)
     console.log(`NN del=${res[1].status}`)
     console.log(`HIST del=${res[2].status}`)
     console.log(`VP del=${res[3].status}`)
@@ -273,11 +189,10 @@ export default {
   import_image,
   delete_image,
   get_orientation,
-  sift_get_similar_images_by_image_buffer,
-  NN_get_similar_images_by_id,
-  get_similar_images_by_text,
-  phash_get_similar_images_by_image_buffer,
-  HIST_get_similar_images_by_id,
-  calculate_image_features,
-  delete_image_features
+  nn_get_similar_images_by_id,
+  nn_get_similar_images_by_text,
+  reverse_search,
+  hist_get_similar_images_by_id,
+  calculate_all_image_features,
+  delete_all_image_features
 }

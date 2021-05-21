@@ -1,58 +1,47 @@
 import uvicorn
 if __name__ == '__main__':
     uvicorn.run('phash_web:app', host='127.0.0.1', port=33336, log_level="info")
-    
+import faiss
 from pydantic import BaseModel
-from fastapi import FastAPI, File,Body,Form, HTTPException
+from fastapi import FastAPI, File,Form, HTTPException
 from os import listdir
 import numpy as np
 import scipy.fft
-from PIL import Image
-from tqdm import tqdm
 from numba import jit
 import cv2
 import sqlite3
 import io
-import hamming_search
 conn = sqlite3.connect('phashes.db')
-
-IMAGE_PATH="./../public/images"
-ID_PHASH_dict={}
+index=None
+IMAGE_PATH="./../../../public/images"
+point_id_to_image_id_map={}
+image_id_to_point_ids_map={}
 
 def init_index():
+    global index
+    index = faiss.read_index_binary("trained.index")
     all_data=get_all_data()
-    for img in all_data:
-        ID_PHASH_dict[img["image_id"]]=img["phash"]    
+    image_ids=np.array([np.int64(x[0]) for x in all_data])
+    phashes=np.array([x[1] for x in all_data])
+    print(phashes.shape)
+    index.add_with_ids(phashes, image_ids)    
     print("Index is ready")
        
 def read_img_file(image_data):
     return np.fromstring(image_data, np.uint8)
 
 @jit(nopython=True)
-def diff(dct, hash_size):
-    dctlowfreq = dct[:hash_size, :hash_size]
-    med = np.median(dctlowfreq)
-    diff = dctlowfreq > med
-    return diff.flatten()
-
-def fast_phash(image, hash_size=16, highfreq_factor=4):
-    img_size = hash_size * highfreq_factor
-    image = cv2.resize(image, (img_size, img_size), interpolation=cv2.INTER_LINEAR)  #cv2.INTER_AREA
-    dct = scipy.fft.dct(scipy.fft.dct(image, axis=0), axis=1)
-    return diff(dct, hash_size)
-
-@jit(nopython=True)
-def bit_list_to_4_uint64(bit_list_256):
+def bit_list_to_32_uint8(bit_list_256):
     uint64_arr=[]
-    for i in range(4):
+    for i in range(32):
         bit_list=[]
-        for j in range(64):
-            if(bit_list_256[i*64+j]==True):
+        for j in range(8):
+            if(bit_list_256[i*8+j]==True):
                 bit_list.append(1)
             else:
                 bit_list.append(0)
         uint64_arr.append(bit_list_to_int(bit_list))
-    return np.array(uint64_arr,dtype=np.uint64)
+    return np.array(uint64_arr,dtype=np.uint8)
 
 @jit(nopython=True)
 def bit_list_to_int(bitlist):
@@ -61,11 +50,35 @@ def bit_list_to_int(bitlist):
          out = (out << 1) | bit
      return out
 
-def get_phash(image_buffer):
+@jit(nopython=True)
+def diff(dct, hash_size):
+    dctlowfreq = dct[:hash_size, :hash_size]
+    med = np.median(dctlowfreq)
+    diff = dctlowfreq > med
+    return diff.flatten()
+
+def fast_phash(resized_image,hash_size):
+    dct = scipy.fft.dct(scipy.fft.dct(resized_image, axis=0), axis=1)
+    return diff(dct, hash_size)
+
+def get_phash(image_buffer,hash_size=16, highfreq_factor=4):
+    img_size = hash_size * highfreq_factor
     query_image=cv2.imdecode(read_img_file(image_buffer),cv2.IMREAD_GRAYSCALE)
-    bit_list_256=fast_phash(query_image)
-    phash=bit_list_to_4_uint64(bit_list_256)
+    query_image = cv2.resize(query_image, (img_size, img_size), interpolation=cv2.INTER_LINEAR)  #cv2.INTER_AREA
+    bit_list_256=fast_phash(query_image,hash_size)
+    phash=bit_list_to_32_uint8(bit_list_256)
     return phash
+
+def get_phash_and_mirrored_phash(image_buffer,hash_size=16, highfreq_factor=4):
+    img_size = hash_size * highfreq_factor
+    query_image=cv2.imdecode(read_img_file(image_buffer),cv2.IMREAD_GRAYSCALE)
+    query_image = cv2.resize(query_image, (img_size, img_size), interpolation=cv2.INTER_LINEAR)  #cv2.INTER_AREA
+    mirrored_query_image=cv2.flip(query_image,1)
+    bit_list_256=fast_phash(query_image,hash_size)
+    bit_list_256_mirrored=fast_phash(mirrored_query_image,hash_size)
+    phash=bit_list_to_32_uint8(bit_list_256)
+    mirrored_phash=bit_list_to_32_uint8(bit_list_256_mirrored)
+    return np.array([phash,mirrored_phash])
 
 def create_table():
 	cursor = conn.cursor()
@@ -106,7 +119,7 @@ def get_all_data():
     '''
     cursor.execute(query)
     all_rows = cursor.fetchall()
-    return list(map(lambda el:{"image_id":el[0],"phash":convert_array(el[1])},all_rows))
+    return list(map(lambda el:(el[0],convert_array(el[1])),all_rows))
 
 def convert_array(text):
     out = io.BytesIO(text)
@@ -136,38 +149,41 @@ def sync_db():
         delete_descriptor_by_id(id)   #Fix this
         print(f"deleting {id}")
     print("db synced")
-    
+
+def phash_reverse_search(image_buffer):
+    target_features=get_phash_and_mirrored_phash(image_buffer)
+    D, I = index.search(target_features, 1)
+    print(D,I)
+    for i in range(2):
+        if D[i][0]<=32:
+            return [int(I[i][0])]
+    return []
+
 app = FastAPI()
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
 
+class Item_image_id(BaseModel):
+    image_id: int
+
+@app.post("/phash_reverse_search")
+async def phash_reverse_search_handler(image: bytes = File(...)):
+    found_image=phash_reverse_search(image)
+    print(found_image)
+    return found_image
+
 @app.post("/calculate_phash_features")
 async def calculate_phash_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     features=get_phash(image)
     add_descriptor(int(image_id),adapt_array(features))
-    ID_PHASH_dict[int(image_id)]=features
+    index.add_with_ids(np.array([features]), np.int64([image_id]))
     return {"status":"200"}
 
-class Item_image_id(BaseModel):
-    image_id: int
-
-from timeit import default_timer as timer
-@app.post("/phash_reverse_search")
-async def phash_reverse_search_handler(image: bytes = File(...)):
-    target_features=get_phash(image)
-    start = timer()
-    results=hamming_search.hamming_knn(target_features,np.array(list(ID_PHASH_dict.values())),np.array(list(ID_PHASH_dict.keys()),dtype=np.int32),20)
-    end = timer()
-    print((end - start)*1000)
-    print(results)
-    return list(map(lambda el:el[1],results))
-
-           
 @app.post("/delete_phash_features")
 async def delete_hist_features_handler(item:Item_image_id):
     delete_descriptor_by_id(item.image_id)
-    del ID_PHASH_dict[item.image_id]
+    index.remove_ids(np.int64([item.image_id]))
     return {"status":"200"}
 
 print(__name__)
