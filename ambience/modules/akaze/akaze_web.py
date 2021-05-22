@@ -19,6 +19,7 @@ image_id_to_point_ids_map={}
 
 IMAGE_PATH="./../../../public/images"
 POINT_ID=0
+FIND_MIRRORED=True
 
 def init_index():
     global index,POINT_ID
@@ -116,9 +117,14 @@ def resize_img_to_array(img):
     return img
 
 
-def calculate_descr(image_buffer):
+def preprocess_image(image_buffer):
     img=cv2.imdecode(read_img_file(image_buffer),0)
     img=resize_img_to_array(img)
+    return img
+
+def calculate_descr(img,mirrored=False):
+    if mirrored:
+        img=cv2.flip(img,1)
     height= img.shape[0]
     width= img.shape[1]
     height_divided_by_2 = img.shape[0]//2
@@ -173,10 +179,10 @@ def median(lst):
     else:
         return (lst[index][1] + lst[index + 1][1])/2.0
 
-def akaze_reverse_search(image_buffer):
+def akaze_reverse_search(img,mirrored=False):
     levels = [{}, {}, {}, {}]
     all_points={}
-    descs = calculate_descr(image_buffer)
+    descs = calculate_descr(img,mirrored)
     if descs is None:
         return []
     D, I = index.search(descs, 1)
@@ -220,14 +226,18 @@ async def read_root():
 
 @app.post("/akaze_reverse_search")
 async def akaze_reverse_search_handler(image: bytes = File(...)):
-    found_image=akaze_reverse_search(image)
+    img=preprocess_image(image)
+    found_image=akaze_reverse_search(img)
+    if len(found_image) == 0 and FIND_MIRRORED:
+        found_image=akaze_reverse_search(img,mirrored=True)
     return found_image
 
 @app.post("/calculate_akaze_features")
 async def calculate_akaze_features_handler(image: bytes = File(...),image_id: str = Form(...)):
     global POINT_ID
     image_id=int(image_id)
-    descs=calculate_descr(image)
+    img=preprocess_image(image)
+    descs=calculate_descr(img)
     if descs is None:
         raise HTTPException(status_code=500, detail="No descritors for this image")
     add_descriptor(image_id,adapt_array(descs))
