@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 from os import listdir
 import math
-
+from joblib import Parallel, delayed
 import sqlite3
 import io
 conn = sqlite3.connect('akaze.db')
-IMAGE_PATH="./../../public/images"
+IMAGE_PATH="./../../../public/images"
 
 def create_table():
 	cursor = conn.cursor()
@@ -59,9 +59,8 @@ def resize_img_to_array(img):
         img=cv2.resize(img, (round(width/k),round(height/k)), interpolation=cv2.INTER_LINEAR)
     return img
 
-def calculate_descr(image_path):
+def calculate_descr(img):
     AKAZE = cv2.AKAZE_create()  #can't serialize, hence init is here
-    img=cv2.imread(image_path,0)
     img=resize_img_to_array(img)
     height= img.shape[0]
     width= img.shape[1]
@@ -120,11 +119,19 @@ for file_name in file_names:
 
 def calc_features(file_name):
     file_id=int(file_name[:file_name.index('.')])
-    descs=calculate_descr(IMAGE_PATH+"/"+file_name)
+    img_path=IMAGE_PATH+"/"+file_name
+    query_image=cv2.imread(img_path,0)
+    if query_image is None:
+        return None
+    descs=calculate_descr(query_image)
     descs_bin=adapt_array(descs)
+    print(file_name)
     return (file_id,descs_bin)
 
-from joblib import Parallel, delayed
-hists=Parallel(n_jobs=-1,verbose=1)(delayed(calc_features)(file_name) for file_name in new_images)
-conn.executemany('''INSERT INTO akaze(id, akaze_features) VALUES (?,?)''', hists)
-conn.commit()
+
+new_images=[new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
+for batch in new_images:
+    descriptors=Parallel(n_jobs=-1,verbose=1)(delayed(calc_features)(file_name) for file_name in batch)
+    descriptors= [i for i in descriptors if i] #remove None's
+    conn.executemany('''INSERT INTO akaze(id, akaze_features) VALUES (?,?)''', descriptors)
+    conn.commit()

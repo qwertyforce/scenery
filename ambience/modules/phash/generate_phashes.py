@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 import sqlite3
 import io
 conn = sqlite3.connect('phashes.db')
-IMAGE_PATH="../../public/images"
+IMAGE_PATH="./../../../public/images"
 
 def create_table():
 	cursor = conn.cursor()
@@ -97,8 +97,7 @@ def bit_list_to_int(bitlist):
          out = (out << 1) | bit
      return out
 
-def get_phash(image_path):
-    query_image=cv2.imread(image_path,cv2.IMREAD_GRAYSCALE)
+def get_phash(query_image):
     bit_list_256=fast_phash(query_image)
     phash=bit_list_to_32_uint8(bit_list_256)
     return phash
@@ -115,11 +114,19 @@ for file_name in file_names:
 
 def calc_phash(file_name):
     file_id=int(file_name[:file_name.index('.')])
-    phash=get_phash(IMAGE_PATH+"/"+file_name) 
+    img_path=IMAGE_PATH+"/"+file_name
+    query_image=cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)
+    if query_image is None:
+        print(f'error reading {img_path}')
+        return None
+    phash=get_phash(query_image) 
     phash_bin=adapt_array(phash)
     print(file_name)
     return (file_id,phash_bin)
 
-hists=Parallel(n_jobs=-1)(delayed(calc_phash)(file_name) for file_name in new_images)
-conn.executemany('''INSERT INTO phashes(id, phash) VALUES (?,?)''', hists)
-conn.commit()
+new_images=[new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
+for batch in new_images:
+    phashes=Parallel(n_jobs=-1)(delayed(calc_phash)(file_name) for file_name in batch)
+    phashes= [i for i in phashes if i] #remove None's
+    conn.executemany('''INSERT INTO phashes(id, phash) VALUES (?,?)''', phashes)
+    conn.commit()

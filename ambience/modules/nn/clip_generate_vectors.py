@@ -3,11 +3,11 @@ import clip
 from os import listdir
 import numpy as np
 from PIL import Image
-
+from joblib import Parallel, delayed
 import sqlite3
 import io
 conn = sqlite3.connect('NN_features.db')
-IMAGE_PATH="../../public/images"
+IMAGE_PATH="./../../../public/images"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32")
@@ -67,8 +67,8 @@ def sync_db():
         delete_descriptor_by_id(id)   #Fix this
         print(f"deleting {id}")
 
-def get_features(image_path):
-    image =  preprocess(Image.open(image_path)).unsqueeze(0).to(device)
+def get_features(image):
+    image =  preprocess(image).unsqueeze(0).to(device)
     with torch.no_grad():
         image_features = model.encode_image(image)
         image_features /= image_features.norm(dim=-1, keepdim=True)
@@ -77,11 +77,31 @@ def get_features(image_path):
 file_names=listdir(IMAGE_PATH)
 create_table()
 sync_db()
+new_images=[]
 for file_name in file_names:
     file_id=int(file_name[:file_name.index('.')])
     if check_if_exists_by_id(file_id):
         continue
-    image_features=get_features(IMAGE_PATH+"/"+file_name) 
+    new_images.append(file_name)
+
+def calc_nn_features(file_name):
+    file_id=int(file_name[:file_name.index('.')])
+    img_path=IMAGE_PATH+"/"+file_name
+    try:
+        query_image=Image.open(img_path)
+    except:
+        print(f'error reading {img_path}')
+        return None
+    image_features=get_features(query_image) 
     image_features_bin=adapt_array(image_features)
-    add_descriptor(file_id,image_features_bin)
     print(file_name)
+    return (file_id,image_features_bin)
+
+new_images=[new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
+for batch in new_images:
+    batch_features=[]
+    for file_name in batch:
+        batch_features.append(calc_nn_features(file_name))
+    batch_features= [i for i in batch_features if i] #remove None's
+    conn.executemany('''INSERT INTO clip(id, clip_features) VALUES (?,?)''', batch_features)
+    conn.commit()
