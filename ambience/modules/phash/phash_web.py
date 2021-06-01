@@ -14,8 +14,6 @@ import io
 conn = sqlite3.connect('phashes.db')
 index=None
 IMAGE_PATH="./../../../public/images"
-point_id_to_image_id_map={}
-image_id_to_point_ids_map={}
 
 def init_index():
     global index

@@ -4,7 +4,7 @@ if __name__ == '__main__':
     
 from pydantic import BaseModel
 from fastapi import FastAPI, File,Form, HTTPException
-
+import faiss
 from os import listdir
 import numpy as np
 from tqdm import tqdm
@@ -12,20 +12,17 @@ import cv2
 import sqlite3
 import io
 conn = sqlite3.connect('rgb_histograms.db')
-
-import nmslib
-# dim=4096
 IMAGE_PATH="./../../../public/images"
-index = nmslib.init(method='hnsw', space="l1", data_type=nmslib.DataType.DENSE_VECTOR) 
-index_time_params = {'M': 32,'efConstruction': 200}
+FLAT_INDEX_IDX=0
+sub_index = faiss.IndexFlat(4096, faiss.METRIC_L1)
+index_id_map = faiss.IndexIDMap2(sub_index)
 
 def init_index():
+    global index_flat,FLAT_INDEX_IDX
     all_ids=get_all_ids()
-    for id in tqdm(all_ids):
-        image_features = convert_array(get_rgb_histogram_by_id(id))
-        # print(image_features)
-        index.addDataPoint(id,image_features)
-    index.createIndex(index_time_params) 
+    for image_id in tqdm(all_ids):
+        features = convert_array(get_rgb_histogram_by_id(image_id))
+        index_id_map.add_with_ids(np.array([features]),np.int64([image_id]))
     print("Index is ready")
        
 def read_img_file(image_data):
@@ -108,7 +105,15 @@ def sync_db():
         delete_descriptor_by_id(id)   #Fix this
         print(f"deleting {id}")
     print("db synced")
-    
+
+def hist_similarity_search(target_features,n):
+    D, I = index_id_map.search(np.array([target_features]), n)
+    print(D,I)
+    similar=[]
+    for img_id in I[0]:   
+        similar.append(int(img_id))
+    return similar
+
 app = FastAPI()
 @app.get("/")
 async def read_root():
@@ -116,10 +121,10 @@ async def read_root():
 
 @app.post("/calculate_hist_features")
 async def calculate_hist_features_handler(image: bytes = File(...),image_id: str = Form(...)):
+    global FLAT_INDEX_IDX
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
-    index.addDataPoint(int(image_id),features)
-    index.createIndex(index_time_params) 
+    index_id_map.add_with_ids(np.array([features]), np.int64([image_id]))
     return {"status":"200"}
 
 class Item_image_id(BaseModel):
@@ -128,23 +133,22 @@ class Item_image_id(BaseModel):
 @app.post("/hist_get_similar_images_by_id")
 async def get_similar_images_by_id_handler(item: Item_image_id):
     try:
-       target_features = convert_array(get_rgb_histogram_by_id(item.image_id))
-       labels, _ = index.knnQuery(target_features, k=100)
-       return labels.tolist()
-    except RuntimeError:
-       raise HTTPException(
-           status_code=500, detail="Image with this id is not found")
-
+        target_features = index_id_map.reconstruct(item.image_id)
+        similar=hist_similarity_search(target_features,20)
+        return similar
+    except:
+        raise HTTPException(status_code=500, detail="Image with this id is not found")
+        
 @app.post("/hist_get_similar_images_by_image_buffer")
 async def hist_get_similar_images_by_image_buffer_handler(image: bytes = File(...)):
     target_features=get_features(image)
-    labels, _ = index.knnQuery(target_features, k=100)
-    return labels.tolist()
+    similar=hist_similarity_search(target_features,20)
+    return similar
 
 @app.post("/delete_hist_features")
 async def delete_hist_features_handler(item:Item_image_id):
     delete_descriptor_by_id(item.image_id)
-    init_index()
+    index_id_map.remove_ids(np.int64([item.image_id]))
     return {"status":"200"}
 
 print(__name__)
