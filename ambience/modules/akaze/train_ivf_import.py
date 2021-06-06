@@ -3,37 +3,28 @@ import numpy as np
 import io
 import faiss
 from math import sqrt
-conn = sqlite3.connect('akaze.db')
+conn_import = sqlite3.connect('import_akaze.db')
 
-def get_all_ids():
-    cursor = conn.cursor()
-    query = '''SELECT id FROM akaze'''
+def import_get_all_data():
+    cursor = conn_import.cursor()
+    query = '''
+    SELECT id, akaze_features
+    FROM akaze
+    '''
     cursor.execute(query)
     all_rows = cursor.fetchall()
-    return list(map(lambda el:el[0],all_rows))  
+    return list(map(lambda el:(el[0],convert_array(el[1])),all_rows))
 
 def convert_array(text):
     out = io.BytesIO(text)
     out.seek(0)
     return np.load(out)
 
-def get_akaze_features_by_id(id):
-    cursor = conn.cursor()
-    query = '''
-    SELECT akaze_features
-    FROM akaze
-    WHERE id = (?)
-    '''
-    cursor.execute(query,(id,))
-    all_rows = cursor.fetchone()
-    return all_rows[0]  
-
 def train():
     all_descriptors=[]
-    all_ids=get_all_ids()
-    for id in all_ids:
-        x=convert_array(get_akaze_features_by_id(id))
-        all_descriptors.append(x)
+    all_data=import_get_all_data()
+    for x in all_data:
+        all_descriptors.append(x[1])
     all_descriptors=np.concatenate(all_descriptors, axis=0)
 
     d=61*8
@@ -44,5 +35,5 @@ def train():
     index = faiss.IndexBinaryIVF(quantizer, d, centroids)
     index.nprobe = 8
     index.train(all_descriptors)
-    faiss.write_index_binary(index, "./" + "trained.index")
+    faiss.write_index_binary(index, "./" + "trained_import.index")
 train()

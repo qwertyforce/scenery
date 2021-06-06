@@ -23,7 +23,14 @@ FIND_MIRRORED=True
 
 def init_index():
     global index,POINT_ID
-    index = faiss.read_index_binary("trained.index")
+    try:
+        index = faiss.read_index_binary("trained.index")
+    except:
+        d=61*8
+        quantizer = faiss.IndexBinaryFlat(d)
+        index = faiss.IndexBinaryIVF(quantizer, d, 1)
+        index.nprobe = 1
+        index.train(np.array([np.zeros(61)],dtype=np.uint8))
     all_ids=get_all_ids()
     for image_id in tqdm(all_ids):
         features = convert_array(get_akaze_features_by_id(image_id))
@@ -208,14 +215,13 @@ def akaze_reverse_search(img,mirrored=False):
             if sorted_levels[-1][1] >= levels_threshold[i]:
                 print({"data": sorted_levels[-1], "level": i})
                 return [sorted_levels[-1][0]]
-    sorted_all_points=sorted(all_points.items(), key=lambda item: item[1])
-    print(sorted_all_points)
-    median_number_of_points=median(sorted_all_points)
-    print(f'median = {median_number_of_points}')
-    if len(sorted_all_points)>=2 and sorted_all_points[-1][1]>=10:
-        if((sorted_all_points[-1][1]/median_number_of_points)>=3):
-            print(sorted_all_points[-1])
-            return [sorted_all_points[-1][0]]
+    if len(all_points)>=2:
+        sorted_all_points=sorted(all_points.items(), key=lambda item: item[1])
+        median_number_of_points=median(sorted_all_points)
+        if sorted_all_points[-1][1]>=10:
+            if((sorted_all_points[-1][1]/median_number_of_points)>=3):
+                print(sorted_all_points[-1])
+                return [sorted_all_points[-1][0]]
     return []
 
 

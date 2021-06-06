@@ -3,7 +3,6 @@ import clip
 from os import listdir
 import numpy as np
 from PIL import Image
-from joblib import Parallel, delayed
 import sqlite3
 import io
 conn = sqlite3.connect('NN_features.db')

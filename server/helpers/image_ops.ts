@@ -12,7 +12,7 @@ import {unlink as fs_unlink_callback} from 'fs'
 
 import FileType from 'file-type'
 import path from "path"
-const PATH_TO_IMAGES = path.join(process.cwd(), 'public', 'images')
+const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
 
 async function reverse_search(image: Buffer) {
   const form = new FormData();
@@ -113,9 +113,9 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
   if (found_img) {
     return `Image with the same sha256 is already in the db. Image id = ${found_img.id} `
   }
-  if(!tags.includes("bypass_dup_check")){
-    const res=await reverse_search(image_buffer)
-    if(res.length!==0){
+  if (!tags.includes("bypass_dup_check")) {
+    const res = await reverse_search(image_buffer)
+    if (res.length !== 0) {
       return `Image with the same phash/akaze descriptors is already in the db. Image id = ${res[0]} `
     }
   }
@@ -149,6 +149,42 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     console.log(`VP calc=${res[3].status}`)
     console.log(`OK. New image_id: ${new_image_id}`)
     return `Success! Image id = ${new_image_id}`
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function import_image_without_check(image_buffer: Buffer, tags: string[] = [], source_url = "") {
+  const sha256_hash = await crypto_ops.image_buffer_sha256_hash(image_buffer)
+  const found_img = await db_ops.image_ops.find_image_by_sha256(sha256_hash)
+  if (found_img) {
+    return `Image with the same sha256 is already in the db. Image id = ${found_img.id} `
+  }
+  try {
+    const mime_type = (await FileType.fromBuffer(image_buffer))?.mime
+    let file_ext = ""
+    switch (mime_type) {
+      case "image/png":
+        file_ext = "png"
+        break
+      case "image/jpeg":
+        file_ext = "jpg"
+        break
+    }
+    const metadata = await sharp(image_buffer).metadata()
+    const size = metadata.size || 10
+    const height = metadata.height || 10
+    const width = metadata.width || 10
+    const orientation = get_orientation(height, width)
+    tags.push(orientation)
+
+    const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
+    const author = await parse_author(tags)
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
+    await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
+    await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
+    console.log(`OK. New image_id: ${new_image_id}`)
+    return new_image_id
   } catch (error) {
     console.error(error);
   }
@@ -194,5 +230,6 @@ export default {
   reverse_search,
   hist_get_similar_images_by_id,
   calculate_all_image_features,
+  import_image_without_check,
   delete_all_image_features
 }

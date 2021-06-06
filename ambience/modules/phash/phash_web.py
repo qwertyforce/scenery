@@ -17,12 +17,19 @@ IMAGE_PATH="./../../../public/images"
 
 def init_index():
     global index
-    index = faiss.read_index_binary("trained.index")
+    try:
+        index = faiss.read_index_binary("trained.index")
+    except:
+        d=32*8
+        quantizer = faiss.IndexBinaryFlat(d)
+        index = faiss.IndexBinaryIVF(quantizer, d, 1)
+        index.nprobe = 1
+        index.train(np.array([np.zeros(32)],dtype=np.uint8))
     all_data=get_all_data()
     image_ids=np.array([np.int64(x[0]) for x in all_data])
     phashes=np.array([x[1] for x in all_data])
-    print(phashes.shape)
-    index.add_with_ids(phashes, image_ids)    
+    if len(all_data)!=0:
+        index.add_with_ids(phashes, image_ids)    
     print("Index is ready")
        
 def read_img_file(image_data):

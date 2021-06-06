@@ -32,7 +32,8 @@ def init_index():
         ids.append(image['image_id'])
     ids=np.array(ids)
     features=np.array(features).squeeze()
-    index.add_items(features,ids)
+    if(len(features)!=0):
+        index.add_items(features,ids)
     print("Index is ready")
        
 def read_img_file(image_data):
