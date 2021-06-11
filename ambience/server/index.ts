@@ -1,6 +1,6 @@
 import express from 'express'
 import { Request, Response } from 'express';
-// import bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import multer from 'multer'
 import config from './../config/config'
 import httpProxy from 'http-proxy'
@@ -157,7 +157,7 @@ app.post('/calculate_all_image_features', [upload_100MB.single('image')], async 
     }
 })
 
-app.post('/delete_all_image_features', async (req: Request, res: Response) => {
+app.post('/delete_all_image_features',[bodyParser.json()], async (req: Request, res: Response) => {
     const image_id = parseInt(req.body.image_id)
     if (typeof image_id === "number") {
         const results = await delete_image_features(image_id)

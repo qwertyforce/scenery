@@ -100,5 +100,6 @@ new_images=[new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
 for batch in new_images:
     hists=Parallel(n_jobs=-1)(delayed(calc_hist)(file_name) for file_name in batch)
     hists= [i for i in hists if i] #remove None's
+    print("pushing data to db")
     conn.executemany('''INSERT INTO rgb_hists(id, rgb_histogram) VALUES (?,?)''', hists)
     conn.commit()

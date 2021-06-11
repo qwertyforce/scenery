@@ -13,12 +13,11 @@ import sqlite3
 import io
 conn = sqlite3.connect('rgb_histograms.db')
 IMAGE_PATH="./../../../public/images"
-FLAT_INDEX_IDX=0
 sub_index = faiss.IndexFlat(4096, faiss.METRIC_L1)
 index_id_map = faiss.IndexIDMap2(sub_index)
 
 def init_index():
-    global index_flat,FLAT_INDEX_IDX
+    global index_flat
     all_ids=get_all_ids()
     for image_id in tqdm(all_ids):
         features = convert_array(get_rgb_histogram_by_id(image_id))
@@ -121,7 +120,6 @@ async def read_root():
 
 @app.post("/calculate_hist_features")
 async def calculate_hist_features_handler(image: bytes = File(...),image_id: str = Form(...)):
-    global FLAT_INDEX_IDX
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
     index_id_map.add_with_ids(np.array([features]), np.int64([image_id]))

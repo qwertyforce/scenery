@@ -122,7 +122,7 @@ def get_text_features(text):
     with torch.no_grad():
         text_features = model.encode_text(text_tokenized)
         text_features /= text_features.norm(dim=-1, keepdim=True)
-    return text_features
+    return text_features.numpy()
     
 app = FastAPI()
 @app.get("/")

@@ -4,6 +4,15 @@ import imagesize
 dir_path = path.dirname(path.realpath(__file__))
 print(dir_path)
 
+def clean_up():
+    print("=========CLEANING UP=========")
+    if path.exists("./import_filename_to_img_id.txt"): remove("./import_filename_to_img_id.txt")
+    if path.exists("./modules/phash/trained_import.index"): remove("./modules/phash/trained_import.index")
+    if path.exists("./modules/phash/import_phashes.db"): remove("./modules/phash/import_phashes.db")
+    if path.exists("./modules/akaze/import_akaze.db"): remove("./modules/akaze/import_akaze.db")
+    if path.exists("./modules/akaze/trained_import.index"): remove("./modules/akaze/trained_import.index")
+ 
+clean_up()    
 print("=========DELETING LOW-RES IMAGES=========")
 IMAGE_PATH="./../import/images"
 file_names=listdir(IMAGE_PATH)
@@ -14,10 +23,15 @@ for file_name in file_names:
         print(f'deleted {file_name}')
         remove(img_path)
         
+print("=========DEDUP SHA256=========")
+subprocess.call(["node","dedupe_import_sha256.js"],shell=True,cwd="../dist/server/bulk_import_images/")
+
 print("=========GENERATING IMPORT PHASHES=========")
 subprocess.call(["python3","generate_import_phashes.py"],shell=True,cwd="./modules/phash/")
 print("=========TRAIN IVF FOR IMPORT=========")
 subprocess.call(["conda", "activate", "my_new_environment","&&","python","train_ivf_import.py"],shell=True,cwd="./modules/phash/")
+print("=========PHASH DEDUP INTERNAL=========")
+subprocess.call(["conda", "activate", "my_new_environment","&&","python","phash_dedup_internal.py"],shell=True,cwd="./modules/phash/")
 print("=========PHASH DEDUP=========")
 subprocess.call(["conda", "activate", "my_new_environment","&&","python","phash_dedup.py"],shell=True,cwd="./modules/phash/")
 
@@ -45,12 +59,8 @@ print("=========GENERATING NN FEATURES=========")
 subprocess.call(["python3","clip_generate_vectors.py"],shell=True,cwd="./modules/nn/")
 print("=========GENERATING AKAZE DESCRIPTORS=========")
 subprocess.call(["python3","generate_rgb_histograms.py"],shell=True,cwd="./modules/histogram/")
+clean_up()
 
-remove("./import_filename_to_img_id.txt")
-remove("./modules/phash/trained_import.index")
-remove("./modules/phash/import_phashes.db")
-remove("./modules/akaze/trained_import.index")
-remove("./modules/akaze/import_akaze.db")
 
 
 

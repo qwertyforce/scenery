@@ -38,7 +38,7 @@ const PASSWORD_RECOVERY_COLLECTION=client.db(db_main).collection("password_recov
 
 //////////////////////////////////////////////////////////////////////////////////////////////////CREATE INDEXES
 client.db(db_main).collection("images").createIndex({"id": 1}, {unique: true})
-// client.db(db_main).collection("images").createIndex({"sha256": 1}, {unique: true})
+client.db(db_main).collection("images").createIndex({"sha256": 1}, {unique: true})
 client.db(db_main).collection("images").createIndex({"tags": 1})
 client.db(db_main).collection("not_activated_users").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})
 client.db(db_main).collection("password_recovery").createIndex({"createdAt": 1}, {expireAfterSeconds: 86400})

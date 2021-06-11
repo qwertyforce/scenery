@@ -6,14 +6,14 @@ from os import listdir,remove
 from joblib import Parallel, delayed
 import sqlite3
 import io
-conn = sqlite3.connect('import_phashes.db')
+conn = sqlite3.connect('phashes.db')
 IMAGE_PATH="./../../../import/images"
 
 def create_table():
 	cursor = conn.cursor()
 	query = '''
 	    CREATE TABLE IF NOT EXISTS phashes(
-	    	id TEXT NOT NULL UNIQUE PRIMARY KEY, 
+	    	id INTEGER NOT NULL UNIQUE PRIMARY KEY, 
 	    	phash BLOB NOT NULL
 	    )
 	'''
@@ -51,6 +51,18 @@ def add_descriptor(id,phash):
 	query = '''INSERT INTO phashes(id, phash) VALUES (?,?)'''
 	cursor.execute(query,(id,phash))
 	conn.commit()
+
+def sync_db():
+    file_names=listdir(IMAGE_PATH)
+    ids_in_db=set(get_all_ids())
+
+    for file_name in file_names:
+        file_id=int(file_name[:file_name.index('.')])
+        if file_id in ids_in_db:
+            ids_in_db.remove(file_id)
+    for id in ids_in_db:
+        delete_descriptor_by_id(id)   #Fix this
+        print(f"deleting {id}")
 
 @jit(nopython=True)
 def diff(dct, hash_size):
@@ -90,18 +102,8 @@ def get_phash(query_image):
     phash=bit_list_to_32_uint8(bit_list_256)
     return phash
 
-def sync_db():
-    file_names=listdir(IMAGE_PATH)
-    ids_in_db=set(get_all_ids())
-
-    for file_name in file_names:
-        if file_name in ids_in_db:
-            ids_in_db.remove(file_name)
-    for id in ids_in_db:
-        delete_descriptor_by_id(id)   #Fix this
-        print(f"deleting {id}")
-
 def calc_phash(file_name):
+    file_id=int(file_name[:file_name.index('.')])
     img_path=IMAGE_PATH+"/"+file_name
     query_image=cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)
     if query_image is None:
@@ -111,14 +113,16 @@ def calc_phash(file_name):
     phash=get_phash(query_image) 
     phash_bin=adapt_array(phash)
     print(file_name)
-    return (file_name,phash_bin)
-
+    return (file_id,phash_bin)
+    
 file_names=listdir(IMAGE_PATH)
 create_table()
 sync_db()
 new_images=[]
+
 for file_name in file_names:
-    if check_if_exists_by_id(file_name):
+    file_id=int(file_name[:file_name.index('.')])
+    if check_if_exists_by_id(file_id):
         continue
     new_images.append(file_name)
 

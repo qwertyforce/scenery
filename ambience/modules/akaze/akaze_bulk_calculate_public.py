@@ -5,14 +5,14 @@ import math
 from joblib import Parallel, delayed
 import sqlite3
 import io
-conn = sqlite3.connect('import_akaze.db')
-IMAGE_PATH="./../../../import/images"
+conn = sqlite3.connect('akaze.db')
+IMAGE_PATH="./../../../public/images"
 
 def create_table():
 	cursor = conn.cursor()
 	query = '''
 	    CREATE TABLE IF NOT EXISTS akaze(
-	    	id TEXT NOT NULL UNIQUE PRIMARY KEY, 
+	    	id INTEGER NOT NULL UNIQUE PRIMARY KEY, 
 	    	akaze_features BLOB NOT NULL
 	    )
 	'''
@@ -60,7 +60,7 @@ def resize_img_to_array(img):
     return img
 
 def calculate_descr(img):
-    AKAZE = cv2.AKAZE_create(threshold=0.0005)  #can't serialize, hence init is here
+    AKAZE = cv2.AKAZE_create()  #can't serialize, hence init is here
     img=resize_img_to_array(img)
     height= img.shape[0]
     width= img.shape[1]
@@ -100,30 +100,31 @@ def sync_db():
     ids_in_db=set(get_all_ids())
 
     for file_name in file_names:
-        if file_name in ids_in_db:
-            ids_in_db.remove(file_name)
+        file_id=int(file_name[:file_name.index('.')])
+        if file_id in ids_in_db:
+            ids_in_db.remove(file_id)
     for id in ids_in_db:
         delete_descriptor_by_id(id)   #Fix this
         print(f"deleting {id}")
 
 def calc_features(file_name):
+    file_id=int(file_name[:file_name.index('.')])
     img_path=IMAGE_PATH+"/"+file_name
     query_image=cv2.imread(img_path,0)
     if query_image is None:
         return None
     descs=calculate_descr(query_image)
-    if descs is None:
-        return None
     descs_bin=adapt_array(descs)
     print(file_name)
-    return (file_name,descs_bin)
+    return (file_id,descs_bin)
 
 file_names=listdir(IMAGE_PATH)
 create_table()
 sync_db()
 new_images=[]
 for file_name in file_names:
-    if check_if_exists_by_id(file_name):
+    file_id=int(file_name[:file_name.index('.')])
+    if check_if_exists_by_id(file_id):
         continue
     new_images.append(file_name)
 

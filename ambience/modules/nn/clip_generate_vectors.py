@@ -102,5 +102,6 @@ for batch in new_images:
     for file_name in batch:
         batch_features.append(calc_nn_features(file_name))
     batch_features= [i for i in batch_features if i] #remove None's
+    print("pushing data to db")
     conn.executemany('''INSERT INTO clip(id, clip_features) VALUES (?,?)''', batch_features)
     conn.commit()

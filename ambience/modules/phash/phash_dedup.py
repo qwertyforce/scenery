@@ -58,11 +58,14 @@ file_id_to_file_name_map={}
 
 def dedup():
     global index
-    index = faiss.read_index_binary("trained_import.index")
+    try:
+      index = faiss.read_index_binary("trained.index")
+    except:
+      index = faiss.read_index_binary("trained_import.index")
     all_data=get_all_data()
-    image_ids=np.array([np.int64(x[0]) for x in all_data])
-    phashes=np.array([x[1] for x in all_data])
     if len(all_data)!=0:
+        image_ids=np.array([np.int64(x[0]) for x in all_data])
+        phashes=np.array([x[1] for x in all_data])
         index.add_with_ids(phashes, image_ids)   
 
     print("Index is ready")
@@ -71,13 +74,11 @@ def dedup():
         filename=x[0]
         features=x[1]
         res=phash_reverse_search(features)
-        if len(res)==0:
-            index.add(np.array([features]))
-        else:
+        if len(res)!=0:
             print(f'duplicate {filename} - {res}')
             print(f'deleting {filename}')
             remove(f'{IMAGE_PATH}/{x[0]}')
-
+            
 create_table()
 dedup()
 
