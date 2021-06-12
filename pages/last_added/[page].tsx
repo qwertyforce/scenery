@@ -40,7 +40,7 @@ export default function LastAddedPage(props: LastAddedPageProps){
       <AppBar />
       {/* 
   // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
+      <Gallery targetRowHeight={200} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
       <div className={classes.pagination}>
         {/* // @ts-ignore */}
         <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {

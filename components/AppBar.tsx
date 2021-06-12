@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('md')]: {
-      width: '20ch',
+      width: '30ch',
     },
   },
   sub:{
@@ -96,7 +96,7 @@ export default function DenseAppBar() {
   const router = useRouter()
   const mobileMenuId = 'menu-mobile';
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<Element|null>(null);
-  const placeholders=["tag1&&(tag2||tag3)","fluttershy in the forest"]
+  const placeholders=["tag1&&(tag2||tag3)","a picture of a winter forest"]
   const [tags, setTags] = useState(router.query.q||'');
   const [searchPlaceholer, setSearchPlaceholer] = useState(placeholders[Number(router.query.semantic)||0]);
   const [semanticModeChecked, setSemanticModeChecked] = useState(Boolean(Number(router.query.semantic))||false)
@@ -153,7 +153,7 @@ export default function DenseAppBar() {
         <Toolbar variant="dense" className={classes.tool_bar}>
           <Typography variant="h6" color="inherit">
           <Link href={config.domain} color="inherit" underline="none">
-             OnlyComfy
+             Scenery
            </Link>
           </Typography>
           <div className={classes.search}>

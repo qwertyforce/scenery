@@ -11,11 +11,10 @@ export default function About() {
       <Container maxWidth="sm">
         <Box my={4}>
           <Typography variant="h4" component="h1" gutterBottom>
-            OnlyComfy.art
+            scenery.cx
         </Typography>
-      High quality comfy pony scenery art.
+      High quality scenery art.
         <br />
-        onlycomfy@gmail.com
       </Box>
       </Container>
     </div>
