@@ -12,8 +12,8 @@ Python + SQLite + FastAPI + OpenCV + CLIP <br>
 hnswlib + faiss<br>
 
 ## features <br>
-- Search by tags (supports logical expressions) (https://onlycomfy.art/search_syntax) ([logical expression parser](https://github.com/qwertyforce/ambience/))
-- Semantic text search (using [CLIP](https://github.com/openai/CLIP)) (https://onlycomfy.art/search_syntax) <br>
+- Search by tags (supports logical expressions) (https://scenery.cx/search_syntax) ([logical expression parser](https://github.com/qwertyforce/ambience/))
+- Semantic text search (using [CLIP](https://github.com/openai/CLIP)) (https://scenery.cx/search_syntax) <br>
 - You can find images with similar tags. <br>
 - You can find images with similar color palette. <br>
 - You can find visually/semantically similar images ([CLIP](https://github.com/openai/CLIP)). <br>
