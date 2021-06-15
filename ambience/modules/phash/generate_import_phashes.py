@@ -1,4 +1,4 @@
-import scipy.fft
+from scipy.fft import dct
 import cv2
 import numpy as np
 from numba import jit
@@ -62,8 +62,8 @@ def diff(dct, hash_size):
 def fast_phash(image, hash_size=16, highfreq_factor=4):
     img_size = hash_size * highfreq_factor
     image = cv2.resize(image, (img_size, img_size), interpolation=cv2.INTER_LINEAR)  #cv2.INTER_AREA
-    dct = scipy.fft.dct(scipy.fft.dct(image, axis=0), axis=1)
-    return diff(dct, hash_size)
+    dct_data = dct(dct(image, axis=0), axis=1)
+    return diff(dct_data, hash_size)
 
 @jit(nopython=True)
 def bit_list_to_32_uint8(bit_list_256):
