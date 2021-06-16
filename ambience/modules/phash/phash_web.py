@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, File,Form, HTTPException
 from os import listdir
 import numpy as np
-import scipy.fft
+from scipy.fft import dct
 from numba import jit
 import cv2
 import sqlite3
@@ -63,8 +63,8 @@ def diff(dct, hash_size):
     return diff.flatten()
 
 def fast_phash(resized_image,hash_size):
-    dct = scipy.fft.dct(scipy.fft.dct(resized_image, axis=0), axis=1)
-    return diff(dct, hash_size)
+    dct_data = dct(dct(resized_image, axis=0), axis=1)
+    return diff(dct_data, hash_size)
 
 def get_phash(image_buffer,hash_size=16, highfreq_factor=4):
     img_size = hash_size * highfreq_factor
