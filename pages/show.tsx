@@ -20,7 +20,7 @@ export default function Show(props: ShowProps) {
       <AppBar />
       {/* 
 // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={PhotoComponent} />   {/* FIX THIS SHIT */}
+      <Gallery targetRowHeight={200} photos={props.photos} renderImage={PhotoComponent} />   {/* FIX THIS SHIT */}
     </div>
   )
 }
