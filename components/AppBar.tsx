@@ -91,24 +91,51 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+
+function Search(props: any) {
+  const placeholders = ["tag1&&(tag2||tag3)", "a picture of a winter forest"]
+  const classes = useStyles();
+  const router = useRouter()
+  const [tags, setTags] = useState(router.query.q || '');
+  const searchPlaceholer = placeholders[Number(router.query.semantic || Number(props.semanticModeChecked) )]
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode === 13 || e.which === 13) {
+      router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&&semantic=${Number(props.semanticModeChecked).toString()}`)
+    }
+  };
+
+  return (
+    <div className={classes.search}>
+      <div className={classes.searchIcon}>
+        <SearchIcon />
+      </div>
+      <InputBase
+        placeholder={searchPlaceholer}
+        onChange={(e) => setTags(e.target.value)}
+        onKeyPress={(e) => handleKeyPress(e)}
+        classes={{
+          root: classes.inputRoot,
+          input: classes.inputInput,
+        }}
+        inputProps={{ 'aria-label': 'search' }}
+        value={tags}
+      />
+    </div>
+    )
+}
+
+
 export default function DenseAppBar() {
   const classes = useStyles();
   const router = useRouter()
   const mobileMenuId = 'menu-mobile';
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<Element|null>(null);
-  const placeholders=["tag1&&(tag2||tag3)","a picture of a winter forest"]
-  const [tags, setTags] = useState(router.query.q||'');
-  const [searchPlaceholer, setSearchPlaceholer] = useState(placeholders[Number(router.query.semantic)||0]);
+
   const [semanticModeChecked, setSemanticModeChecked] = useState(Boolean(Number(router.query.semantic))||false)
   const toggleSemanticModeChecked = () => {
-    setSearchPlaceholer(placeholders[Number(!semanticModeChecked)])
     setSemanticModeChecked(!semanticModeChecked)
   }
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.keyCode === 13 || e.which === 13) {
-       router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&&semantic=${Number(semanticModeChecked).toString()}`)
-    }
-  };
+  
   const handleMobileMenuOpen = (event:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
@@ -119,6 +146,7 @@ export default function DenseAppBar() {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const renderMobileMenu = (
     <Menu
+      className={classes.sectionMobile}
       anchorEl={mobileMoreAnchorEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       id={mobileMenuId}
@@ -145,8 +173,6 @@ export default function DenseAppBar() {
     </Menu>
   );
 
-
-
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.app_bar}>
@@ -156,22 +182,7 @@ export default function DenseAppBar() {
              Scenery
            </Link>
           </Typography>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder={searchPlaceholer}
-              onChange={(e)=>setTags(e.target.value)}
-              onKeyPress={(e)=>handleKeyPress(e)}
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-              value={tags}
-            />
-          </div>
+        <Search  semanticModeChecked={semanticModeChecked}/>
           <div className={classes.sectionDesktop}>
             <div className={classes.search_mode_switch}>
               <span>tags</span>
