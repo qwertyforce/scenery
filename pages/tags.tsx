@@ -29,7 +29,7 @@ export default function Tags(props: PropsTags) {
   const Orientation_tags=[]
   let Author_tags=[]  
   for (const {_id, count} of props.tags) {
-    const tag = <Chip label={`${_id} (${count})`} key={_id} className={classes.chip} component="a" href={`/search?q=${_id}`} clickable />
+    const tag = <Chip label={`${_id} (${count})`} key={_id} className={classes.chip} component="a" href={`/search?q=${_id}&semantic=0`} clickable />
     if (Seasons.includes(_id)) {
       Seasons_tags.push(tag)
     }else if(Orientation.includes(_id)){
@@ -48,6 +48,7 @@ export default function Tags(props: PropsTags) {
       <Typography variant="h6" gutterBottom>
         Seasons
       </Typography>
+      {Seasons_tags}
       <Typography variant="h6" gutterBottom>
         Orientation
       </Typography>

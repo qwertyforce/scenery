@@ -55,7 +55,7 @@ interface ImageProps{
  export default function Image(props: ImageProps) {
   const classes = useStyles();
 
-  const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}`} clickable />);
+  const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}&semantic=0`} clickable />);
   return (
     <div className={classes.root}>
       <AppBar />

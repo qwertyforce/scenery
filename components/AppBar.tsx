@@ -100,7 +100,7 @@ function Search(props: any) {
   const searchPlaceholer = placeholders[Number(router.query.semantic || Number(props.semanticModeChecked) )]
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-      router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&&semantic=${Number(props.semanticModeChecked).toString()}`)
+      router.push(`${config.domain}/search?q=${encodeURIComponent((tags as string))}&semantic=${Number(props.semanticModeChecked).toString()}`)
     }
   };
 
