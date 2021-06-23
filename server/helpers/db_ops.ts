@@ -77,8 +77,12 @@ async function check_if_image_exists_by_id(id:number){
     return Boolean(IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
 }
 
+async function set_tags_to_image_by_id(id:number,tags:string[]){
+    await IMAGES_COLLECTION.updateOne({id:id}, { $set: {tags:tags}})
+}
+
 async function add_tags_to_image_by_id(id:number,tags:string[]){
-    await IMAGES_COLLECTION.updateOne({id:id}, { $push: {tags:{ $each:tags}}})
+    await IMAGES_COLLECTION.updateOne({id:id}, { $addToSet: {tags:{ $each:tags}}})
 }
 
 async function update_image_data_by_id(id:number,update:Record<string,unknown>){
@@ -294,6 +298,7 @@ async function create_new_user_not_activated(email:string, pass:string, token:st
 export default {
     image_ops: {
         get_tags_stats,
+        set_tags_to_image_by_id,
         get_images_with_similar_tags,
         get_number_of_unique_tags,
         get_number_of_unique_authors,
