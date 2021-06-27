@@ -31,6 +31,9 @@ def get_akaze_features_by_id(id):
 def train():
     all_descriptors=[]
     all_ids=get_all_ids()
+    if len(all_ids)==0:
+        print("No images. exit()")
+        exit()
     for id in all_ids:
         x=convert_array(get_akaze_features_by_id(id))
         all_descriptors.append(x)

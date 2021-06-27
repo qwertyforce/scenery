@@ -97,7 +97,11 @@ def akaze_reverse_search(target_features):
 
 def dedup():
     global index,POINT_ID
-    index = faiss.read_index_binary("trained_import.index")
+    try:
+        index = faiss.read_index_binary("trained_import.index")
+    except:
+        print("trained_import.index not found. exit()")
+        exit()
     all_data=get_all_data()
     for obj in all_data:
         image_id=obj[0]

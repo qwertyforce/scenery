@@ -58,18 +58,24 @@ file_id_to_file_name_map={}
 
 def dedup():
     global index
+    all_data=get_all_data()
+    if len(all_data)==0:
+        print("all_data no images. exit()")
+        exit()
     try:
       index = faiss.read_index_binary("trained.index")
     except:
       index = faiss.read_index_binary("trained_import.index")
-    all_data=get_all_data()
-    if len(all_data)!=0:
-        image_ids=np.array([np.int64(x[0]) for x in all_data])
-        phashes=np.array([x[1] for x in all_data])
-        index.add_with_ids(phashes, image_ids)   
+
+    image_ids=np.array([np.int64(x[0]) for x in all_data])
+    phashes=np.array([x[1] for x in all_data])
+    index.add_with_ids(phashes, image_ids)   
 
     print("Index is ready")
     import_all_data=import_get_all_data()
+    if len(import_all_data)==0:
+        print("import_all_data no images. exit()")
+        exit()
     for x in import_all_data:
         filename=x[0]
         features=x[1]

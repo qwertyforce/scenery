@@ -26,10 +26,14 @@ def get_all_data():
 
 
 create_table()
-with open('./../../import_filename_to_img_id.txt') as json_file:
-    filename_to_img_id_map = json.load(json_file)
-akaze_data_import=get_all_data()
+try:
+    with open('./../../import_filename_to_img_id.txt') as json_file:
+        filename_to_img_id_map = json.load(json_file)
+except:
+    print("import_filename_to_img_id.txt not found")
+    exit()
 
+akaze_data_import=get_all_data()
 img_id_akaze=[]
 for akaze_data in akaze_data_import:
     filename=akaze_data[0]

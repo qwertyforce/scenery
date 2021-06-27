@@ -23,6 +23,9 @@ def convert_array(text):
 def train():
     all_descriptors=[]
     all_data=import_get_all_data()
+    if len(all_data)==0:
+        print("No images. exit()")
+        exit()
     for x in all_data:
         all_descriptors.append(x[1])
     all_descriptors=np.concatenate(all_descriptors, axis=0)
