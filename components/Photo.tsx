@@ -19,12 +19,12 @@ const Photo = ({ index, onClick, photo, margin, direction, top, left, key }:{ in
   };
 
   return (
-      <Link key={key} href={key} prefetch={false}>
-    <img
-      style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
-      {...photo}
-      onClick={onClick ? handleClick : null}
-    />
+    <Link key={key} href={key} prefetch={false}>
+      <img
+        style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
+        {...photo}
+        onClick={onClick ? handleClick : null}
+      />
     </Link>
   );
 };

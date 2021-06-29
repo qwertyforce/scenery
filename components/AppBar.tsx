@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { fade,makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -15,6 +15,7 @@ import { useRouter } from 'next/router'
 import MoreIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import {DataContext} from "./DataContext"
 
 const useStyles = makeStyles((theme) => ({
   app_bar:{
@@ -22,13 +23,11 @@ const useStyles = makeStyles((theme) => ({
   },
   root: {
     flexGrow: 1,
-    marginBottom:'10px'
+    marginBottom:'10px',
+    marginRight:"0px"
   },
-  tool_bar:{
-   minHeight:"36px!"
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
+  tool_bar: {
+    paddingRight: "6px",
   },
   search: {
     position: 'relative',
@@ -38,12 +37,8 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: fade(theme.palette.common.white, 0.25),
     },
     marginRight: theme.spacing(2),
-    marginLeft: theme.spacing(2),
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
-      width: 'auto',
-    },
+    marginLeft:"0px",
+    width: 'auto',
   },
   searchIcon: {
     padding: theme.spacing(0, 2),
@@ -57,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   inputRoot: {
     color: 'inherit',
   },
-  search_mode_switch:{
+  switch:{
     display:"inline-flex",
     alignItems:"center"
   },
@@ -88,6 +83,13 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       display: 'none',
     },
+  },
+  Logo:{
+    marginRight:"16px",
+    display:"inherit",
+    [theme.breakpoints.down(350)]: {
+      display: 'none',
+    }
   }
 }));
 
@@ -124,8 +126,45 @@ function Search(props: any) {
     )
 }
 
+function MobileMenu(props:any){
+  const classes = useStyles();
+  return(
+    <Menu
+      anchorEl={props.mobileMoreAnchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      id={'menu-mobile'}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={props.isMobileMenuOpen}
+      onClose={props.handleMobileMenuClose}
+    >
+      <MenuItem className={classes.sectionMobile} component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
+        <HelpOutlineIcon />
+        <p style={{ paddingLeft: "5px" }}>Search syntax</p>
+      </MenuItem>
+      <MenuItem className={classes.sectionMobile}>
+        <div className={classes.switch}>
+          <span>tags</span>
+          <Switch color="secondary" checked={props.semanticModeChecked} onChange={props.toggleSemanticModeChecked} />
+          <span>semantic<sub className={classes.sub}>beta</sub></span>
+        </div>
+      </MenuItem>
+      <MenuItem className={classes.sectionMobile} component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
+        <ImageSearchIcon />
+        <p style={{ paddingLeft: "5px" }}>Reverse Image Search</p>
+      </MenuItem>
+      <MenuItem>
+        <div className={classes.switch}>
+          <span>use ipfs</span>
+          <Switch color="secondary" checked={props.dataContext?.useIPFS} onChange={props.dataContext?._handleSwitchUseIPFS} />
+        </div>
+      </MenuItem>
+    </Menu>
+  )
+}
 
 export default function DenseAppBar() {
+  const dataContext = useContext(DataContext); 
   const classes = useStyles();
   const router = useRouter()
   const mobileMenuId = 'menu-mobile';
@@ -139,52 +178,24 @@ export default function DenseAppBar() {
   const handleMobileMenuOpen = (event:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
+
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
 
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const renderMobileMenu = (
-    <Menu
-      className={classes.sectionMobile}
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem component={Link} color="inherit" aria-label="search_syntax" href={`${config.domain}/search_syntax`}>
-        <HelpOutlineIcon />
-        <p style={{ paddingLeft: "5px" }}>Search syntax</p>
-      </MenuItem>
-      <MenuItem>
-      <div className={classes.search_mode_switch}>
-              <span>tags</span>
-              <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
-              <span>semantic<sub className={classes.sub}>beta</sub></span>
-            </div>
-      </MenuItem>
-      <MenuItem component={Link} color="inherit" aria-label="reverse_search" href={`${config.domain}/reverse_search`}>
-        <ImageSearchIcon />
-        <p style={{ paddingLeft: "5px" }}>Reverse Image Search</p>
-      </MenuItem>
-    </Menu>
-  );
-
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.app_bar}>
         <Toolbar variant="dense" className={classes.tool_bar}>
-          <Typography variant="h6" color="inherit">
+          <Typography variant="h6" color="inherit" className={classes.Logo}>
           <Link href={config.domain} color="inherit" underline="none">
              Scenery
            </Link>
           </Typography>
-        <Search  semanticModeChecked={semanticModeChecked}/>
+          <Search semanticModeChecked={semanticModeChecked} />
           <div className={classes.sectionDesktop}>
-            <div className={classes.search_mode_switch}>
+            <div className={classes.switch}>
               <span>tags</span>
               <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
               <span>semantic<sub className={classes.sub}>beta</sub></span>
@@ -196,7 +207,7 @@ export default function DenseAppBar() {
               <ImageSearchIcon />
             </IconButton>
           </div>
-          <div className={classes.sectionMobile}>
+          <div style={{marginLeft:"auto"}}>
             <IconButton
               aria-label="show more"
               aria-controls={mobileMenuId}
@@ -209,7 +220,7 @@ export default function DenseAppBar() {
           </div>
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
+      <MobileMenu {...{dataContext,semanticModeChecked,mobileMoreAnchorEl,isMobileMenuOpen,handleMobileMenuClose,toggleSemanticModeChecked}}/>
     </div>
   );
 }
