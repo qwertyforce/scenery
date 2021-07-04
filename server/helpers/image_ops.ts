@@ -2,17 +2,37 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import db_ops from './db_ops';
 import crypto_ops from './crypto_ops';
-import thumbnail_ops from './thumbnail_ops'
 import sharp from 'sharp'
 import axios from 'axios';
 import FormData from 'form-data'
 import config from '../../config/config'
-import {promises as fs} from 'fs'
-import {unlink as fs_unlink_callback} from 'fs'
+import { promises as fs } from 'fs'
+import { unlink as fs_unlink_callback } from 'fs'
 
 import FileType from 'file-type'
 import path from "path"
 const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
+const PATH_TO_THUMBNAILS = path.join(config.root_path, 'public', 'thumbnails')
+
+
+async function generate_thumbnail(image_src: Buffer | string) {  //buffer or path to the image
+  const metadata = await sharp(image_src).metadata()
+  if (metadata && metadata.height && metadata.width) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const x: any = {}
+    if (metadata.width > metadata.height) {
+      x.width = Math.min(metadata.width, 750)
+    } else if (metadata.width < metadata.height) {
+      x.height = Math.min(metadata.height, 750)
+    } else {
+      x.width = Math.min(metadata.width, 750)
+    }
+    const data = await sharp(image_src).resize(x).jpeg({ quality: 80 }).toBuffer()
+    return data
+  }else{
+    return null
+  }
+}
 
 async function reverse_search(image: Buffer) {
   const form = new FormData();
@@ -78,7 +98,45 @@ async function calculate_all_image_features(image_id: number, image_buffer: Buff
   }
 }
 
-async function delete_all_image_features(image_id: number){
+async function nn_get_image_tags(image_buffer: Buffer) {
+  const form = new FormData();
+  form.append('image', image_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  try {
+    const similar = await axios.post(`${config.ambience_microservice_url}/nn_get_image_tags_by_image_buffer`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return similar.data
+  } catch (err) {
+    console.log(err)
+    return []
+  }
+}
+
+async function upload_data_to_backup_server(full_paths: string[], file_buffers: Buffer[]) {
+  const form = new FormData();
+  for (const file_buffer of file_buffers) {
+    form.append('data', file_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  }
+  form.append('full_paths', JSON.stringify(full_paths))
+  try {
+    const res = await axios.post(`${config.backup_file_server_url}/upload_file`, form.getBuffer(), {
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      headers: {
+        ...form.getHeaders()
+      }
+    })
+    return res.data
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+async function delete_all_image_features(image_id: number) {
   try {
     const res = await axios.post(`${config.ambience_microservice_url}/delete_all_image_features`, { image_id: image_id })
     return res.data
@@ -99,10 +157,10 @@ function get_orientation(height: number, width: number) {
 
 async function parse_author(tags: string[]) {
   for (const tag of tags) {
-      const idx = tag.indexOf("artist:")
-      if (idx === 0) {    //tag starts with "artist:" 
-          return tag.slice(7) //strip off "artist:" 
-      }
+    const idx = tag.indexOf("artist:")
+    if (idx === 0) {    //tag starts with "artist:" 
+      return tag.slice(7) //strip off "artist:" 
+    }
   }
   return "???"
 }
@@ -129,6 +187,8 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       case "image/jpeg":
         file_ext = "jpg"
         break
+      default:
+        return "Not supported mime type"
     }
     const metadata = await sharp(image_buffer).metadata()
     const size = metadata.size || 10
@@ -139,15 +199,36 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
     const author = await parse_author(tags)
-    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
+    const generated_tags = await nn_get_image_tags(image_buffer)
+    for (const tag of generated_tags){
+      tags.push(tag)
+    }
+
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: [...new Set(tags)], sha256: sha256_hash })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
-    await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
+    const thumbnail_buffer = await generate_thumbnail(image_buffer)
+    if (!thumbnail_buffer) {
+      return "Can't generate thumbnail"
+    }
+    await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
     const res = await calculate_all_image_features(new_image_id, image_buffer)
+    if(!res){
+      return "Can't calculate_all_image_features"
+    }
     console.log(`Akaze calc=${res[0].status}`)
     console.log(`NN calc=${res[1].status}`)
     console.log(`HIST calc=${res[2].status}`)
     console.log(`VP calc=${res[3].status}`)
     console.log(`OK. New image_id: ${new_image_id}`)
+    if(config.use_backup_file_server){
+      try{
+        await upload_data_to_backup_server([`images/${new_image_id}.${file_ext}`,`thumbnails/${new_image_id}.jpg`],[image_buffer,thumbnail_buffer])
+        console.log("uploaded to backup server")
+      }catch(err){
+        console.log("backup_error")
+        console.log(err)
+      }
+    }
     return `Success! Image id = ${new_image_id}`
   } catch (error) {
     console.error(error);
@@ -182,7 +263,11 @@ async function import_image_without_check(image_buffer: Buffer, tags: string[] =
     const author = await parse_author(tags)
     await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
-    await thumbnail_ops.generate_thumbnail(image_buffer, new_image_id)
+    const thumbnail_buffer = await generate_thumbnail(image_buffer)
+    if(!thumbnail_buffer){
+      return "Can't generate thumbnail"
+    }
+    await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
     console.log(`OK. New image_id: ${new_image_id}`)
     return new_image_id
   } catch (error) {
@@ -209,7 +294,24 @@ async function delete_image(id: number) {
       if (err) return console.log(err);
       console.log('upscaled file deleted successfully');
     });
-    const res=await delete_all_image_features(id)
+
+    if(config.use_backup_file_server){
+      try {
+        await axios.post(`${config.backup_file_server_url}/delete_file`, {
+          full_paths: [
+            `images/${id}.${image.file_ext}`, `thumbnails/${id}.jpg`]
+        })
+        console.log("deleted from backup server")
+      }catch(err){
+        console.log("backup_error")
+        console.log(err)
+      }
+    }
+
+    const res = await delete_all_image_features(id)
+    if(!res){
+      return "Can't delete all_image_features"
+    }
     console.log(`Akaze del=${res[0].status}`)
     console.log(`NN del=${res[1].status}`)
     console.log(`HIST del=${res[2].status}`)

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
-import Photo from '../components/Photo'
 import Link from '../components/Link'
+import GalleryWrapper from '../components/GalleryWrapper'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 import PhotoInterface from '../types/photo'
 import build_ast from "../components/parse"
@@ -41,9 +40,7 @@ export default function Search(props: SearchProps) {
     <div>
       <AppBar />
       <p>Total images: {props.total_images}</p>
-      {/* 
-      // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
+      <GalleryWrapper photos={props.photos}/>
       <div className={classes.pagination}>
         {/* 
         // @ts-ignore */}

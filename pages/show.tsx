@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
-import Gallery from "react-photo-gallery";
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
-import PhotoComponent from '../components/Photo'
+import GalleryWrapper from '../components/GalleryWrapper'
 import ErrorPage from 'next/error'
 import PhotoInterface from '../types/photo'
 interface ShowProps{
@@ -18,9 +17,7 @@ export default function Show(props: ShowProps) {
   return (
     <div>
       <AppBar />
-      {/* 
-// @ts-ignore */ }
-      <Gallery targetRowHeight={200} photos={props.photos} renderImage={PhotoComponent} />   {/* FIX THIS SHIT */}
+      <GalleryWrapper photos={props.photos}/>
     </div>
   )
 }

@@ -1,31 +1,40 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React from "react";
-import Gallery from "react-photo-gallery";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
 import Pagination from '@material-ui/lab/Pagination';
 import { GetStaticProps, GetStaticPaths } from 'next'
 import { useRouter } from 'next/router'
-import Photo from '../../components/Photo'
 import Link from '../../components/Link'
 import Footer from '../../components/Footer'
+import GalleryWrapper from '../../components/GalleryWrapper'
 import ErrorPage from 'next/error'
 import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
 import PhotoInterface from '../../types/photo'
+
+
 const useStyles = makeStyles(() => ({
-  pagination: {
+  flex_center: {
     display: "flex",
     justifyContent: 'center'
+  },
+  visible:{
+    visibility:"visible"
+  },
+  hidden:{
+    visibility:"hidden"
   }
 }));
 
 interface LastAddedPageProps{
-  photos: PhotoInterface,
+  photos: PhotoInterface[],
   current_page: number,
   max_page: number,
   err:boolean
 }
+
+
 export default function LastAddedPage(props: LastAddedPageProps){
   const classes = useStyles();
   const router = useRouter()
@@ -38,14 +47,11 @@ export default function LastAddedPage(props: LastAddedPageProps){
   return (
     <div>
       <AppBar />
-      {/* 
-  // @ts-ignore */ }
-      <Gallery targetRowHeight={200} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
-      <div className={classes.pagination}>
-        {/* // @ts-ignore */}
+      <GalleryWrapper photos={props.photos}/>
+      <div className={classes.flex_center}>
         <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
           {/* 
-// @ts-ignore */ }
+            // @ts-ignore */ }
           return (<PaginationItem
             component={Link}
             href={`/last_added/${item.page}`}
@@ -56,9 +62,8 @@ export default function LastAddedPage(props: LastAddedPageProps){
         }
         } siblingCount={3} color="primary" size="large" />
       </div>
-     <Footer/>
+      <Footer />
     </div>
-
   )
 }
 

@@ -20,4 +20,6 @@ export default {
     deviant_art_client_secret:"client_secret",
     reverse_search_url:"http://localhost",
     ambience_microservice_url:"http://localhost:44444",
+    use_backup_file_server:false,
+    backup_file_server_url:"http://localhost:8787"
 }
