@@ -3,6 +3,15 @@ import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/core/styles';
 import theme from '../components/theme';
 import config from "../config/config";
+import CleanCSS from "clean-css"
+const cleanCSS = new CleanCSS({
+  level: {
+    2: {
+      all: false, // sets all values to `false`
+      removeDuplicateRules: true // turns on removing duplicate rules
+    }
+  }
+});
 
 export default class MyDocument extends Document {
   render() {
@@ -15,7 +24,7 @@ export default class MyDocument extends Document {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
-            <script src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
+            <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
         </Head>
         <body>
           <Main />
@@ -61,10 +70,13 @@ MyDocument.getInitialProps = async (ctx) => {
     });
 
   const initialProps = await Document.getInitialProps(ctx);
-
+  let css = sheets.toString();
+  if (css) {
+    css = cleanCSS.minify(css).styles;
+  }
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
+    styles: [...React.Children.toArray(initialProps.styles), <style id="jss-server-side" key="jss-server-side">{css}</style>],
   };
 };
