@@ -194,7 +194,7 @@ app.post(['/akaze_reverse_search','/calculate_akaze_features','/delete_akaze_fea
 })
 
 app.post(['/nn_get_similar_images_by_image_buffer','/nn_get_similar_images_by_text',
-'/nn_get_similar_images_by_id','/calculate_nn_features','/delete_nn_features'], async (req, res) => {
+'/nn_get_similar_images_by_id','/calculate_nn_features','/delete_nn_features','/nn_get_image_tags_by_image_buffer'], async (req, res) => {
     try {
         apiProxy.web(req, res, { target: config.nn_microservice_url });
     } catch (err) {

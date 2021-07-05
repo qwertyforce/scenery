@@ -17,7 +17,7 @@ module.exports = {
     },
     {
       name: 'nn_microservice',
-      script: 'clip_web.py',
+      script: 'nn_web.py',
       log_file: 'nn_microservice.txt',
       interpreter: "python3",
       time: true,

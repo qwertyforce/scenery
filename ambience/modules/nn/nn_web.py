@@ -1,12 +1,18 @@
 import uvicorn
 if __name__ == '__main__':
-    uvicorn.run('clip_web:app', host='127.0.0.1', port=33334, log_level="info")
+    uvicorn.run('nn_web:app', host='127.0.0.1', port=33334, log_level="info")
+
+from os import listdir,getcwd,path,chdir
+old_cwd=getcwd()
+chdir(path.join(getcwd(),"modules"))
+from modules.img_tag_module import tag
+chdir(old_cwd)
 
 import torch
 from pydantic import BaseModel
 from fastapi import FastAPI, File,Form, HTTPException
 import clip
-from os import listdir
+
 import numpy as np
 from PIL import Image
 
@@ -37,7 +43,7 @@ def init_index():
     print("Index is ready")
        
 def read_img_file(image_data):
-    img = Image.open(io.BytesIO(image_data))
+    img = Image.open(io.BytesIO(image_data)).convert("RGB")
     return img
 
 def get_features(image_buffer):
@@ -163,6 +169,11 @@ async def nn_get_similar_images_by_image_buffer_handler(image: bytes = File(...)
     labels, _ = index.knn_query(target_features, k=20)
     return labels[0].tolist()
 
+@app.post("/nn_get_image_tags_by_image_buffer")
+async def nn_get_image_tags_by_image_buffer_handler(image: bytes = File(...)):
+    tags = tag(image)
+    return tags
+
 class Item_query(BaseModel):
     query: str
 @app.post("/nn_get_similar_images_by_text")
@@ -172,7 +183,7 @@ async def find_similar_by_text_handler(item:Item_query):
     return labels[0].tolist()
 
 print(__name__)
-if __name__ == 'clip_web':
+if __name__ == 'nn_web':
     create_table()
     sync_db()
     init_index()
