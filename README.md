@@ -12,6 +12,7 @@ Python + SQLite + FastAPI + OpenCV + CLIP <br>
 hnswlib + faiss<br>
 
 ## features <br>
+- Serving images from ipfs (using [additional microservice](https://github.com/qwertyforce/crud_file_server))
 - Search by tags (supports logical expressions) (https://scenery.cx/search_syntax) ([logical expression parser](https://github.com/qwertyforce/ambience/))
 - Semantic text search (using [CLIP](https://github.com/openai/CLIP)) (https://scenery.cx/search_syntax) <br>
 - You can find images with similar tags. <br>
