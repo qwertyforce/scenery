@@ -19,15 +19,14 @@ export default class MyDocument extends Document {
         <Head>
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-          />
-          <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
+          <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin="anonymous" />
+          <link rel="preload" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" as="style" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
         </Head>
         <body>
           <Main />
           <NextScript />
+          <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
         </body>
       </Html>
     );
