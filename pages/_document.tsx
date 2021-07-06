@@ -6,12 +6,11 @@ import config from "../config/config";
 import CleanCSS from "clean-css"
 const cleanCSS = new CleanCSS({
   level: {
-    2: {
-      all: false, // sets all values to `false`
-      removeDuplicateRules: true // turns on removing duplicate rules
-    }
+    1: {},
+    2: {}
   }
 });
+const minified_css_cache = new Map()
 
 export default class MyDocument extends Document {
   render() {
@@ -24,7 +23,7 @@ export default class MyDocument extends Document {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
-            <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
+          <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
         </Head>
         <body>
           <Main />
@@ -70,13 +69,22 @@ MyDocument.getInitialProps = async (ctx) => {
     });
 
   const initialProps = await Document.getInitialProps(ctx);
+
   let css = sheets.toString();
+  const min_css = minified_css_cache.get(css)
   if (css) {
-    css = cleanCSS.minify(css).styles;
+    if (min_css) {
+      css = min_css
+    } else {
+      const old_css = css
+      css = cleanCSS.minify(css).styles;
+      minified_css_cache.set(old_css, css)
+    }
   }
+
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...React.Children.toArray(initialProps.styles), <style id="jss-server-side" key="jss-server-side">{css}</style>],
+    styles: [...React.Children.toArray(initialProps.styles), <style id="jss-server-side" key="jss-server-side" dangerouslySetInnerHTML={{ __html: css }}></style>],
   };
 };
