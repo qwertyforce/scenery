@@ -27,7 +27,7 @@ async function generate_thumbnail(image_src: Buffer | string) {  //buffer or pat
     } else {
       x.width = Math.min(metadata.width, 750)
     }
-    const data = await sharp(image_src).resize(x).jpeg({ quality: 80 }).toBuffer()
+    const data = await sharp(image_src).resize(x).jpeg({quality: 80,mozjpeg:true}).toBuffer()
     return data
   }else{
     return null
