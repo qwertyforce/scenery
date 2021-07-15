@@ -2,7 +2,7 @@ from os import listdir
 import subprocess
 from tqdm import tqdm
 import re
-IMG_PATH="./../../testing/reddit"
+IMG_PATH="./../../import/images/"
 files=listdir(IMG_PATH)
 all=[]
 for file in tqdm(files):
