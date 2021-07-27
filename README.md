@@ -4,7 +4,7 @@ https://scenery.cx <br>
 Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
 
 ## scenery
-Node.js + MongoDB + TypeScript + Next.js + Express + Material UI <br>
+Node.js + MongoDB + TypeScript + Next.js + Fastify + Material UI <br>
 
 ## ambience
 Node.js + TypeScript (api gateway) <br>
