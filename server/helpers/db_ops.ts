@@ -52,7 +52,7 @@ async function generate_id() {
             }
             const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const user = await find_user_by_id(id) //check if id exists
-            if (user) {
+            if (!user) {
                 resolve(id)
             } else {
                 const id_1 = await generate_id()
@@ -74,7 +74,7 @@ async function batch_find_images(query:Record<string,unknown>,skip:number,limit:
 }
 
 async function check_if_image_exists_by_id(id:number){
-    return Boolean(IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
+    return Boolean(await IMAGES_COLLECTION.countDocuments({id:id},{limit:1}))
 }
 
 async function set_tags_to_image_by_id(id:number,tags:string[]){
@@ -99,10 +99,7 @@ async function get_image_file_extension_by_id(id:number){
     return img
 }
 
-async function find_images_by_tags(query:Record<string,unknown>){
-    const imgs = IMAGES_COLLECTION.find(query).project({_id:0}).toArray()
-    return imgs
-}
+
 async function find_image_by_sha256(hash:string){
     const img = IMAGES_COLLECTION.find({sha256: hash}).project({_id:0}).next()
     return img
@@ -206,11 +203,11 @@ async function find_user_id_by_password_recovery_token(token:string) {
 
 //////////////////////////////////////////////////////////////////////////////////ACTIVATED USER
 async function check_if_user_exists_by_id(id:number){
-    return Boolean(USERS_COLLECTION.countDocuments({id:id},{limit:1}))
+    return Boolean(await USERS_COLLECTION.countDocuments({id:id},{limit:1}))
 }
 
 async function check_if_user_exists_by_email(email:string){
-    return Boolean(USERS_COLLECTION.countDocuments({email:email},{limit:1}))
+    return Boolean(await USERS_COLLECTION.countDocuments({email:email},{limit:1}))
 }
 
 
@@ -236,10 +233,9 @@ async function create_new_user_activated(email:string, pass:string) {
         id: id,
         password: pass,
         username:"",
-        links:0,
         activated: true
     }
-    IMAGES_COLLECTION.insertOne(user)
+    USERS_COLLECTION.insertOne(user)
 }
 
 
@@ -249,7 +245,6 @@ async function create_new_user_activated_github(oauth_id:string) {
         oauth_id: oauth_id,
         id: id,
         username:"",
-        links:0,
         activated: true
     })
     return id
@@ -262,7 +257,6 @@ async function create_new_user_activated_google(oauth_id:string,email:string) {
         email_google:email,
         id: id,
         username:"",
-        links:0,
         activated: true
     })
     return id
@@ -310,7 +304,6 @@ export default {
         find_image_by_id,
         get_max_image_id,
         delete_image_by_id,
-        find_images_by_tags,
         get_image_file_extension_by_id,
         find_image_by_sha256,
         check_if_image_exists_by_id,

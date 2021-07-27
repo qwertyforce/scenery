@@ -40,7 +40,7 @@ export default function Search(props: SearchProps) {
     <div>
       <AppBar />
       <p>Total images: {props.total_images}</p>
-      <GalleryWrapper photos={props.photos}/>
+      <GalleryWrapper photos={props.photos} />
       <div className={classes.pagination}>
         {/* 
         // @ts-ignore */}
@@ -63,7 +63,9 @@ export default function Search(props: SearchProps) {
 const ERROR = { props: { err: true } }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
-  if (typeof context.query.q !== "string" || context.query.q.includes("$") || !(["1","0"].includes(context.query.semantic)) ) {
+  const nosql_injection_regex = new RegExp(/\[|\]|\$|:|\{|\}/gm); //[,],$,:,{,}
+
+  if (typeof context.query.q !== "string" || nosql_injection_regex.test(context.query.q) || !(["1", "0"].includes(context.query.semantic))) {
     return ERROR
   }
   const photos: PhotoInterface[] = []
@@ -138,7 +140,7 @@ export async function getServerSideProps(context: any) {
         total_images: total_num_of_images,
         photos: photos,
         search_query: context.query.q,
-        semantic:context.query.semantic,
+        semantic: context.query.semantic,
         current_page: page,
         max_page: Math.ceil(total_num_of_images / images_on_page)
       }

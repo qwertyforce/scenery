@@ -1,8 +1,18 @@
 import db_ops from './../helpers/db_ops';
 import config from '../../config/config';
 import axios from 'axios';
-import {Request, Response} from 'express';
-async function github_oauth_callback(req:Request, res:Response) {
+
+import { FastifyRequest, FastifyReply } from "fastify"
+import { FromSchema } from "json-schema-to-ts";
+const querystring_schema_github_oauth_callback = {
+    type: 'object',
+    properties: {
+        code: { type: 'string' },
+    },
+    required: ['code'],
+} as const;
+
+async function github_oauth_callback(req: FastifyRequest<{ Querystring: FromSchema<typeof querystring_schema_github_oauth_callback> }>, res: FastifyReply) {
     const code = req.query.code;
     try {
         const result = await axios({
@@ -39,4 +49,9 @@ async function github_oauth_callback(req:Request, res:Response) {
     }
 }
 
-export default github_oauth_callback;
+export default {
+    schema: {
+        querystring: querystring_schema_github_oauth_callback
+    },
+    handler: github_oauth_callback
+}

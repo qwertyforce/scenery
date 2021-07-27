@@ -1,8 +1,12 @@
 import config from '../../config/config';
-import {Request,Response} from 'express';
-function github_oauth_redirect (_req:Request,res:Response){
+import { FastifyRequest, FastifyReply } from "fastify"
+
+function github_oauth_redirect (_req:FastifyRequest,res:FastifyReply){
 	const authorizeUrl = `https://github.com/login/oauth/authorize?client_id=${config.GITHUB_CLIENT_ID}`;
     res.redirect(authorizeUrl);
 }
 
-export default github_oauth_redirect;
+export default {
+    handler: github_oauth_redirect
+}
+

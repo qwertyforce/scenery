@@ -1,27 +1,17 @@
-import express from 'express'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import fastify from 'fastify'
+import formBodyPlugin from 'fastify-formbody'
+import fastifyCookie from 'fastify-cookie'
+import config from "./../config/config"
+import MongoStore from 'connect-mongo'
+import fastifyMultipart from 'fastify-multipart'
+import fastifyCors from 'fastify-cors'
+import fastifySession from 'fastify-session';
+import fastifyRecaptcha from 'fastify-recaptcha'
 import next from 'next'
-import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import connectMongo from 'connect-mongo';
-const MongoStore = connectMongo(session);
-import rateLimit from "express-rate-limit";
-import cors from 'cors';
-import multer from 'multer'
-import mongoSanitize from 'express-mongo-sanitize'
-import { check } from 'express-validator';
-import { RecaptchaV3 } from 'express-recaptcha'
-import config from '../config/config'
-declare module "express-session" {
-  interface Session {
-    user_id: string,
-    authed: boolean
-  }
-}
-const PASS_MIN = 8;
-const PASS_MAX = 128;
-const port = parseInt(process.env.NODE_PORT || config.server_port)
+
 const dev = process.env.NODE_ENV !== 'production'
+const port = parseInt(process.env.NODE_PORT || config.server_port)
 const next_app = next({ dev })
 const handle = next_app.getRequestHandler()
 ////////////////////////////////////////////////////////ROUTE HANDLERS
@@ -39,82 +29,81 @@ import delete_image from './routes/delete_image'
 import reverse_search from './routes/reverse_search'
 import proxy_get_image from './routes/proxy_get_image'
 import import_image from './routes/import_image'
-import reverse_search_global from './routes/public_api/reverse_search_global'
-import get_all_images from './routes/public_api/get_all_images'
-import temp_image from './routes/public_api/temp_image'
-////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 function main() {
-  const app = express()
-  const storage = multer.memoryStorage()
-  const upload_50MB = multer({ storage: storage, limits: { files: 1, fileSize: 50000000 } })  //50MB
-  const upload_150MB = multer({ storage: storage, limits: { files: 1, fileSize: 150000000 } })  //150MB
-  const recaptcha = new RecaptchaV3(config.recaptcha_site_key, config.recaptcha_secret_key);
-  app.use(function (_req, res, next) {
-    res.setHeader('X-Content-Type-Options', "nosniff")
-    res.setHeader('X-Frame-Options', "Deny")  //clickjacking protection
-    next();
-  });
-  app.use(bodyParser.urlencoded({
-    extended: true
-  }));
-  app.use(bodyParser.json());
-  app.disable('x-powered-by');
-  app.use(cookieParser());
-  app.use(session({
+  const server = fastify({ trustProxy: true })
+  server.register(formBodyPlugin)
+  server.register(fastifyCookie);
+  server.register(fastifySession, {
     secret: config.session_secret,
-    resave: false,
-    saveUninitialized: true,
-    name: "session",
+    cookieName: "session",
+    rolling: false,
     cookie: {
-      maxAge: 14 * 24 * 60 * 60 * 1000,              //use secure: true
+      secure: process.env.NODE_ENV === "production" ? true : false, //use secure: true
+      maxAge: 14 * 24 * 60 * 60 * 1000,
       sameSite: 'lax'
     },
     store: new MongoStore({
-      url: config.mongodb_url + 'Scenery',
+      mongoUrl: config.mongodb_url + 'Scenery',
       ttl: 14 * 24 * 60 * 60
     }) // = 14 days. Default
-  }))
-  app.use(mongoSanitize());
-  const limiter = rateLimit({
-    windowMs: 15 * 60,  // 15 minutes
-    max: 200 // limit each IP to w00 requests per windowMs
+  })
+
+  server.register(fastifyMultipart, {
+    attachFieldsToBody: true,
+    sharedSchemaId: '#mySharedSchema',
+    limits: {
+      fieldNameSize: 100, // Max field name size in bytes
+      fieldSize: 1000,     // Max field value size in bytes
+      fields: 10,         // Max number of non-file fields
+      fileSize: 50000000,  // For multipart forms, the max file size in bytes  //50MB
+      files: 1,           // Max number of file fields
+      headerPairs: 2000   // Max number of header key=>value pairs
+    }
   });
-  const cors_options = {
+  server.register(fastifyCors, {
     "origin": config.domain,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
-  }
-  ///////////////////////////////////////////////PUBLIC_API_ROUTER 
-  const public_api_router = express.Router()
-  public_api_router.use(cors());
-  /////////////////////////////////////////////// 
-
-  ///////////////////////////////////////PUBLIC_API
-  public_api_router.get('/image/:image_id', temp_image)
-  public_api_router.get("/reverse_search_global", (req, res) => {
-    if (req.query.url) {
-      return reverse_search_global(req, res)
-    }
-    return next_app.render(req, res, '/public_api/reverse_search_global')
   })
-  public_api_router.post('/reverse_search_global', [upload_50MB.single('image')], reverse_search_global)
-  public_api_router.get('/get_all_images', get_all_images)
-  /////////////////////////////////////////////////
+
+  interface Body {
+    [key: string]: any
+  }
+  server.addHook<{ Body: Body }>('preValidation', async (request) => {
+    if (request.body && typeof request.body["g-recaptcha-response"]?.value === "string") {
+      request.body["g-recaptcha-response"] = request.body["g-recaptcha-response"].value
+    }
+  })
+
+  server.register(fastifyRecaptcha, {
+    recaptcha_secret_key: config.recaptcha_secret_key,
+    reply: true
+  })
 
   //////////////////////////////////////////////////////////////AUTH AND PROFILE ACTIONS
-  app.get('/auth/google', google_oauth_redirect)
-  app.get('/auth/github', github_oauth_redirect)
-  app.get('/auth/github/callback', github_oauth_callback)
-  app.get('/auth/google/callback', google_oauth_callback)
-  app.post('/login', [limiter, recaptcha.middleware.verify, check('email').isEmail(), check('password').isLength({ min: PASS_MIN, max: PASS_MAX })], login)
-  app.post('/signup', [limiter, recaptcha.middleware.verify, check('email').isEmail(), check('password').isLength({ min: PASS_MIN, max: PASS_MAX })], signup)
-  app.post('/change_pw', [limiter, recaptcha.middleware.verify, check('password').isLength({ min: PASS_MIN, max: PASS_MAX })], change_password)
-  app.post('/forgot_pw', [limiter, recaptcha.middleware.verify, check('email').isEmail()], forgot_password)
-  app.get('/activate', [limiter], activate_account_email)
-  app.get('/logout', (req, res) => {
+  server.get('/auth/google', google_oauth_redirect)
+  server.get('/auth/github', github_oauth_redirect)
+  server.get('/auth/github/callback', github_oauth_callback)
+  server.get('/auth/google/callback', google_oauth_callback)
+  server.post('/login', login)
+  server.post('/signup', signup)
+  server.post('/change_pw', change_password)
+  server.post('/forgot_pw', forgot_password)
+  server.get('/activate', activate_account_email)
+  ///////////////////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////////////////////////////////////////ADMIN ONLY
+  server.post('/update_image_data', update_image_data)
+  server.post('/delete_image', delete_image)
+  server.post('/import_image', import_image)
+  /////////////////////////////////////////////////////////////////////////////////////
+
+  server.post('/reverse_search', reverse_search)
+  server.post('/proxy_get_image', proxy_get_image)
+
+  server.get('/logout', (req, res) => {
     if (req.session) {
-      req.session.destroy(function (err) {
+      req.destroySession(function (err: any) {
         if (err) {
           console.log(err)
         }
@@ -122,25 +111,20 @@ function main() {
       });
     }
   })
-  ///////////////////////////////////////////////////////////////
 
-  /////////////////////////////////////////////////////////////////////////////////////ADMIN ONLY
-  app.post('/update_image_data', update_image_data)
-  app.post('/delete_image', delete_image)
-  app.post('/import_image', [upload_150MB.single('image')], import_image)
-  /////////////////////////////////////////////////////////////////////////////////////
-
-  app.post('/reverse_search', [cors(cors_options), limiter, upload_50MB.single('image'), recaptcha.middleware.verify], reverse_search)
-  app.post('/proxy_get_image', [limiter, check('image_url').isURL(), recaptcha.middleware.verify,], proxy_get_image)
-  app.use("/public_api", public_api_router)
-
-  app.all('*', async(req, res) => {
-    return handle(req, res);
+  server.all('/*', (req: any, reply) => {
+    req.raw.session = req.session
+    return handle(req.raw, reply.raw).then(() => {
+      reply.sent = true
+    })
   })
-
-  app.set('trust proxy', '127.0.0.1')
-  app.listen(port, 'localhost', () => {
-    console.log(`> Ready on ${port}`)
+  // Run the server!
+  server.listen(port, "127.0.0.1", function (err, address) {
+    if (err) {
+      server.log.error(err)
+      process.exit(1)
+    }
+    server.log.info(`server listening on ${address}`)
   })
 }
 next_app.prepare().then(() => main())

@@ -70,8 +70,8 @@ MyDocument.getInitialProps = async (ctx) => {
   const initialProps = await Document.getInitialProps(ctx);
 
   let css = sheets.toString();
-  const min_css = minified_css_cache.get(css)
-  if (css) {
+  if (css && process.env.NODE_ENV === "production") {
+    const min_css = minified_css_cache.get(css)
     if (min_css) {
       css = min_css
     } else {

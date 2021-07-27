@@ -1,21 +1,30 @@
-import { Request, Response } from 'express';
-import { RecaptchaResponseV3 } from 'express-recaptcha/dist/interfaces';
 import image_ops from '../helpers/image_ops'
+import { FastifyRequest, FastifyReply } from "fastify"
 
-async function reverse_search(req: Request, res: Response) {
-    const recaptcha_score=(req.recaptcha as RecaptchaResponseV3)?.data?.score
-    if (req.recaptcha?.error|| (typeof recaptcha_score==="number" && recaptcha_score<0.5)) {
-        return res.status(403).json({
-            message: "Captcha error"
-        });
+const body_schema_reverse_search = {
+    type: 'object',
+    image: { $ref: '#mySharedSchema' },
+    properties: {
+        "g-recaptcha-response": { type: 'string' },
+    },
+    required: ['image', 'g-recaptcha-response'],
+} as const;
+
+async function reverse_search(req: FastifyRequest, res: FastifyReply) {
+    let image_buffer: Buffer;
+    try {
+        image_buffer = await (req as any).body.image.toBuffer()
+    } catch (err) {
+        return res.send({ ids: '' })
     }
-    if(req.file){
-        req.connection.setTimeout(5*60000)//5min
-        res.setTimeout(5*60000)//5min
-        const ids=await image_ops.reverse_search(req.file.buffer)
-         // console.log(ids)
-        res.json({ids:ids.join(',')})
-    }
+    const ids = await image_ops.reverse_search(image_buffer)
+    // console.log(ids)
+    res.send({ ids: ids.join(',') })
 }
 
-export default reverse_search;
+export default {
+    schema: {
+        body: body_schema_reverse_search
+    },
+    handler: reverse_search
+}

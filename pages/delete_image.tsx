@@ -73,7 +73,8 @@ export default function deleteImage(props: DeleteImageProps) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
-  if (context.req.session.authed && context.req.session.user_id) {
+  // console.log(context.req)
+  if (context.req?.session?.authed && context.req?.session?.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
     if (user.isAdmin) {
       return {

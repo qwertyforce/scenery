@@ -12,7 +12,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
-import Autocomplete,{ createFilterOptions } from '@material-ui/lab/Autocomplete';
+import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import ErrorPage from 'next/error'
 
@@ -22,38 +22,38 @@ const useStyles = makeStyles(() => ({
     zIndex: 9999,
     color: '#fff',
   },
-  url_div:{
-    display:"flex",
-    marginLeft:"10px",
-    marginBottom:"10px"
+  url_div: {
+    display: "flex",
+    marginLeft: "10px",
+    marginBottom: "10px"
   },
-  url_text_field:{
-    width:"300px",
-    marginRight:"10px"
+  url_text_field: {
+    width: "300px",
+    marginRight: "10px"
   },
-  fetch_img_div:{
-    display:"flex",
-    marginBottom:"10px"
+  fetch_img_div: {
+    display: "flex",
+    marginBottom: "10px"
   },
-  upload_interface:{
+  upload_interface: {
     margin: "10px",
     padding: "10px"
   },
-  tags_field:{
-    margin:10
+  tags_field: {
+    margin: 10
   }
 }));
 
-function isValidURL(url:string){
+function isValidURL(url: string) {
   const RegExp = /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
-  if(RegExp.test(url)){
-      return true;
-  }else{
-      return false;
+  if (RegExp.test(url)) {
+    return true;
+  } else {
+    return false;
   }
-} 
+}
 
-function AutoCompleteTagTextField(props:{AllTags:string[],SelectedTags:string[],setSelectedTags:React.Dispatch<React.SetStateAction<string[]>>}){
+function AutoCompleteTagTextField(props: { AllTags: string[], SelectedTags: string[], setSelectedTags: React.Dispatch<React.SetStateAction<string[]>> }) {
   const classes = useStyles();
   const [inputValue, setInputValue] = React.useState("");
   const [openTagsAutocomplete, setOpenTagsAutocomplete] = React.useState(false);
@@ -65,7 +65,7 @@ function AutoCompleteTagTextField(props:{AllTags:string[],SelectedTags:string[],
       setOpenTagsAutocomplete(true);
     }
   };
-  const handleInputChange = (_event: ChangeEvent<unknown>, newInputValue:string) => {
+  const handleInputChange = (_event: ChangeEvent<unknown>, newInputValue: string) => {
     setInputValue(newInputValue);
     if (newInputValue.length > 0) {
       setOpenTagsAutocomplete(true);
@@ -73,37 +73,37 @@ function AutoCompleteTagTextField(props:{AllTags:string[],SelectedTags:string[],
       setOpenTagsAutocomplete(false);
     }
   };
-  return( 
-  <Autocomplete
-    className={classes.tags_field}
-    multiple
-    autoComplete
-    freeSolo
-    open={openTagsAutocomplete}
-    onOpen={handleOpenTagsAutocomplete}
-    onClose={() => setOpenTagsAutocomplete(false)}
-    onInputChange={handleInputChange}
-    filterOptions={filterOptions}
-    id="tags-filled"
-    options={props.AllTags}
-    value={props.SelectedTags}
-    onChange={(_event:ChangeEvent<unknown>, newValue) => {
-      props.setSelectedTags(newValue as string[]);
-    }}
-    defaultValue={["2"]}
-    filterSelectedOptions
-    renderTags={(value, getTagProps) =>
-      value.map((option, index) => (
-        <Chip variant="outlined" key={option as string} label={option as string} {...getTagProps({ index })} />
-      ))
-    }
-    renderInput={(params) => (
-      <TextField {...params} variant="outlined" label="Tags" placeholder="Tags" />
-    )}
-  />)
+  return (
+    <Autocomplete
+      className={classes.tags_field}
+      multiple
+      autoComplete
+      freeSolo
+      open={openTagsAutocomplete}
+      onOpen={handleOpenTagsAutocomplete}
+      onClose={() => setOpenTagsAutocomplete(false)}
+      onInputChange={handleInputChange}
+      filterOptions={filterOptions}
+      id="tags-filled"
+      options={props.AllTags}
+      value={props.SelectedTags}
+      onChange={(_event: ChangeEvent<unknown>, newValue) => {
+        props.setSelectedTags(newValue as string[]);
+      }}
+      defaultValue={["2"]}
+      filterSelectedOptions
+      renderTags={(value, getTagProps) =>
+        value.map((option, index) => (
+          <Chip variant="outlined" key={option as string} label={option as string} {...getTagProps({ index })} />
+        ))
+      }
+      renderInput={(params) => (
+        <TextField {...params} variant="outlined" label="Tags" placeholder="Tags" />
+      )}
+    />)
 }
 
-export default function Import(props:{err:boolean,AllTags:string[]}) {
+export default function Import(props: { err: boolean, AllTags: string[] }) {
   if (props.err) {
     return <ErrorPage statusCode={404} />
   }
@@ -113,7 +113,7 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
   const [SelectedTags, setSelectedTags] = useState<string[]>([]);
   const [fileObjects, setFileObjects] = useState([]);
   const [open, setOpen] = useState(false);
-  
+
   const upload_image = () => {
     setOpen(true)
     const formData = new FormData();
@@ -126,7 +126,7 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      timeout:5*60000   //5min
+      timeout: 5 * 60000   //5min
     }).then((resp) => {
       setOpen(false)
       setUrl("")
@@ -140,27 +140,27 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
       console.log(err)
     })
   }
-  const proxy_get_image=(token:string,url:string)=>{
+  const proxy_get_image = (token: string, url: string) => {
     const login_data = { image_url: url, 'g-recaptcha-response': token }
     axios(`/proxy_get_image`, {
       method: "post",
       data: login_data,
-      responseType:"blob"
+      responseType: "blob"
     }).then((resp) => {
       console.log(resp.data)
-      const file = new File([resp.data], "image.png", {type:"image/png"});
+      const file = new File([resp.data], "image.png", { type: "image/png" });
       const reader = new FileReader();
       reader.readAsDataURL(resp.data);
       reader.onloadend = function () {
         const base64data = reader.result;
-        setFileObjects( ([{data:base64data,file:file}]) as any)
+        setFileObjects(([{ data: base64data, file: file }]) as any)
         setUrl("")
         setOpen(false)
         return;
       }
-    }).catch(async(err) => {
+    }).catch(async (err) => {
       setOpen(false)
-      const response =JSON.parse(await new Response(err.response.data).text()).message
+      const response = JSON.parse(await new Response(err.response.data).text()).message
       if (response) {
         alert(response)
         console.log(err.response)
@@ -177,38 +177,38 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
   //     });
   //   })
   // }
-  const get_image_by_url= async ()=>{ 
-    if(!isValidURL(URL)){
+  const get_image_by_url = async () => {
+    if (!isValidURL(URL)) {
       alert("invalid url")
       setUrl("")
       return
     }
     setOpen(true)
-    try{
-      const x =await axios.get(URL,{responseType:"blob"})
+    try {
+      const x = await axios.get(URL, { responseType: "blob" })
       setOpen(false)
-      const file = new File([x.data], "image.png", {type:"image/png"});
+      const file = new File([x.data], "image.png", { type: "image/png" });
       const reader = new FileReader();
       reader.readAsDataURL(x.data);
       reader.onloadend = function () {
         const base64data = reader.result;
-        setFileObjects( ([{data:base64data,file:file}]) as any)
+        setFileObjects(([{ data: base64data, file: file }]) as any)
         setUrl("")
         return;
       }
-    }catch(err){
+    } catch (err) {
       console.log(err)
-      if(!err.response){
+      if (!err.response) {
         grecaptcha.ready(function () {
           grecaptcha.execute(config.recaptcha_site_key, { action: 'import_image' }).then(function (token) {
-            proxy_get_image(token,URL)
+            proxy_get_image(token, URL)
           });
         })
       }
       // alert("error")
     }
   }
- 
+
   return (
     <div>
       <AppBar />
@@ -216,48 +216,48 @@ export default function Import(props:{err:boolean,AllTags:string[]}) {
         <CircularProgress color="inherit" />
       </Backdrop>
       <Box my={2}>
-      <div className={classes.url_div}>
-      <TextField
-        value ={Source_URL}
-        onChange={(e)=>setSource_URL(e.target.value)}
-        type="text"
-        label="Source url"
-        className={classes.url_text_field}
-        placeholder="https://somesite.com/artist/"
-        variant="outlined"
-        size="small"
-      />
-      </div>
-      <Paper  className={classes.upload_interface} elevation={6}>
-      <h4 style={{margin:0,marginBottom:"5px"}}>Image</h4>
-      <div className={classes.fetch_img_div}>
-        <TextField onChange={(e)=>setUrl(e.target.value)} value={URL} 
-        className={classes.url_text_field} label="Image url"
-        placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
-      <Button onClick={get_image_by_url} size="small" variant="outlined">Fetch</Button>
-      </div>
-        <DropzoneAreaBase
-          acceptedFiles={['image/png', 'image/jpg', 'image/jpeg']}
-          dropzoneText={"Drag and drop an image here or click"}
-          fileObjects={fileObjects}
-          filesLimit={1}
-          onAdd={(newFileObjs:any) => {
-            console.log(newFileObjs)
-            console.log('onAdd', newFileObjs);
-            setFileObjects([].concat(newFileObjs[0]));
-          }}
-          onDelete={(_removedFileObj, removedFileObjIdx) => {
-            const remainingFileObjs = fileObjects.filter((_fileObject, i) => {
-              return i !== removedFileObjIdx;
-          });
-          setFileObjects(remainingFileObjs)
-          }}
-          maxFileSize={120000000}
-        />
+        <div className={classes.url_div}>
+          <TextField
+            value={Source_URL}
+            onChange={(e) => setSource_URL(e.target.value)}
+            type="text"
+            label="Source url"
+            className={classes.url_text_field}
+            placeholder="https://somesite.com/artist/"
+            variant="outlined"
+            size="small"
+          />
+        </div>
+        <Paper className={classes.upload_interface} elevation={6}>
+          <h4 style={{ margin: 0, marginBottom: "5px" }}>Image</h4>
+          <div className={classes.fetch_img_div}>
+            <TextField onChange={(e) => setUrl(e.target.value)} value={URL}
+              className={classes.url_text_field} label="Image url"
+              placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
+            <Button onClick={get_image_by_url} size="small" variant="outlined">Fetch</Button>
+          </div>
+          <DropzoneAreaBase
+            acceptedFiles={['image/png', 'image/jpg', 'image/jpeg']}
+            dropzoneText={"Drag and drop an image here or click"}
+            fileObjects={fileObjects}
+            filesLimit={1}
+            onAdd={(newFileObjs: any) => {
+              console.log(newFileObjs)
+              console.log('onAdd', newFileObjs);
+              setFileObjects([].concat(newFileObjs[0]));
+            }}
+            onDelete={(_removedFileObj, removedFileObjIdx) => {
+              const remainingFileObjs = fileObjects.filter((_fileObject, i) => {
+                return i !== removedFileObjIdx;
+              });
+              setFileObjects(remainingFileObjs)
+            }}
+            maxFileSize={120000000}
+          />
         </Paper>
       </Box>
-     <AutoCompleteTagTextField AllTags={props.AllTags} SelectedTags={SelectedTags} setSelectedTags={setSelectedTags}/>
-     <Button style={{marginLeft:10}} onClick={() => { upload_image() }} variant="contained" color="primary" >Upload</Button>
+      <AutoCompleteTagTextField AllTags={props.AllTags} SelectedTags={SelectedTags} setSelectedTags={setSelectedTags} />
+      <Button style={{ marginLeft: 10 }} onClick={() => { upload_image() }} variant="contained" color="primary" >Upload</Button>
     </div>
   );
 }
@@ -265,15 +265,15 @@ export async function getServerSideProps(context: any) {
   if (context.req.session.authed && context.req.session.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
     if (user?.isAdmin) {
-      const imgs = await db_ops.image_ops.get_all_images() 
-      const tags:Set<string>=new Set()
+      const imgs = await db_ops.image_ops.get_all_images()
+      const tags: Set<string> = new Set()
       for (const img of imgs) {
         for (const tag of img.tags) {
           tags.add(tag)
         }
       }
       return {
-        props: {AllTags:[...tags]},
+        props: { AllTags: [...tags] },
       }
     }
   }

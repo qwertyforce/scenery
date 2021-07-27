@@ -13,7 +13,7 @@ async function generate_activation_token(): Promise<string> {
             }
             const token = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const users = await db_ops.not_activated_user.find_not_activated_user_by_token(token) //check if token exists
-            if (users.length === 0) {
+            if (!users) {
                 resolve(token);
             } else {
                 const token_1 = await generate_activation_token()
@@ -31,7 +31,7 @@ async function generate_password_recovery_token(): Promise<string> {
             }
             const token = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const user_id = await db_ops.password_recovery.find_user_id_by_password_recovery_token(token) //check if token exists
-            if (user_id.length === 0) {
+            if (!user_id) {
                 resolve(token);
             } else {
                 const token_1 = await generate_password_recovery_token()
