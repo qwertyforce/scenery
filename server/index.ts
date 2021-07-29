@@ -121,7 +121,7 @@ function main() {
   // Run the server!
   server.listen(port, "127.0.0.1", function (err, address) {
     if (err) {
-      server.log.error(err)
+      console.error(err)
       process.exit(1)
     }
     server.log.info(`server listening on ${address}`)
