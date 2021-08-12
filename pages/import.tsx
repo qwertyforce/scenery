@@ -4,7 +4,6 @@ import Box from '@material-ui/core/Box';
 import AppBar from '../components/AppBar'
 import { DropzoneAreaBase } from 'material-ui-dropzone';
 import Button from '@material-ui/core/Button';
-import config from '../config/config'
 import axios from "axios"
 import db_ops from '../server/helpers/db_ops'
 import Backdrop from '@material-ui/core/Backdrop';
@@ -120,7 +119,7 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
     formData.append("image", (fileObjects[0] as any).file)
     formData.append("source_url", Source_URL)
     formData.append("tags", JSON.stringify(SelectedTags))
-    axios(`${config.domain}/import_image`, {
+    axios(`${process.env.domain}/import_image`, {
       method: "post",
       data: formData,
       headers: {
@@ -169,14 +168,7 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
       }
     })
   }
-  // const _upload_image = () => {
-  //   /*global grecaptcha*/ // defined in pages/_document.tsx
-  //   grecaptcha.ready(function () {
-  //     grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
-  //       upload_image(token)
-  //     });
-  //   })
-  // }
+
   const get_image_by_url = async () => {
     if (!isValidURL(URL)) {
       alert("invalid url")
@@ -200,7 +192,7 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
       console.log(err)
       if (!err.response) {
         grecaptcha.ready(function () {
-          grecaptcha.execute(config.recaptcha_site_key, { action: 'import_image' }).then(function (token) {
+          grecaptcha.execute(process.env.recaptcha_site_key, { action: 'import_image' }).then(function (token) {
             proxy_get_image(token, URL)
           });
         })

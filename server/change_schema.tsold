@@ -1,0 +1,16 @@
+import db_ops from './helpers/db_ops'
+
+async function change_schema() {
+    const images = await db_ops.image_ops.get_all_images();
+    for (const image of images) {
+        const new_image=JSON.parse(JSON.stringify(image))
+    
+        await db_ops.image_ops.delete_image_by_id(image.id)
+        await db_ops.image_ops.add_image_by_object(new_image)
+    }
+}
+async function run(){
+    await change_schema()
+    process.exit()
+}
+run()

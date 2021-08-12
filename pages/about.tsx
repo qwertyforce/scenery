@@ -15,7 +15,7 @@ export default function About() {
         </Typography>
       High quality scenery art.
         <br />
-      </Box>
+        </Box>
       </Container>
     </div>
   );

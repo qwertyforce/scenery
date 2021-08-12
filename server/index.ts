@@ -10,6 +10,20 @@ import fastifySession from 'fastify-session';
 import fastifyRecaptcha from 'fastify-recaptcha'
 import next from 'next'
 
+////////////////////////////////////////////////////////INIT DEFAULT FOLDERS
+import fs from 'fs'
+import path from "path"
+const root_path = path.join(__dirname, "..", "..")
+console.log(__dirname)
+const dirs = ["public", "temp", "import", path.join("import", "images"), path.join("public", "thumbnails"), path.join("public", "images")]
+
+for (const dir of dirs) {
+    const dir_path = path.join(root_path, dir)
+    if (!fs.existsSync(dir_path)) {
+        fs.mkdirSync(dir_path);
+    }
+}
+////////////////////////////////////////////////////////
 const dev = process.env.NODE_ENV !== 'production'
 const port = parseInt(process.env.NODE_PORT || config.server_port)
 const next_app = next({ dev })
@@ -64,15 +78,6 @@ function main() {
   server.register(fastifyCors, {
     "origin": config.domain,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  })
-
-  interface Body {
-    [key: string]: any
-  }
-  server.addHook<{ Body: Body }>('preValidation', async (request) => {
-    if (request.body && typeof request.body["g-recaptcha-response"]?.value === "string") {
-      request.body["g-recaptcha-response"] = request.body["g-recaptcha-response"].value
-    }
   })
 
   server.register(fastifyRecaptcha, {

@@ -6,7 +6,6 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button';
-import config from "../config/config"
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -76,7 +75,7 @@ function SignUpForm() {
       if (password === password2) {
         if (password.length > 7 && password.length < 129) {
           grecaptcha.ready(function () {
-            grecaptcha.execute(config.recaptcha_site_key, { action: 'signup' }).then(function (token) {
+            grecaptcha.execute(process.env.recaptcha_site_key, { action: 'signup' }).then(function (token) {
               handleSignUp(token)
             });
           })

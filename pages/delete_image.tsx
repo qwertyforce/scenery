@@ -76,7 +76,7 @@ export async function getServerSideProps(context: any) {
   // console.log(context.req)
   if (context.req?.session?.authed && context.req?.session?.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
-    if (user.isAdmin) {
+    if (user && user.isAdmin) {
       return {
         props: {},
       }

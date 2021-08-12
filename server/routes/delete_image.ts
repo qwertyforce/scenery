@@ -15,7 +15,7 @@ async function delete_image(req: FastifyRequest<{ Body: FromSchema<typeof body_s
     const id = req.body.id
     if (req.session?.user_id) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
-        if (user.isAdmin) {
+        if (user && user.isAdmin) {
             const result = await image_ops.delete_image(id)
             if (result) {
                 res.send({ message: result })

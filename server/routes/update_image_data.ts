@@ -15,7 +15,7 @@ async function update_image_data(req: FastifyRequest<{ Body: FromSchema<typeof b
     const image_data = req.body.image_data;
     if (req.session?.user_id) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
-        if (user.isAdmin) {
+        if (user && user.isAdmin) {
             db_ops.image_ops.update_image_data_by_id(id, image_data)
             return res.send({ message: "OK" })
         }

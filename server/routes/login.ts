@@ -24,7 +24,7 @@ async function login(req: FastifyRequest<{ Body: FromSchema<typeof body_schema_l
             message: MESSAGE_FOR_AUTH_ERROR
         })
     } else {
-        const match = await crypto_ops.check_password(password, user.password);
+        const match = await crypto_ops.check_password(password, user.password||"");
         if (match) {
             if (user.activated === true) {
                 req.session.authed = true;

@@ -57,7 +57,7 @@ async function import_image(req: FastifyRequest<{ Body: FromSchema<typeof body_s
 
     if (req.session?.user_id) {
         const user = await db_ops.activated_user.find_user_by_id(req.session?.user_id)
-        if (user.isAdmin) {
+        if (user && user.isAdmin) {
             const results = await image_ops.import_image(image_buffer, tags, source_url)
             if (results) {
                 res.send({ message: results })

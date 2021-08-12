@@ -4,7 +4,6 @@ import Box from '@material-ui/core/Box';
 import AppBar from '../components/AppBar'
 import { DropzoneAreaBase } from 'material-ui-dropzone';
 import Button from '@material-ui/core/Button';
-import config from '../config/config'
 import axios from "axios"
 import { useRouter } from 'next/router'
 import Backdrop from '@material-ui/core/Backdrop';
@@ -47,7 +46,7 @@ export default function ReverseSearch() {
     const formData = new FormData();
     formData.append("image", (fileObjects[0] as any).file);
     formData.append("g-recaptcha-response", token);
-    axios(`${config.reverse_search_url}/reverse_search`, {
+    axios(`${process.env.reverse_search_url}/reverse_search`, {
       method: "post",
       data: formData,
       headers: {
@@ -94,7 +93,7 @@ export default function ReverseSearch() {
   const _send_image = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
+      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
         send_image(token)
       });
     })
@@ -122,7 +121,7 @@ export default function ReverseSearch() {
       console.log(err)
       if(!err.response){
         grecaptcha.ready(function () {
-          grecaptcha.execute(config.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
+          grecaptcha.execute(process.env.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
             proxy_get_image(token,URL)
           });
         })

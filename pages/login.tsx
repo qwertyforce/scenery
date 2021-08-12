@@ -13,7 +13,6 @@ import Grid from "@material-ui/core/Grid";
 import SvgIcon from "@material-ui/core/SvgIcon";
 import { faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
 import { useRouter } from 'next/router'
-import config from "../config/config"
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -79,7 +78,7 @@ function LoginForm() {
   const _handleLogin = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'login' }).then(function (token) {
+      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'login' }).then(function (token) {
         handleLogin(token)
       });
     })

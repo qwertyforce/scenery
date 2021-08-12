@@ -12,36 +12,36 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-interface Tags{
-  _id:string,
-  count:number
+interface Tags {
+  _id: string,
+  count: number
 }
-interface PropsTags{
-  tags:Tags[]
+interface PropsTags {
+  tags: Tags[]
 }
 
 export default function Tags(props: PropsTags) {
   const classes = useStyles();
-  const Seasons=["winter","spring","summer","autumn"]
-  const Orientation=["horizontal","vertical","square"]
-  const Tags=[]
-  const Seasons_tags=[]
-  const Orientation_tags=[]
-  let Author_tags=[]  
-  for (const {_id, count} of props.tags) {
+  const Seasons = ["winter", "spring", "summer", "autumn"]
+  const Orientation = ["horizontal", "vertical", "square"]
+  const Tags = []
+  const Seasons_tags = []
+  const Orientation_tags = []
+  let Author_tags = []
+  for (const { _id, count } of props.tags) {
     const tag = <Chip label={`${_id} (${count})`} key={_id} className={classes.chip} component="a" href={`/search?q=${_id}&semantic=0`} clickable />
     if (Seasons.includes(_id)) {
       Seasons_tags.push(tag)
-    }else if(Orientation.includes(_id)){
+    } else if (Orientation.includes(_id)) {
       Orientation_tags.push(tag)
-    }else if(_id.includes("artist:")){
-      Author_tags.push({tag,count})
+    } else if (_id.includes("artist:")) {
+      Author_tags.push({ tag, count })
     }
     else {
       Tags.push(tag)
     }
   }
-  Author_tags=Author_tags.sort((a,b)=>b.count-a.count).map((el)=>el.tag)
+  Author_tags = Author_tags.sort((a, b) => b.count - a.count).map((el) => el.tag)
   return (
     <div>
       <AppBar />
@@ -66,7 +66,7 @@ export default function Tags(props: PropsTags) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const tags= await db_ops.image_ops.get_tags_stats()
+  const tags = await db_ops.image_ops.get_tags_stats()
   return {
     props: {
       tags: tags,

@@ -6,7 +6,6 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button';
-import config from "../config/config"
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -71,7 +70,7 @@ function ForgotPassword() {
   const _handleFP = () => {
     /*global grecaptcha*/ // defined in public/index.html
     grecaptcha.ready(function () {
-      grecaptcha.execute(config.recaptcha_site_key, { action: 'login' }).then(function (token) {
+      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'login' }).then(function (token) {
         handleFP(token)
       });
     })

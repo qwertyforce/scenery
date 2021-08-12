@@ -1,6 +1,5 @@
 import {makeStyles } from '@material-ui/core/styles';
 import Link from './Link'
-import config from '../config/config'
 const useStyles = makeStyles(() => ({
   footer: {
     display: "flex",
@@ -13,7 +12,7 @@ export default function Footer() {
   return (
     <div>
     <div className={classes.footer}>
-      <Link href={config.api_domain}>API&nbsp;</Link>
+      <Link href={process.env.api_domain}>API&nbsp;</Link>
       <Link href='/stats'>Stats&nbsp;</Link>
       <Link href='/tags'>Tags&nbsp;</Link>
       <Link href='/about'>About&nbsp;</Link>

@@ -238,7 +238,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       tags.push(tag)
     }
 
-    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: [...new Set(tags)], sha256: sha256_hash })
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: [...new Set(tags)], sha256: sha256_hash,created_at:new Date()})
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     const thumbnail_buffer = await generate_thumbnail(image_buffer)
     if (!thumbnail_buffer) {
@@ -300,7 +300,7 @@ async function import_image_without_check(image_buffer: Buffer, tags: string[] =
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
     const author = await parse_author(tags)
-    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash })
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash,created_at:new Date()})
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     const thumbnail_buffer = await generate_thumbnail(image_buffer)
     if (!thumbnail_buffer) {

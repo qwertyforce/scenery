@@ -2,7 +2,6 @@ import React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/core/styles';
 import theme from '../components/theme';
-import config from "../config/config";
 import CleanCSS from "clean-css"
 const cleanCSS = new CleanCSS({
   level: {
@@ -26,7 +25,7 @@ export default class MyDocument extends Document {
         <body>
           <Main />
           <NextScript />
-          <script defer src={`https://www.google.com/recaptcha/api.js?render=${config.recaptcha_site_key}`}></script>
+          <script defer src={`https://www.google.com/recaptcha/api.js?render=${process.env.recaptcha_site_key}`}></script>
         </body>
       </Html>
     );
