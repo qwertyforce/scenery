@@ -1,8 +1,8 @@
-require('sharp'); //https://github.com/lovell/sharp/issues/2655#issuecomment-815684743
+require('sharp') //https://github.com/lovell/sharp/issues/2655#issuecomment-815684743
 module.exports = {
   poweredByHeader: false,
   // typescript: {ignoreBuildErrors: true},
-  optimizeFonts: false,
+  optimizeFonts: false, //fix flickering font
   async rewrites() {
     return [
       {
@@ -11,7 +11,7 @@ module.exports = {
       }
     ]
   },
-  env: {
+  env: {  //https://nextjs.org/docs/api-reference/next.config.js/environment-variables
     recaptcha_site_key: "6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb",
     api_domain: "http://localhost/public_api",
     reverse_search_url: "http://localhost",

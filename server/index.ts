@@ -14,14 +14,13 @@ import next from 'next'
 import fs from 'fs'
 import path from "path"
 const root_path = path.join(__dirname, "..", "..")
-console.log(__dirname)
 const dirs = ["public", "temp", "import", path.join("import", "images"), path.join("public", "thumbnails"), path.join("public", "images")]
 
 for (const dir of dirs) {
-    const dir_path = path.join(root_path, dir)
-    if (!fs.existsSync(dir_path)) {
-        fs.mkdirSync(dir_path);
-    }
+  const dir_path = path.join(root_path, dir)
+  if (!fs.existsSync(dir_path)) {
+    fs.mkdirSync(dir_path);
+  }
 }
 ////////////////////////////////////////////////////////
 const dev = process.env.NODE_ENV !== 'production'
@@ -53,7 +52,7 @@ function main() {
     cookieName: "session",
     rolling: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production" ? true : false, //use secure: true
+      secure: process.env.NODE_ENV === "production" && config.domain !== "http://localhost" ? true : false, //use secure: true
       maxAge: 14 * 24 * 60 * 60 * 1000,
       sameSite: 'lax'
     },
@@ -78,6 +77,15 @@ function main() {
   server.register(fastifyCors, {
     "origin": config.domain,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  })
+
+  interface Body {
+    [key: string]: any
+  }
+  server.addHook<{ Body: Body }>('preValidation', async (request) => {
+    if (request.body && typeof request.body["g-recaptcha-response"]?.value === "string") {
+      request.body["g-recaptcha-response"] = request.body["g-recaptcha-response"].value
+    }
   })
 
   server.register(fastifyRecaptcha, {
@@ -129,7 +137,7 @@ function main() {
       console.error(err)
       process.exit(1)
     }
-    server.log.info(`server listening on ${address}`)
+    console.log(`server listening on ${address}`)
   })
 }
 next_app.prepare().then(() => main())
