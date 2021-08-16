@@ -8,7 +8,7 @@ Node.js + MongoDB + TypeScript + Next.js + Fastify + Material UI <br>
 
 ## ambience
 Node.js + TypeScript (api gateway) <br>
-Python + SQLite + FastAPI + OpenCV + CLIP <br>
+Python + SQLite + FastAPI + OpenCV + CLIP + Numba<br>
 hnswlib + faiss<br>
 
 ## features <br>
