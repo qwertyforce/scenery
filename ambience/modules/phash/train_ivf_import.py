@@ -4,6 +4,8 @@ import io
 import faiss
 from math import sqrt
 conn = sqlite3.connect('import_phashes.db')
+
+
 def get_all_data():
     cursor = conn.cursor()
     query = '''
@@ -12,19 +14,21 @@ def get_all_data():
     '''
     cursor.execute(query)
     all_rows = cursor.fetchall()
-    return list(map(lambda el:convert_array(el[0]),all_rows))
+    return list(map(lambda el: convert_array(el[0]), all_rows))
+
 
 def convert_array(text):
     out = io.BytesIO(text)
     out.seek(0)
     return np.load(out)
 
+
 def train():
-    all_data=np.array(get_all_data())
-    if len(all_data)==0:
+    all_data = np.array(get_all_data())
+    if len(all_data) == 0:
         print("No images. exit()")
         exit()
-    d=32*8
+    d = 32*8
     centroids = round(sqrt(all_data.shape[0]))
     print(f'centroids: {centroids}')
     quantizer = faiss.IndexBinaryFlat(d)
@@ -32,4 +36,6 @@ def train():
     index.nprobe = 8
     index.train(all_data)
     faiss.write_index_binary(index, "./" + "trained_import.index")
+
+
 train()

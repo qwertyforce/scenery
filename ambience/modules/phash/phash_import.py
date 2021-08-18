@@ -3,16 +3,18 @@ import sqlite3
 conn_import = sqlite3.connect('import_phashes.db')
 conn = sqlite3.connect('phashes.db')
 
+
 def create_table():
-	cursor = conn.cursor()
-	query = '''
+    cursor = conn.cursor()
+    query = '''
 	    CREATE TABLE IF NOT EXISTS phashes(
 	    	id INTEGER NOT NULL UNIQUE PRIMARY KEY, 
 	    	phash BLOB NOT NULL
 	    )
 	'''
-	cursor.execute(query)
-	conn.commit()
+    cursor.execute(query)
+    conn.commit()
+
 
 def get_all_data():
     cursor = conn_import.cursor()
@@ -22,7 +24,8 @@ def get_all_data():
     '''
     cursor.execute(query)
     all_rows = cursor.fetchall()
-    return list(map(lambda el:(el[0],el[1]),all_rows))
+    return list(map(lambda el: (el[0], el[1]), all_rows))
+
 
 create_table()
 try:
@@ -32,14 +35,14 @@ except:
     print("import_filename_to_img_id.txt not found")
     exit()
 
-phash_data_import=get_all_data()
-img_id_phash=[]
+phash_data_import = get_all_data()
+img_id_phash = []
 for phash_data in phash_data_import:
-    filename=phash_data[0]
-    phash=phash_data[1]
+    filename = phash_data[0]
+    phash = phash_data[1]
     if filename in filename_to_img_id_map:
-        img_id=filename_to_img_id_map[filename]
-        img_id_phash.append((img_id,phash))
+        img_id = filename_to_img_id_map[filename]
+        img_id_phash.append((img_id, phash))
 
 conn.executemany('''INSERT INTO phashes(id, phash) VALUES (?,?)''', img_id_phash)
 conn.commit()
