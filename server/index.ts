@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import fastify from 'fastify'
 import formBodyPlugin from 'fastify-formbody'
 import fastifyCookie from 'fastify-cookie'
@@ -23,10 +22,16 @@ for (const dir of dirs) {
   }
 }
 ////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////
 const dev = process.env.NODE_ENV !== 'production'
 const port = parseInt(process.env.NODE_PORT || config.server_port)
 const next_app = next({ dev })
 const handle = next_app.getRequestHandler()
+////////////////////////////////////////////////////////
+
+
 ////////////////////////////////////////////////////////ROUTE HANDLERS
 import google_oauth_redirect from './routes/google_oauth_redirect';
 import github_oauth_redirect from './routes/github_oauth_redirect';
@@ -43,6 +48,8 @@ import reverse_search from './routes/reverse_search'
 import proxy_get_image from './routes/proxy_get_image'
 import import_image from './routes/import_image'
 /////////////////////////////////////////////////////////////////////
+
+
 function main() {
   const server = fastify({ trustProxy: true })
   server.register(formBodyPlugin)
@@ -73,16 +80,15 @@ function main() {
       files: 1,           // Max number of file fields
       headerPairs: 2000   // Max number of header key=>value pairs
     }
-  });
+  })
+
   server.register(fastifyCors, {
     "origin": config.domain,
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
   })
 
-  interface Body {
-    [key: string]: any
-  }
-  server.addHook<{ Body: Body }>('preValidation', async (request) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  server.addHook<{ Body: { "g-recaptcha-response": any } }>('preValidation', async (request) => {
     if (request.body && typeof request.body["g-recaptcha-response"]?.value === "string") {
       request.body["g-recaptcha-response"] = request.body["g-recaptcha-response"].value
     }
@@ -92,6 +98,7 @@ function main() {
     recaptcha_secret_key: config.recaptcha_secret_key,
     reply: true
   })
+
 
   //////////////////////////////////////////////////////////////AUTH AND PROFILE ACTIONS
   server.get('/auth/google', google_oauth_redirect)
@@ -105,18 +112,20 @@ function main() {
   server.get('/activate', activate_account_email)
   ///////////////////////////////////////////////////////////////
 
+
   /////////////////////////////////////////////////////////////////////////////////////ADMIN ONLY
   server.post('/update_image_data', update_image_data)
   server.post('/delete_image', delete_image)
   server.post('/import_image', import_image)
   /////////////////////////////////////////////////////////////////////////////////////
 
+
   server.post('/reverse_search', reverse_search)
   server.post('/proxy_get_image', proxy_get_image)
 
   server.get('/logout', (req, res) => {
     if (req.session) {
-      req.destroySession(function (err: any) {
+      req.destroySession(function (err) {
         if (err) {
           console.log(err)
         }
@@ -125,13 +134,12 @@ function main() {
     }
   })
 
-  server.all('/*', (req: any, reply) => {
+  server.all('/*', (req, reply) => {
     req.raw.session = req.session
     return handle(req.raw, reply.raw).then(() => {
       reply.sent = true
     })
   })
-  // Run the server!
   server.listen(port, "127.0.0.1", function (err, address) {
     if (err) {
       console.error(err)
@@ -140,4 +148,5 @@ function main() {
     console.log(`server listening on ${address}`)
   })
 }
+
 next_app.prepare().then(() => main())

@@ -1,19 +1,10 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import React from "react";
-import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
-import GalleryWrapper from '../components/GalleryWrapper'
-import ErrorPage from 'next/error'
+import { GetServerSideProps } from 'next'
 import PhotoInterface from '../types/photo'
-interface ShowProps {
-  photos: PhotoInterface[],
-  err: boolean
-}
+import GalleryWrapper from '../components/GalleryWrapper'
+import AppBar from '../components/AppBar'
 
-export default function Show(props: ShowProps) {
-  if (props.err) {
-    return <ErrorPage statusCode={404} />
-  }
+export default function Show(props: {photos: PhotoInterface[]}) {
   return (
     <div>
       <AppBar />
@@ -22,9 +13,8 @@ export default function Show(props: ShowProps) {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getServerSideProps(context: any) {
-  if (context.query.ids) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  if (typeof context.query.ids === "string") {
     const ids = context.query.ids.split(',')
     const images = []
     for (const id of ids) {
@@ -50,6 +40,6 @@ export async function getServerSideProps(context: any) {
 
   }
   return {
-    props: { err: true }, // will be passed to the page component as props
+    props: { notFound: true }
   }
 }

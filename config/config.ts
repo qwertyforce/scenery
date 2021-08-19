@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-namespace */
 import path from "path"
 const server_config = {
   domain: "http://localhost",
@@ -23,15 +21,4 @@ const server_config = {
   backup_file_server_url: "http://localhost:8787",
   optimize_images: true,
 }
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      api_domain: string,
-      recaptcha_site_key: string,
-      reverse_search_url: string,
-      domain: string,
-    }
-  }
-}
-
 export default server_config

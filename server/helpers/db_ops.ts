@@ -19,6 +19,7 @@ interface User {
     password?: string,
     email?: string
 }
+
 interface NotActivatedUser {
     createdAt: Date,
     email: string,
@@ -47,6 +48,7 @@ interface Image {
     sha256: string,
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////////////COLLECTIONS
 const IMAGES_COLLECTION = client.db(db_main).collection("images")
 const USERS_COLLECTION = client.db(db_main).collection("users")

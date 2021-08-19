@@ -1,23 +1,21 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '../components/AppBar'
 import db_ops from '../server/helpers/db_ops'
-import Pagination from '@material-ui/lab/Pagination';
+import Pagination from '@material-ui/lab/Pagination'
 import Link from '../components/Link'
 import GalleryWrapper from '../components/GalleryWrapper'
-import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
+import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem"
 import PhotoInterface from '../types/photo'
 import build_ast from "../components/parse"
-import image_ops from "../server/helpers/image_ops";
+import image_ops from "../server/helpers/image_ops"
+import { GetServerSideProps } from 'next'
 
 const useStyles = makeStyles(() => ({
   pagination: {
     display: "flex",
     justifyContent: 'center'
   }
-}));
+}))
 
 interface SearchProps {
   err: boolean,
@@ -28,27 +26,26 @@ interface SearchProps {
   current_page: number,
   max_page: number
 }
+
 export default function Search(props: SearchProps) {
-  const classes = useStyles();
+  const classes = useStyles()
   if (props.err) {
     return (<div>
       <AppBar />
       <p>Total images: 0</p>
     </div>)
   }
+
   return (
     <div>
       <AppBar />
       <p>Total images: {props.total_images}</p>
       <GalleryWrapper photos={props.photos} />
       <div className={classes.pagination}>
-        {/* 
-        // @ts-ignore */}
         <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
-          {/* 
-          // @ts-ignore */ }
           return (<PaginationItem
-            component={Link}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component={Link as any}
             href={`/search?q=${encodeURIComponent(props.search_query)}&semantic=${props.semantic}&page=${item.page}`}
             underline="none"
             {...item}
@@ -61,13 +58,16 @@ export default function Search(props: SearchProps) {
   )
 }
 const ERROR = { props: { err: true } }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getServerSideProps(context: any) {
-  const nosql_injection_regex = new RegExp(/\[|\]|\$|:|\{|\}/gm); //[,],$,:,{,}
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const nosql_injection_regex = new RegExp(/\[|\]|\$|:|\{|\}/gm) //[,],$,:,{,}
 
-  if (typeof context.query.q !== "string" || nosql_injection_regex.test(context.query.q) || !(["1", "0"].includes(context.query.semantic))) {
+  if (typeof context.query.q !== "string" ||
+    nosql_injection_regex.test(context.query.q) ||
+    (typeof context.query.semantic === "string" && !(["1", "0"].includes(context.query.semantic)))
+  ) {
     return ERROR
   }
+
   const photos: PhotoInterface[] = []
   console.log([context.query.q, context.query.semantic])
   if (context.query.semantic === "1") {
@@ -115,8 +115,8 @@ export async function getServerSideProps(context: any) {
     return ERROR
   }
 
-  let page: number;
-  if (context.query.page) {
+  let page: number
+  if (typeof context.query.page === "string") {
     page = parseInt(context.query.page)
   } else {
     page = 1

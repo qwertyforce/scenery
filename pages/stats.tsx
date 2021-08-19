@@ -1,7 +1,6 @@
-import React from 'react';
 import db_ops from '../server/helpers/db_ops'
-import AppBar from '../components/AppBar'
 import { GetStaticProps } from 'next'
+import AppBar from '../components/AppBar'
 
 interface StatsProps {
   number_of_images: number,
@@ -21,14 +20,14 @@ export default function Stats(props: StatsProps) {
       <div>Images deleted: {props.number_of_deleted}</div>
       <div>ID of the last image: {props.last_image_id}</div>
     </div>
-  );
+  )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
   const number_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
   const number_of_unique_tags = await db_ops.image_ops.get_number_of_unique_tags()
   const number_of_unique_authors = await db_ops.image_ops.get_number_of_unique_authors()
-  const last_image_id=await db_ops.image_ops.get_max_image_id()
+  const last_image_id = await db_ops.image_ops.get_max_image_id()
   return {
     props: {
       number_of_images: number_of_images,

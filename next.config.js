@@ -1,6 +1,7 @@
 require('sharp') //https://github.com/lovell/sharp/issues/2655#issuecomment-815684743
 module.exports = {
   poweredByHeader: false,
+  compress: false,
   // typescript: {ignoreBuildErrors: true},
   optimizeFonts: false, //fix flickering font
   async rewrites() {
@@ -15,7 +16,8 @@ module.exports = {
     recaptcha_site_key: "6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb",
     api_domain: "http://localhost/public_api",
     reverse_search_url: "http://localhost",
-    domain: "http://localhost"
+    domain: "http://localhost",
+    ipns: "ipns.scenery.cx"
   },
   distDir: '_next'
 }

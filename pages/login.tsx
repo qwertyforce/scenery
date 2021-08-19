@@ -1,18 +1,18 @@
-import React from "react";
-import axios from 'axios';
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
-import Link from '../components/Link';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Grid from "@material-ui/core/Grid";
-import SvgIcon from "@material-ui/core/SvgIcon";
-import { faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons";
+import axios from 'axios'
+import { makeStyles } from "@material-ui/core/styles"
+import TextField from '@material-ui/core/TextField'
+import Card from '@material-ui/core/Card'
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
+import Button from '@material-ui/core/Button'
+import Box from '@material-ui/core/Box'
+import Link from '../components/Link'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import Grid from "@material-ui/core/Grid"
+import SvgIcon from "@material-ui/core/SvgIcon"
+import { faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons"
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -34,24 +34,24 @@ const useStyles = makeStyles(theme => ({
   Oauth: {
     'margin-left': '0px !important'
   }
-}));
+}))
 
 function LoginForm() {
   const router = useRouter()
-  const classes = useStyles();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
-  const [helperText, setHelperText] = React.useState('');
-  const [error, setError] = React.useState(false);
+  const classes = useStyles()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [helperText, setHelperText] = useState('')
+  const [error, setError] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (email.trim() && password.trim()) {
-      setIsButtonDisabled(false);
+      setIsButtonDisabled(false)
     } else {
-      setIsButtonDisabled(true);
+      setIsButtonDisabled(true)
     }
-  }, [email, password]);
+  }, [email, password])
 
 
   const handleLogin = (token: string) => {
@@ -61,12 +61,12 @@ function LoginForm() {
       data: login_data,
       withCredentials: true
     }).then((resp) => {
-      setError(false);
-      setHelperText('Successful');
-      router.push("/");
+      setError(false)
+      setHelperText('Successful')
+      router.push("/")
       console.log(resp)
     }).catch((err) => {
-      setError(true);
+      setError(true)
       if (err.response) {
         setHelperText(err.response.data.message)
         console.log(err.response)
@@ -74,21 +74,21 @@ function LoginForm() {
         setHelperText("Unknown error")
       }
     })
-  };
+  }
   const _handleLogin = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     grecaptcha.ready(function () {
       grecaptcha.execute(process.env.recaptcha_site_key, { action: 'login' }).then(function (token) {
         handleLogin(token)
-      });
+      })
     })
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-      isButtonDisabled || _handleLogin();
+      isButtonDisabled || _handleLogin()
     }
-  };
+  }
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
@@ -178,7 +178,7 @@ function LoginForm() {
         </CardActions>
       </Card>
     </form>
-  );
+  )
 }
 
-export default LoginForm;
+export default LoginForm

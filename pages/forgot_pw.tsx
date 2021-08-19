@@ -1,11 +1,11 @@
-import React from "react";
-import axios from 'axios';
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
+import axios from 'axios'
+import { makeStyles } from "@material-ui/core/styles"
+import TextField from '@material-ui/core/TextField'
+import Card from '@material-ui/core/Card'
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
+import Button from '@material-ui/core/Button'
+import { useEffect, useState } from 'react'
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -24,26 +24,27 @@ const useStyles = makeStyles(theme => ({
   CardActions: {
     'flex-wrap': 'wrap'
   }
-}));
+}))
 
 function ForgotPassword() {
-  const classes = useStyles();
-  const [email, setEmail] = React.useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
-  const [helperText, setHelperText] = React.useState('');
-  const [error, setError] = React.useState(false);
+  const classes = useStyles()
+  const [email, setEmail] = useState('')
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [helperText, setHelperText] = useState('')
+  const [error, setError] = useState(false)
+  
   function validateEmail(email: string) {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
+    const re = /\S+@\S+\.\S+/
+    return re.test(email)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (email.trim() && validateEmail(email)) {
-      setIsButtonDisabled(false);
+      setIsButtonDisabled(false)
     } else {
-      setIsButtonDisabled(true);
+      setIsButtonDisabled(true)
     }
-  }, [email]);
+  }, [email])
 
 
   const handleFP = (token: string) => {
@@ -53,12 +54,12 @@ function ForgotPassword() {
       data: data,
       withCredentials: true
     }).then((resp) => {
-      setError(false);
-      setHelperText(resp.data.message);
+      setError(false)
+      setHelperText(resp.data.message)
       console.log(resp)
       setIsButtonDisabled(true)
     }).catch((err) => {
-      setError(true);
+      setError(true)
       if (err.response) {
         setHelperText(err.response.data.message)
         console.log(err.response)
@@ -66,21 +67,21 @@ function ForgotPassword() {
         setHelperText("Unknown error")
       }
     })
-  };
+  }
   const _handleFP = () => {
     /*global grecaptcha*/ // defined in public/index.html
     grecaptcha.ready(function () {
-      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'login' }).then(function (token) {
+      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'forgot_pw' }).then(function (token) {
         handleFP(token)
-      });
+      })
     })
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-      isButtonDisabled || _handleFP();
+      isButtonDisabled || _handleFP()
     }
-  };
+  }
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
@@ -113,7 +114,7 @@ function ForgotPassword() {
         </CardActions>
       </Card>
     </form>
-  );
+  )
 }
 
-export default ForgotPassword;
+export default ForgotPassword

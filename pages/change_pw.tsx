@@ -1,13 +1,13 @@
-import React from "react";
-import axios from 'axios';
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
-
+import axios from 'axios'
+import { makeStyles } from "@material-ui/core/styles"
+import TextField from '@material-ui/core/TextField'
+import Card from '@material-ui/core/Card'
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
+import Button from '@material-ui/core/Button'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+
 const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
@@ -25,25 +25,25 @@ const useStyles = makeStyles(theme => ({
   CardActions: {
     'flex-wrap': 'wrap'
   }
-}));
+}))
 
 function ChangePassword() {
   const router = useRouter()
   const token = router.query.token
-  const classes = useStyles();
-  const [password, setPassword] = React.useState('');
-  const [password2, setPassword2] = React.useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
-  const [helperText, setHelperText] = React.useState('');
-  const [error, setError] = React.useState(false);
+  const classes = useStyles()
+  const [password, setPassword] = useState('')
+  const [password2, setPassword2] = useState('')
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [helperText, setHelperText] = useState('')
+  const [error, setError] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (password.trim() && password2.trim()) {
-      setIsButtonDisabled(false);
+      setIsButtonDisabled(false)
     } else {
-      setIsButtonDisabled(true);
+      setIsButtonDisabled(true)
     }
-  }, [password, password2]);
+  }, [password, password2])
 
 
   const handleChangePassword = (captcha_token: string) => {
@@ -53,12 +53,12 @@ function ChangePassword() {
       data: data,
       withCredentials: true
     }).then((resp) => {
-      setError(false);
-      setHelperText(resp.data.message);
-      router.push("/login");
+      setError(false)
+      setHelperText(resp.data.message)
+      router.push("/login")
       console.log(resp)
     }).catch((err) => {
-      setError(true);
+      setError(true)
       if (err.response) {
         setHelperText(err.response.data.message)
         console.log(err.response)
@@ -66,14 +66,14 @@ function ChangePassword() {
         setHelperText("Unknown error")
       }
     })
-  };
+  }
   const _handleChangePassword = () => {
     /*global grecaptcha*/ // defined in public/index.html
     if (password === password2) {
       grecaptcha.ready(function () {
         grecaptcha.execute(process.env.recaptcha_site_key, { action: 'change_password' }).then(function (token) {
           handleChangePassword(token)
-        });
+        })
       })
     } else {
       setError(true)
@@ -84,9 +84,9 @@ function ChangePassword() {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-      isButtonDisabled || _handleChangePassword();
+      isButtonDisabled || _handleChangePassword()
     }
-  };
+  }
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
@@ -131,7 +131,7 @@ function ChangePassword() {
         </CardActions>
       </Card>
     </form>
-  );
+  )
 }
 
-export default ChangePassword;
+export default ChangePassword

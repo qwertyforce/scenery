@@ -1,54 +1,18 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import React from "react";
-import Gallery from "react-photo-gallery";
-import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
-import {GetServerSideProps} from 'next'
-import { useRouter } from 'next/router'
-import Photo from '../../components/Photo'
-import Link from '../../components/Link'
-import ErrorPage from 'next/error'
+import { GetServerSideProps } from 'next'
+import GalleryWrapper from '../../components/GalleryWrapper'
+import Footer from '../../components/Footer'
 import db_ops from '../../server/helpers/db_ops'
 import PhotoInterface from '../../types/photo'
-import image_ops from "../../server/helpers/image_ops";
+import image_ops from "../../server/helpers/image_ops"
 
-const useStyles = makeStyles(() => ({
-  pagination: {
-    display: "flex",
-    justifyContent: 'center'
-  },
-  footer: {
-    display: "flex",
-    justifyContent: "center"
-  }
-}));
-
-interface VisuallySimilarProps {
-  photos: PhotoInterface,
-  err: boolean
-}
-export default function VisuallySimilar(props: VisuallySimilarProps) {
-  const classes = useStyles();
-  const router = useRouter()
-  if (router.isFallback) {
-    return <ErrorPage statusCode={404} />
-  }
-  if (props.err) {
-    return <ErrorPage statusCode={404} />
-  }
+export default function VisuallySimilar(props: { photos: PhotoInterface[] }) {
   return (
     <div>
       <AppBar />
-      {/* 
-  // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
-      <div className={classes.footer}>
-        <Link href='/about'>About&nbsp;</Link>
-        <Link href='/stats'>Stats&nbsp;</Link>
-        <Link href='/tags'>Tags</Link>
-      </div>
+      <GalleryWrapper photos={props.photos} />
+      <Footer />
     </div>
-
   )
 }
 

@@ -1,16 +1,14 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import React from "react";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
-import Pagination from '@material-ui/lab/Pagination';
+import Pagination from '@material-ui/lab/Pagination'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import { useRouter } from 'next/router'
 import Link from '../../components/Link'
 import Footer from '../../components/Footer'
 import GalleryWrapper from '../../components/GalleryWrapper'
 import ErrorPage from 'next/error'
-import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem";
+import PaginationItem from "@material-ui/lab/PaginationItem/PaginationItem"
 import PhotoInterface from '../../types/photo'
 
 
@@ -19,24 +17,24 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     justifyContent: 'center'
   },
-  visible:{
-    visibility:"visible"
+  visible: {
+    visibility: "visible"
   },
-  hidden:{
-    visibility:"hidden"
+  hidden: {
+    visibility: "hidden"
   }
-}));
+}))
 
-interface LastAddedPageProps{
+interface LastAddedPageProps {
   photos: PhotoInterface[],
   current_page: number,
   max_page: number,
-  err:boolean
+  err: boolean
 }
 
 
-export default function LastAddedPage(props: LastAddedPageProps){
-  const classes = useStyles();
+export default function LastAddedPage(props: LastAddedPageProps) {
+  const classes = useStyles()
   const router = useRouter()
   if (router.isFallback) {
     return <ErrorPage statusCode={404} />
@@ -47,13 +45,12 @@ export default function LastAddedPage(props: LastAddedPageProps){
   return (
     <div>
       <AppBar />
-      <GalleryWrapper photos={props.photos}/>
+      <GalleryWrapper photos={props.photos} />
       <div className={classes.flex_center}>
         <Pagination count={props.max_page} defaultPage={props.current_page} renderItem={(item) => {
-          {/* 
-            // @ts-ignore */ }
           return (<PaginationItem
-            component={Link}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            component={Link as any}
             href={`/last_added/${item.page}`}
             prefetch={false}
             underline="none"
@@ -109,6 +106,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return {
     paths: paths,
     fallback: true
-  };
+  }
 }
 

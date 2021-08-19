@@ -1,11 +1,12 @@
-import React from "react";
-import axios from 'axios';
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Button from '@material-ui/core/Button';
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { makeStyles } from "@material-ui/core/styles"
+import TextField from '@material-ui/core/TextField'
+import Card from '@material-ui/core/Card'
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
+import Button from '@material-ui/core/Button'
+
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -25,27 +26,27 @@ const useStyles = makeStyles(theme => ({
   CardActions: {
     'flex-wrap': 'wrap'
   }
-}));
+}))
 
 function SignUpForm() {
-  const classes = useStyles();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [password2, setPassword2] = React.useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
-  const [helperText, setHelperText] = React.useState('');
-  const [error, setError] = React.useState(false);
+  const classes = useStyles()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [password2, setPassword2] = useState('')
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [helperText, setHelperText] = useState('')
+  const [error, setError] = useState(false)
   function validateEmail(email: string) {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
+    const re = /\S+@\S+\.\S+/
+    return re.test(email)
   }
-  React.useEffect(() => {
+  useEffect(() => {
     if (email.trim() && password.trim() && password2.trim()) {
-      setIsButtonDisabled(false);
+      setIsButtonDisabled(false)
     } else {
-      setIsButtonDisabled(true);
+      setIsButtonDisabled(true)
     }
-  }, [email, password, password2]);
+  }, [email, password, password2])
 
   const handleSignUp = (token: string) => {
     const login_data = { email: email, password: password, 'g-recaptcha-response': token }
@@ -54,12 +55,12 @@ function SignUpForm() {
       data: login_data,
       withCredentials: true
     }).then((resp) => {
-      setError(false);
-      setHelperText(resp.data.message);
+      setError(false)
+      setHelperText(resp.data.message)
       console.log(resp)
     }).catch((err) => {
       console.log(err)
-      setError(true);
+      setError(true)
       if (err.response) {
         setHelperText(err.response.data.message)
         console.log(err.response)
@@ -68,7 +69,7 @@ function SignUpForm() {
       }
     })
 
-  };
+  }
   const _handleSignUp = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
     if (validateEmail(email)) {
@@ -77,7 +78,7 @@ function SignUpForm() {
           grecaptcha.ready(function () {
             grecaptcha.execute(process.env.recaptcha_site_key, { action: 'signup' }).then(function (token) {
               handleSignUp(token)
-            });
+            })
           })
         } else {
           setError(true)
@@ -95,9 +96,9 @@ function SignUpForm() {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
-      isButtonDisabled || _handleSignUp();
+      isButtonDisabled || _handleSignUp()
     }
-  };
+  }
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
@@ -152,7 +153,7 @@ function SignUpForm() {
         </CardActions>
       </Card>
     </form>
-  );
+  )
 }
 
-export default SignUpForm;
+export default SignUpForm

@@ -1,38 +1,35 @@
-import React from 'react';
 import db_ops from '../server/helpers/db_ops'
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '../components/AppBar'
 import { GetStaticProps } from 'next'
-import Chip from '@material-ui/core/Chip';
-import { Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles'
+import Chip from '@material-ui/core/Chip'
+import { Typography } from '@material-ui/core'
+import AppBar from '../components/AppBar'
 
 const useStyles = makeStyles(() => ({
   chip: {
     margin: 5
   }
-}));
+}))
 
 interface Tags {
   _id: string,
   count: number
 }
-interface PropsTags {
-  tags: Tags[]
-}
 
-export default function Tags(props: PropsTags) {
-  const classes = useStyles();
-  const Seasons = ["winter", "spring", "summer", "autumn"]
+export default function Tags(props: { tags: Tags[] }) {
+  const classes = useStyles()
+  // const Seasons = ["winter", "spring", "summer", "autumn"]
   const Orientation = ["horizontal", "vertical", "square"]
   const Tags = []
-  const Seasons_tags = []
+  // const Seasons_tags = []
   const Orientation_tags = []
   let Author_tags = []
   for (const { _id, count } of props.tags) {
     const tag = <Chip label={`${_id} (${count})`} key={_id} className={classes.chip} component="a" href={`/search?q=${_id}&semantic=0`} clickable />
-    if (Seasons.includes(_id)) {
-      Seasons_tags.push(tag)
-    } else if (Orientation.includes(_id)) {
+    // if (Seasons.includes(_id)) {
+    //   Seasons_tags.push(tag)
+    // } else 
+    if (Orientation.includes(_id)) {
       Orientation_tags.push(tag)
     } else if (_id.includes("artist:")) {
       Author_tags.push({ tag, count })
@@ -45,10 +42,10 @@ export default function Tags(props: PropsTags) {
   return (
     <div>
       <AppBar />
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         Seasons
       </Typography>
-      {Seasons_tags}
+      {Seasons_tags} */}
       <Typography variant="h6" gutterBottom>
         Orientation
       </Typography>
@@ -62,7 +59,7 @@ export default function Tags(props: PropsTags) {
       </Typography>
       {Author_tags}
     </div>
-  );
+  )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
@@ -71,6 +68,6 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       tags: tags,
     },
-    revalidate: 6 * 50 //5 min
+    revalidate: 5 * 60 //5 min
   }
 }

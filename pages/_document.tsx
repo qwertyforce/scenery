@@ -1,14 +1,14 @@
-import React from 'react';
-import Document, { Html, Head, Main, NextScript } from 'next/document';
-import { ServerStyleSheets } from '@material-ui/core/styles';
-import theme from '../components/theme';
+import Document, { Html, Head, Main, NextScript } from 'next/document'
+import { ServerStyleSheets } from '@material-ui/core/styles'
+import theme from '../components/theme'
 import CleanCSS from "clean-css"
+import { Children } from 'react'
 const cleanCSS = new CleanCSS({
   level: {
     1: {},
     2: {}
   }
-});
+})
 const minified_css_cache = new Map()
 
 export default class MyDocument extends Document {
@@ -28,7 +28,7 @@ export default class MyDocument extends Document {
           <script defer src={`https://www.google.com/recaptcha/api.js?render=${process.env.recaptcha_site_key}`}></script>
         </body>
       </Html>
-    );
+    )
   }
 }
 
@@ -58,24 +58,24 @@ MyDocument.getInitialProps = async (ctx) => {
   // 4. page.render
 
   // Render app and page and get the context of the page with collected side effects.
-  const sheets = new ServerStyleSheets();
-  const originalRenderPage = ctx.renderPage;
+  const sheets = new ServerStyleSheets()
+  const originalRenderPage = ctx.renderPage
 
   ctx.renderPage = () =>
     originalRenderPage({
       enhanceApp: (App) => (props) => sheets.collect(<App {...props} />),
-    });
+    })
 
-  const initialProps = await Document.getInitialProps(ctx);
+  const initialProps = await Document.getInitialProps(ctx)
 
-  let css = sheets.toString();
+  let css = sheets.toString()
   if (css && process.env.NODE_ENV === "production") {
     const min_css = minified_css_cache.get(css)
     if (min_css) {
       css = min_css
     } else {
       const old_css = css
-      css = cleanCSS.minify(css).styles;
+      css = cleanCSS.minify(css).styles
       minified_css_cache.set(old_css, css)
     }
   }
@@ -83,6 +83,6 @@ MyDocument.getInitialProps = async (ctx) => {
   return {
     ...initialProps,
     // Styles fragment is rendered after the app and page rendering finish.
-    styles: [...React.Children.toArray(initialProps.styles), <style id="jss-server-side" key="jss-server-side" dangerouslySetInnerHTML={{ __html: css }}></style>],
-  };
-};
+    styles: [...Children.toArray(initialProps.styles), <style id="jss-server-side" key="jss-server-side" dangerouslySetInnerHTML={{ __html: css }}></style>],
+  }
+}

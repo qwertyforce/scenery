@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import { alpha, makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -9,11 +9,11 @@ import Link from './Link'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import ImageSearchIcon from '@material-ui/icons/ImageSearch'
 import { IconButton } from '@material-ui/core'
-import Switch from '@material-ui/core/Switch';
+import Switch from '@material-ui/core/Switch'
 import { useRouter } from 'next/router'
-import MoreIcon from '@material-ui/icons/MoreVert';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
+import MoreIcon from '@material-ui/icons/MoreVert'
+import MenuItem from '@material-ui/core/MenuItem'
+import Menu from '@material-ui/core/Menu'
 import { DataContext } from "./DataContext"
 
 const useStyles = makeStyles((theme) => ({
@@ -90,20 +90,20 @@ const useStyles = makeStyles((theme) => ({
       display: 'none',
     }
   }
-}));
+}))
 
 
-function Search(props: any) {
+function Search(props: { semanticModeChecked: boolean }) {
   const placeholders = ["tag1&&(tag2||tag3)", "a picture of a winter forest"]
-  const classes = useStyles();
+  const classes = useStyles()
   const router = useRouter()
-  const [tags, setTags] = useState(router.query.q || '');
+  const [tags, setTags] = useState(router.query.q || '')
   const searchPlaceholer = placeholders[Number(router.query.semantic || Number(props.semanticModeChecked))]
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13 || e.which === 13) {
       router.push(`${process.env.domain}/search?q=${encodeURIComponent((tags as string))}&semantic=${Number(props.semanticModeChecked).toString()}`)
     }
-  };
+  }
 
   return (
     <div className={classes.search}>
@@ -125,8 +125,9 @@ function Search(props: any) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function MobileMenu(props: any) {
-  const classes = useStyles();
+  const classes = useStyles()
   return (
     <Menu
       anchorEl={props.mobileMoreAnchorEl}
@@ -163,11 +164,11 @@ function MobileMenu(props: any) {
 }
 
 export default function DenseAppBar() {
-  const dataContext = useContext(DataContext);
-  const classes = useStyles();
+  const dataContext = useContext(DataContext)
+  const classes = useStyles()
   const router = useRouter()
-  const mobileMenuId = 'menu-mobile';
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState<Element | null>(null);
+  const mobileMenuId = 'menu-mobile'
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<Element | null>(null)
 
   const [semanticModeChecked, setSemanticModeChecked] = useState(Boolean(Number(router.query.semantic)) || false)
   const toggleSemanticModeChecked = () => {
@@ -175,14 +176,14 @@ export default function DenseAppBar() {
   }
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setMobileMoreAnchorEl(event.currentTarget);
-  };
+    setMobileMoreAnchorEl(event.currentTarget)
+  }
 
   const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
-  };
+    setMobileMoreAnchorEl(null)
+  }
 
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl)
   return (
     <div className={classes.root}>
       <AppBar position="static" className={classes.app_bar}>
@@ -221,5 +222,5 @@ export default function DenseAppBar() {
       </AppBar>
       <MobileMenu {...{ dataContext, semanticModeChecked, mobileMoreAnchorEl, isMobileMenuOpen, handleMobileMenuClose, toggleSemanticModeChecked }} />
     </div>
-  );
+  )
 }

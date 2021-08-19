@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ChangeEvent, useState } from 'react';
-import Box from '@material-ui/core/Box';
+import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react'
+import Box from '@material-ui/core/Box'
 import AppBar from '../components/AppBar'
-import { DropzoneAreaBase } from 'material-ui-dropzone';
-import Button from '@material-ui/core/Button';
+import { DropzoneAreaBase } from 'material-ui-dropzone'
+import Button from '@material-ui/core/Button'
 import axios from "axios"
 import db_ops from '../server/helpers/db_ops'
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import Chip from '@material-ui/core/Chip';
-import ErrorPage from 'next/error'
+import Backdrop from '@material-ui/core/Backdrop'
+import CircularProgress from '@material-ui/core/CircularProgress'
+import { makeStyles } from '@material-ui/core/styles'
+import TextField from '@material-ui/core/TextField'
+import Paper from '@material-ui/core/Paper'
+import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete'
+import Chip from '@material-ui/core/Chip'
+import { GetServerSideProps } from 'next'
 
 
 const useStyles = makeStyles(() => ({
@@ -41,37 +41,37 @@ const useStyles = makeStyles(() => ({
   tags_field: {
     margin: 10
   }
-}));
+}))
 
 function isValidURL(url: string) {
   const RegExp = /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
   if (RegExp.test(url)) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }
 
-function AutoCompleteTagTextField(props: { AllTags: string[], SelectedTags: string[], setSelectedTags: React.Dispatch<React.SetStateAction<string[]>> }) {
-  const classes = useStyles();
-  const [inputValue, setInputValue] = React.useState("");
-  const [openTagsAutocomplete, setOpenTagsAutocomplete] = React.useState(false);
+function AutoCompleteTagTextField(props: { all_tags: string[], selectedTags: string[], setSelectedTags: Dispatch<SetStateAction<string[]>> }) {
+  const classes = useStyles()
+  const [inputValue, setInputValue] = useState("")
+  const [openTagsAutocomplete, setOpenTagsAutocomplete] = useState(false)
   const filterOptions = createFilterOptions({
     matchFrom: 'start'
-  });
+  })
   const handleOpenTagsAutocomplete = () => {
     if (inputValue.length > 0) {
-      setOpenTagsAutocomplete(true);
+      setOpenTagsAutocomplete(true)
     }
-  };
+  }
   const handleInputChange = (_event: ChangeEvent<unknown>, newInputValue: string) => {
-    setInputValue(newInputValue);
+    setInputValue(newInputValue)
     if (newInputValue.length > 0) {
-      setOpenTagsAutocomplete(true);
+      setOpenTagsAutocomplete(true)
     } else {
-      setOpenTagsAutocomplete(false);
+      setOpenTagsAutocomplete(false)
     }
-  };
+  }
   return (
     <Autocomplete
       className={classes.tags_field}
@@ -84,10 +84,10 @@ function AutoCompleteTagTextField(props: { AllTags: string[], SelectedTags: stri
       onInputChange={handleInputChange}
       filterOptions={filterOptions}
       id="tags-filled"
-      options={props.AllTags}
-      value={props.SelectedTags}
+      options={props.all_tags}
+      value={props.selectedTags}
       onChange={(_event: ChangeEvent<unknown>, newValue) => {
-        props.setSelectedTags(newValue as string[]);
+        props.setSelectedTags(newValue as string[])
       }}
       defaultValue={["2"]}
       filterSelectedOptions
@@ -102,23 +102,20 @@ function AutoCompleteTagTextField(props: { AllTags: string[], SelectedTags: stri
     />)
 }
 
-export default function Import(props: { err: boolean, AllTags: string[] }) {
-  if (props.err) {
-    return <ErrorPage statusCode={404} />
-  }
-  const classes = useStyles();
-  const [URL, setUrl] = useState("");
-  const [Source_URL, setSource_URL] = useState("");
-  const [SelectedTags, setSelectedTags] = useState<string[]>([]);
-  const [fileObjects, setFileObjects] = useState([]);
-  const [open, setOpen] = useState(false);
+export default function Import(props: { err: boolean, all_tags: string[] }) {
+  const classes = useStyles()
+  const [URL, setUrl] = useState("")
+  const [source_URL, setSource_URL] = useState("")
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [fileObjects, setFileObjects] = useState([])
+  const [open, setOpen] = useState(false)
 
   const upload_image = () => {
     setOpen(true)
-    const formData = new FormData();
+    const formData = new FormData()
     formData.append("image", (fileObjects[0] as any).file)
-    formData.append("source_url", Source_URL)
-    formData.append("tags", JSON.stringify(SelectedTags))
+    formData.append("source_URL", source_URL)
+    formData.append("tags", JSON.stringify(selectedTags))
     axios(`${process.env.domain}/import_image`, {
       method: "post",
       data: formData,
@@ -147,15 +144,15 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
       responseType: "blob"
     }).then((resp) => {
       console.log(resp.data)
-      const file = new File([resp.data], "image.png", { type: "image/png" });
-      const reader = new FileReader();
-      reader.readAsDataURL(resp.data);
+      const file = new File([resp.data], "image.png", { type: "image/png" })
+      const reader = new FileReader()
+      reader.readAsDataURL(resp.data)
       reader.onloadend = function () {
-        const base64data = reader.result;
+        const base64data = reader.result
         setFileObjects(([{ data: base64data, file: file }]) as any)
         setUrl("")
         setOpen(false)
-        return;
+        return
       }
     }).catch(async (err) => {
       setOpen(false)
@@ -179,14 +176,14 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
     try {
       const x = await axios.get(URL, { responseType: "blob" })
       setOpen(false)
-      const file = new File([x.data], "image.png", { type: "image/png" });
-      const reader = new FileReader();
-      reader.readAsDataURL(x.data);
+      const file = new File([x.data], "image.png", { type: "image/png" })
+      const reader = new FileReader()
+      reader.readAsDataURL(x.data)
       reader.onloadend = function () {
-        const base64data = reader.result;
+        const base64data = reader.result
         setFileObjects(([{ data: base64data, file: file }]) as any)
         setUrl("")
-        return;
+        return
       }
     } catch (err) {
       console.log(err)
@@ -194,7 +191,7 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
         grecaptcha.ready(function () {
           grecaptcha.execute(process.env.recaptcha_site_key, { action: 'import_image' }).then(function (token) {
             proxy_get_image(token, URL)
-          });
+          })
         })
       }
       // alert("error")
@@ -210,7 +207,7 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
       <Box my={2}>
         <div className={classes.url_div}>
           <TextField
-            value={Source_URL}
+            value={source_URL}
             onChange={(e) => setSource_URL(e.target.value)}
             type="text"
             label="Source url"
@@ -235,25 +232,25 @@ export default function Import(props: { err: boolean, AllTags: string[] }) {
             filesLimit={1}
             onAdd={(newFileObjs: any) => {
               console.log(newFileObjs)
-              console.log('onAdd', newFileObjs);
-              setFileObjects([].concat(newFileObjs[0]));
+              console.log('onAdd', newFileObjs)
+              setFileObjects([].concat(newFileObjs[0]))
             }}
             onDelete={(_removedFileObj, removedFileObjIdx) => {
               const remainingFileObjs = fileObjects.filter((_fileObject, i) => {
-                return i !== removedFileObjIdx;
-              });
+                return i !== removedFileObjIdx
+              })
               setFileObjects(remainingFileObjs)
             }}
             maxFileSize={120000000}
           />
         </Paper>
       </Box>
-      <AutoCompleteTagTextField AllTags={props.AllTags} SelectedTags={SelectedTags} setSelectedTags={setSelectedTags} />
+      <AutoCompleteTagTextField all_tags={props.all_tags} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
       <Button style={{ marginLeft: 10 }} onClick={() => { upload_image() }} variant="contained" color="primary" >Upload</Button>
     </div>
-  );
+  )
 }
-export async function getServerSideProps(context: any) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   if (context.req.session.authed && context.req.session.user_id) {
     const user = await db_ops.activated_user.find_user_by_id(context.req.session.user_id)
     if (user?.isAdmin) {
@@ -265,11 +262,11 @@ export async function getServerSideProps(context: any) {
         }
       }
       return {
-        props: { AllTags: [...tags] },
+        props: { all_tags: [...tags] },
       }
     }
   }
   return {
-    props: { err: true },
+    props: { notFound: true },
   }
 }

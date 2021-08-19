@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-var-requires */
 import db_ops from './db_ops';
 import crypto_ops from './crypto_ops';
 import sharp from 'sharp'
@@ -47,8 +45,7 @@ async function optimize_image(extension: string, image: Buffer) {
 async function generate_thumbnail(image_src: Buffer | string) {  //buffer or path to the image
   const metadata = await sharp(image_src).metadata()
   if (metadata && metadata.height && metadata.width) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const x: any = {}
+    const x = { width: 0, height: 0 }
     if (metadata.width > metadata.height) {
       x.width = Math.min(metadata.width, 750)
     } else if (metadata.width < metadata.height) {
@@ -147,12 +144,12 @@ async function nn_get_image_tags(image_buffer: Buffer) {
 
 async function upload_data_to_backup_server(full_paths: string[], file_buffers: Buffer[]) {
   const form = new FormData();
-  for (const file_buffer of file_buffers) {
-    form.append('data', file_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
-  }
   form.append('full_paths', JSON.stringify(full_paths))
+  for (const file_buffer of file_buffers) {
+    form.append('images', file_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
+  }
   try {
-    const res = await axios.post(`${config.backup_file_server_url}/upload_file`, form.getBuffer(), {
+    const res = await axios.post(`${config.backup_file_server_url}/upload_files`, form.getBuffer(), {
       maxContentLength: Infinity,
       maxBodyLength: Infinity,
       headers: {
@@ -238,7 +235,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       tags.push(tag)
     }
 
-    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: [...new Set(tags)], sha256: sha256_hash,created_at:new Date()})
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: [...new Set(tags)], sha256: sha256_hash, created_at: new Date() })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     const thumbnail_buffer = await generate_thumbnail(image_buffer)
     if (!thumbnail_buffer) {
@@ -300,7 +297,7 @@ async function import_image_without_check(image_buffer: Buffer, tags: string[] =
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
     const author = await parse_author(tags)
-    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash,created_at:new Date()})
+    await db_ops.image_ops.add_image({ id: new_image_id, description: "", source_url: source_url, file_ext: file_ext, width: width, height: height, author: author, size: size, tags: tags, sha256: sha256_hash, created_at: new Date() })
     await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     const thumbnail_buffer = await generate_thumbnail(image_buffer)
     if (!thumbnail_buffer) {
@@ -329,14 +326,14 @@ async function delete_image(id: number) {
       if (err) return console.log(err);
       console.log('thumbnail file deleted successfully');
     });
-    fs_unlink_callback(`${config.root_path}/public/upscaled/${id}.png`, function (err) {
-      if (err) return console.log(err);
-      console.log('upscaled file deleted successfully');
-    });
+    // fs_unlink_callback(`${config.root_path}/public/upscaled/${id}.png`, function (err) {
+    //   if (err) return console.log(err);
+    //   console.log('upscaled file deleted successfully');
+    // });
 
     if (config.use_backup_file_server) {
       try {
-        await axios.post(`${config.backup_file_server_url}/delete_file`, {
+        await axios.post(`${config.backup_file_server_url}/delete_files`, {
           full_paths: [
             `images/${id}.${image.file_ext}`, `thumbnails/${id}.jpg`]
         })

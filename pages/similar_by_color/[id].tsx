@@ -1,46 +1,24 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import React from "react";
-import Gallery from "react-photo-gallery";
-import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
 import image_ops from '../../server/helpers/image_ops'
-import {GetServerSideProps} from 'next'
-import Photo from '../../components/Photo'
-import Link from '../../components/Link'
+import { GetServerSideProps } from 'next'
+import GalleryWrapper from '../../components/GalleryWrapper'
 import PhotoInterface from '../../types/photo'
+import Footer from '../../components/Footer'
 
-const useStyles = makeStyles(() => ({
-  pagination: {
-    display: "flex",
-    justifyContent: 'center'
-  },
-  footer: {
-    display: "flex",
-    justifyContent: "center"
-  }
-}));
-
-interface SimilarByColorProps{
-  photos: PhotoInterface,
+interface SimilarByColorProps {
+  photos: PhotoInterface[],
   current_page: number,
   max_page: number,
-  err:boolean
+  err: boolean
 }
 
-export default function SimilarByColor(props: SimilarByColorProps){
-  const classes = useStyles();
+export default function SimilarByColor(props: SimilarByColorProps) {
   return (
     <div>
       <AppBar />
-      {/* 
-  // @ts-ignore */ }
-      <Gallery targetRowHeight={250} photos={props.photos} renderImage={Photo} />   {/* FIX THIS SHIT */}
-      <div className={classes.footer}>
-        <Link href='/about'>About&nbsp;</Link>
-        <Link href='/stats'>Stats&nbsp;</Link>
-        <Link href='/tags'>Tags</Link>
-      </div>
+      <GalleryWrapper photos={props.photos} />
+      <Footer />
     </div>
 
   )

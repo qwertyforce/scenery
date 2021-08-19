@@ -1,5 +1,6 @@
 {
   "extends": "./tsconfig.json",
+  "ts-node": {  "files": true },
   "compilerOptions": {
     "module": "commonjs",
     "outDir": "dist",
@@ -7,5 +8,5 @@
     "isolatedModules": false,
     "noEmit": false
   },
-  "include": ["server/**/*.ts"]
+  "include": ["additional.d.ts", "server/**/*.ts"]
 }

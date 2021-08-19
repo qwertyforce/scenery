@@ -1,15 +1,15 @@
 import AppBar from '../../components/AppBar'
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import LabelIcon from '@material-ui/icons/Label';
-import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
-import AspectRatioIcon from '@material-ui/icons/AspectRatio';
-import LinkIcon from '@material-ui/icons/Link';
-import { GetServerSideProps} from 'next'
+import { makeStyles } from '@material-ui/core/styles'
+import Paper from '@material-ui/core/Paper'
+import Grid from '@material-ui/core/Grid'
+import LabelIcon from '@material-ui/icons/Label'
+import CalendarTodayIcon from '@material-ui/icons/CalendarToday'
+import AspectRatioIcon from '@material-ui/icons/AspectRatio'
+import LinkIcon from '@material-ui/icons/Link'
+import { GetServerSideProps } from 'next'
 import db_ops from '../../server/helpers/db_ops'
-import CreateIcon from '@material-ui/icons/Create';
-import Chip from '@material-ui/core/Chip';
+import CreateIcon from '@material-ui/icons/Create'
+import Chip from '@material-ui/core/Chip'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,11 +35,11 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
-}));
+}))
 
-interface ImageProps{
+interface ImageProps {
   filename: string,
-  width:number,
+  width: number,
   height: number,
   size: number,
   author: string,
@@ -47,26 +47,25 @@ interface ImageProps{
   source_link: string,
   date: string,
   similar_by_tags_link: string,
-  similar_by_color_link:string,
-  visually_similar_link:string,
-  upscaled:string,
-  err:boolean
+  similar_by_color_link: string,
+  visually_similar_link: string,
+  // upscaled: string,
 }
- export default function Image(props: ImageProps) {
-  const classes = useStyles();
+export default function Image(props: ImageProps) {
+  const classes = useStyles()
 
-  const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}&semantic=0`} clickable />);
+  const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}&semantic=0`} clickable />)
   return (
     <div className={classes.root}>
       <AppBar />
       <div className={classes.grid_container}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Paper className={classes.paper}> 
-            <a href={`/images/${props.filename}`} target="_blank" rel="noreferrer">
-              <img className={classes.responsive} src={`/images/${props.filename}`} /> 
+            <Paper className={classes.paper}>
+              <a href={`/images/${props.filename}`} target="_blank" rel="noreferrer">
+                <img className={classes.responsive} src={`/images/${props.filename}`} />
               </a>
-              </Paper>
+            </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper className={classes.paper}>
@@ -98,12 +97,12 @@ interface ImageProps{
                 <LinkIcon />
               &nbsp;<a href={props.visually_similar_link} target="_blank" rel="noreferrer">Visually similar (Beta)</a>
               </div>
-              {((props.upscaled)?(
+              {/* {((props.upscaled) ? (
                 <div className={classes.icon_container}>
-                <LinkIcon />
+                  <LinkIcon />
               &nbsp;<a href={props.upscaled} target="_blank" rel="noreferrer">Upscaled version</a>
-              </div>
-                ):null)}
+                </div>
+              ) : null)} */}
               <div className={classes.icon_container}>
                 <LabelIcon />
                 <p>&nbsp;Tags:</p>
@@ -114,7 +113,7 @@ interface ImageProps{
         </Grid>
       </div>
     </div>
-  );
+  )
 }
 
 
@@ -124,7 +123,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (img) {
       const date = new Date(img.created_at)
       const date_str = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`
-      const upscaled = (img.tags.includes('upscaled')?(`/upscaled/${img.id}.png`):null)
+      // const upscaled = (img.tags.includes('upscaled') ? (`/upscaled/${img.id}.png`) : null)
       return {
         props: {
           filename: `${img.id}.${img.file_ext}`,
@@ -135,10 +134,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           tags: img.tags,
           source_link: img.source_url,
           date: date_str,
-          similar_by_tags_link:`/similar_by_tags/${img.id}`,
-          similar_by_color_link:`/similar_by_color/${img.id}`,
-          visually_similar_link:`/visually_similar/${img.id}`,
-          upscaled:upscaled
+          similar_by_tags_link: `/similar_by_tags/${img.id}`,
+          similar_by_color_link: `/similar_by_color/${img.id}`,
+          visually_similar_link: `/visually_similar/${img.id}`,
+          // upscaled: upscaled
         }
       }
     }
