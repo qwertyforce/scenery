@@ -45,13 +45,11 @@ async function optimize_image(extension: string, image: Buffer) {
 async function generate_thumbnail(image_src: Buffer | string) {  //buffer or path to the image
   const metadata = await sharp(image_src).metadata()
   if (metadata && metadata.height && metadata.width) {
-    const x = { width: 0, height: 0 }
-    if (metadata.width > metadata.height) {
+    const x: { width?: number, height?: number } = {}
+    if (metadata.width >= metadata.height) {
       x.width = Math.min(metadata.width, 750)
-    } else if (metadata.width < metadata.height) {
+    } else { //metadata.width < metadata.heigh
       x.height = Math.min(metadata.height, 750)
-    } else {
-      x.width = Math.min(metadata.width, 750)
     }
     const data = await sharp(image_src).resize(x).jpeg({ quality: 80, mozjpeg: true }).toBuffer()
     return data
