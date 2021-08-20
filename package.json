@@ -33,6 +33,7 @@
     "bcrypt": "^5.0.1",
     "clean-css": "^5.1.5",
     "clsx": "^1.1.1",
+    "compression-webpack-plugin": "^8.0.1",
     "connect-mongo": "^4.4.1",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
