@@ -69,8 +69,7 @@ def diff(dct, hash_size):
 
 def fast_phash(image, hash_size=16, highfreq_factor=4):
     img_size = hash_size * highfreq_factor
-    image = cv2.resize(image, (img_size, img_size),
-                       interpolation=cv2.INTER_LINEAR)  # cv2.INTER_AREA
+    image = cv2.resize(image, (img_size, img_size), interpolation=cv2.INTER_LINEAR)  # cv2.INTER_AREA
     dct_data = dct(dct(image, axis=0), axis=1)
     return diff(dct_data, hash_size)
 
