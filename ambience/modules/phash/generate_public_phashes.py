@@ -142,8 +142,7 @@ for file_name in file_names:
 
 new_images = [new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
 for batch in new_images:
-    phashes = Parallel(n_jobs=-1)(delayed(calc_phash)(file_name)
-                                  for file_name in batch)
+    phashes = Parallel(n_jobs=-1, verbose=1)(delayed(calc_phash)(file_name) for file_name in batch)
     phashes = [i for i in phashes if i]  # remove None's
     print("pushing data to db")
     conn.executemany('''INSERT INTO phashes(id, phash) VALUES (?,?)''', phashes)
