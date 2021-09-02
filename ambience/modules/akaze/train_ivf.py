@@ -41,7 +41,6 @@ def train():
 
     d=61*8
     centroids = round(sqrt(all_descriptors.shape[0]))
-    # centroids=8
     print(f'centroids: {centroids}')
     quantizer = faiss.IndexBinaryFlat(d)
     index = faiss.IndexBinaryIVF(quantizer, d, centroids)

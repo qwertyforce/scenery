@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from os import listdir
 import math
+from numba import jit
+from numba.core import types
+from numba.typed import Dict
 from joblib import Parallel, delayed
 import sqlite3
 import io
@@ -51,49 +54,83 @@ def add_descriptor(id,akaze_features):
 	cursor.execute(query,(id,akaze_features))
 	conn.commit()
 
-def resize_img_to_array(img):
-    height,width=img.shape
-    threshold=3000*3000
-    if height*width>threshold:
-        k=math.sqrt(height*width/(threshold))
-        img=cv2.resize(img, (round(width/k),round(height/k)), interpolation=cv2.INTER_LINEAR)
+def resize_img_to_threshold(img):
+    height, width = img.shape
+    threshold = 3000*3000
+    if height*width > threshold:
+        k = math.sqrt(height*width/(threshold))
+        img = cv2.resize(img, (round(width/k), round(height/k)), interpolation=cv2.INTER_LINEAR)
     return img
 
+
+@jit(nopython=True, cache=True, fastmath=True)
+def check_distance(keypoint_x, keypoint_y, keypoints, keypoints_neighbors):
+    skip_flag = False
+    for keyp in keypoints:
+        if keyp[0] == 0 and keyp[1] == 0: #_keypoints is zeroed
+            break
+        dist = math.sqrt((keypoint_x-keyp[0])**2 + (keypoint_y-keyp[1])**2)
+        if dist < 40:
+            pseudohash = keyp[0]+keyp[1]
+            if not pseudohash in keypoints_neighbors:
+                keypoints_neighbors[pseudohash] = 1
+            if keypoints_neighbors[pseudohash] >= 3:
+                skip_flag = True
+                continue
+            else:
+                keypoints_neighbors[pseudohash] += 1
+    return skip_flag
+
+
 def calculate_descr(img):
-    AKAZE = cv2.AKAZE_create()  #can't serialize, hence init is here
-    img=resize_img_to_array(img)
-    height= img.shape[0]
-    width= img.shape[1]
-    height_divided_by_2 = img.shape[0]//2
-    width_divided_by_2 = img.shape[1]//2
-    kps = AKAZE.detect(img,None)
-    kps = sorted(kps, key = lambda x:x.response,reverse=True)
-    descriptors_count=[0,0,0,0]
-    keypoints=[]
+    AKAZE = cv2.AKAZE_create(threshold=0) # can't serialize, hence init is here
+    img = resize_img_to_threshold(img)
+    height = img.shape[0]
+    width = img.shape[1]
+    height_divided_by_2 = height//2
+    width_divided_by_2 = width//2
+    kps = AKAZE.detect(img, None)
+    kps = sorted(kps, key=lambda x: x.response, reverse=True)
+    descriptors_count = [0, 0, 0, 0]
+    keypoints = []
+    _keypoints = np.zeros((256, 2))
+    keypoints_neighbors = Dict.empty(key_type=types.float64, value_type=types.int64)
     for keypoint in kps:
-        keypoint_y,keypoint_x=keypoint.pt
+        keypoint_x, keypoint_y = keypoint.pt
+        if len(keypoints) != 0:
+            skip_keypoint = check_distance(keypoint_x, keypoint_y, _keypoints, keypoints_neighbors)
+            if skip_keypoint:
+                continue
         if sum(descriptors_count) == 64*4:
             break
-        if descriptors_count[0]<64 and 0<keypoint_x<height_divided_by_2 and 0<keypoint_y<width_divided_by_2:
+        if descriptors_count[0] < 64 and 0 < keypoint_y < height_divided_by_2 and 0 < keypoint_x < width_divided_by_2:
             keypoints.append(keypoint)
-            descriptors_count[0]+=1
+            _keypoints[len(keypoints)-1][0] = keypoint.pt[0]
+            _keypoints[len(keypoints)-1][1] = keypoint.pt[1]
+            descriptors_count[0] += 1
             continue
 
-        if descriptors_count[1]<64 and 0<keypoint_x<height_divided_by_2 and width_divided_by_2<keypoint_y<width:
+        if descriptors_count[1] < 64 and 0 < keypoint_y < height_divided_by_2 and width_divided_by_2 < keypoint_x < width:
             keypoints.append(keypoint)
-            descriptors_count[1]+=1
+            _keypoints[len(keypoints)-1][0] = keypoint.pt[0]
+            _keypoints[len(keypoints)-1][1] = keypoint.pt[1]
+            descriptors_count[1] += 1
             continue
 
-        if descriptors_count[2]<64 and height_divided_by_2<keypoint_x<height and 0<keypoint_y<width_divided_by_2:
+        if descriptors_count[2] < 64 and height_divided_by_2 < keypoint_y < height and 0 < keypoint_x < width_divided_by_2:
             keypoints.append(keypoint)
-            descriptors_count[2]+=1
+            _keypoints[len(keypoints)-1][0] = keypoint.pt[0]
+            _keypoints[len(keypoints)-1][1] = keypoint.pt[1]
+            descriptors_count[2] += 1
             continue
 
-        if descriptors_count[3]<64 and height_divided_by_2<keypoint_x<height and 0<width_divided_by_2<keypoint_y<width:
+        if descriptors_count[3] < 64 and height_divided_by_2 < keypoint_y < height and 0 < width_divided_by_2 < keypoint_x < width:
             keypoints.append(keypoint)
-            descriptors_count[3]+=1
+            _keypoints[len(keypoints)-1][0] = keypoint.pt[0]
+            _keypoints[len(keypoints)-1][1] = keypoint.pt[1]
+            descriptors_count[3] += 1
             continue
-    _,desc1 = AKAZE.compute(img, keypoints)
+    _, desc1 = AKAZE.compute(img, keypoints)
     return desc1
 
 def sync_db():
