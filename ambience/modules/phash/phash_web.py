@@ -1,7 +1,6 @@
 import uvicorn
 if __name__ == '__main__':
-    uvicorn.run('phash_web:app', host='127.0.0.1',
-                port=33336, log_level="info")
+    uvicorn.run('phash_web:app', host='127.0.0.1', port=33336, log_level="info")
 
 import faiss
 from pydantic import BaseModel
