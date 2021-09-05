@@ -33,6 +33,7 @@ module.exports = {
     }
     return config
   },
+  webpack5: false,
   env: {  //https://nextjs.org/docs/api-reference/next.config.js/environment-variables
     recaptcha_site_key: "6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb",
     api_domain: "http://localhost/public_api",
