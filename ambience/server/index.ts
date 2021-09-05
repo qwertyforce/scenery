@@ -18,7 +18,13 @@ server.register(fastifyMultipart, {
         files: 1,           // Max number of file fields
         headerPairs: 2000   // Max number of header key=>value pairs
     }
-});
+})
+
+function combineURLs(baseURL:string, relativeURL:string) { //https://stackoverflow.com/a/49966753
+    return relativeURL
+      ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+      : baseURL;
+}
 
 import calculate_all_image_features from "./routes/calculate_all_image_features"
 import delete_all_image_features from "./routes/delete_all_image_features"
@@ -32,7 +38,7 @@ server.post("/reverse_search",reverse_search)
 const akaze_routes = ['/akaze_reverse_search', '/calculate_akaze_features', '/delete_akaze_features']
 akaze_routes.forEach((r) => server.post(r, async (_req, res) => {
     try {
-        res.from(config.akaze_microservice_url)
+        res.from(combineURLs(config.akaze_microservice_url,r))
     } catch (err) {
         res.status(500).send('Akaze microservice is down')
     }
@@ -42,7 +48,7 @@ const nn_routes = ['/nn_get_similar_images_by_image_buffer', '/nn_get_similar_im
     '/nn_get_similar_images_by_id', '/calculate_nn_features', '/delete_nn_features', '/nn_get_image_tags_by_image_buffer']
 nn_routes.forEach((r) => server.post(r, async (_req, res) => {
     try {
-        res.from(config.nn_microservice_url)
+        res.from(combineURLs(config.nn_microservice_url,r))
     } catch (err) {
         res.status(500).send('NN microservice is down')
     }
@@ -51,7 +57,7 @@ nn_routes.forEach((r) => server.post(r, async (_req, res) => {
 const hist_routes = ['/hist_get_similar_images_by_image_buffer', '/hist_get_similar_images_by_id', '/calculate_hist_features', '/delete_hist_features']
 hist_routes.forEach((r) => server.post(r, async (_req, res) => {
     try {
-        res.from(config.hist_microservice_url)
+        res.from(combineURLs(config.hist_microservice_url,r))
     } catch (err) {
         res.status(500).send('HIST microservice is down')
     }
@@ -60,7 +66,7 @@ hist_routes.forEach((r) => server.post(r, async (_req, res) => {
 const phash_routes = ['/phash_reverse_search', '/calculate_phash_features', '/delete_phash_features']
 phash_routes.forEach((r) => server.post(r, async (_req, res) => {
     try {
-        res.from(config.phash_microservice_url)
+        res.from(combineURLs(config.phash_microservice_url,r))
     } catch (err) {
         res.status(500).send('Phash microservice is down')
     }
