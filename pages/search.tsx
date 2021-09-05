@@ -30,10 +30,12 @@ interface SearchProps {
 export default function Search(props: SearchProps) {
   const classes = useStyles()
   if (props.err) {
-    return (<div>
-      <AppBar />
-      <p>Total images: 0</p>
-    </div>)
+    return (
+      <div>
+        <AppBar />
+        <p>Total images: 0</p>
+      </div>
+    )
   }
 
   return (

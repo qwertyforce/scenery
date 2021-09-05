@@ -97,10 +97,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const images = await db_ops.image_ops.get_all_images()
+  const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
   const images_on_page = 30
   const paths = []
-  for (let i = 1; i <= Math.ceil(images.length / images_on_page); i++) {
+  for (let i = 1; i <= Math.ceil(total_num_of_images / images_on_page); i++) {
     paths.push({ params: { page: i.toString() } })
   }
   return {
