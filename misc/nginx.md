@@ -7,16 +7,18 @@
 
     location /images/ {
         root /home/scenery/public;
-        expires 30 d;
+        expires 30d;
     }
 
     location /thumbnails/ {
         root /home/scenery/public;
-        expires 30 d;
+        expires 30d;
     }
 
     location /_next/static/ {
         root /home/scenery;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
     }
 
     location / {
