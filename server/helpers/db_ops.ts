@@ -89,7 +89,7 @@ async function get_number_of_images_returned_by_search_query(query: Record<strin
 }
 
 async function batch_find_images(query: Record<string, unknown>, skip: number, limit: number) {
-    const data: Promise<Image[]> = IMAGES_COLLECTION.find(query).sort({ "$natural": -1 }).skip(skip).limit(limit).project({ _id: 0 }).toArray()
+    const data: Promise<Image[]> = IMAGES_COLLECTION.find(query).sort({ "$natural": -1 }).skip(skip).limit(limit).project<Image>({ _id: 0 }).toArray()
     return data
 }
 
@@ -110,7 +110,7 @@ async function update_image_data_by_id(id: number, update: Record<string, unknow
 }
 
 async function get_all_images() {
-    const imgs: Promise<Image[]> = IMAGES_COLLECTION.find({}).project({ _id: 0 }).toArray()
+    const imgs: Promise<Image[]> = IMAGES_COLLECTION.find({}).project<Image>({ _id: 0 }).toArray()
     return imgs
 }
 
@@ -121,16 +121,16 @@ async function get_image_file_extension_by_id(id: number) {
 
 
 async function find_image_by_sha256(hash: string) {
-    const img: Promise<Image | null> = IMAGES_COLLECTION.find({ sha256: hash }).project({ _id: 0 }).next()
+    const img: Promise<Image | null> = IMAGES_COLLECTION.find({ sha256: hash }).project<Image>({ _id: 0 }).next()
     return img
 }
 async function find_image_by_id(id: number) {
-    const img: Promise<Image | null> = IMAGES_COLLECTION.find({ id: id }).project({ _id: 0 }).next()
+    const img: Promise<Image | null> = IMAGES_COLLECTION.find({ id: id }).project<Image>({ _id: 0 }).next()
     return img
 }
 
 async function get_max_image_id() {
-    const result: Image | null = await IMAGES_COLLECTION.find({}).sort({ id: -1 }).limit(1).next()
+    const result: Image | null = await IMAGES_COLLECTION.find({}).sort({ id: -1 }).limit(1).project<Image>({}).next()
     return result?.id || 0
 }
 async function delete_image_by_id(id: number) {
@@ -166,7 +166,8 @@ async function get_number_of_unique_authors() {
 }
 
 async function get_tags_stats() {
-    const x = IMAGES_COLLECTION.aggregate([
+    await IMAGES_COLLECTION.distinct("tags") //WTF??? 
+    const x = IMAGES_COLLECTION.aggregate([ //Report bug to mongodb jira
         { $unwind: "$tags" },
         {
             $group: {
@@ -177,8 +178,9 @@ async function get_tags_stats() {
         {
             $sort: { _id: 1 }
         }
-    ]);
-    return x.toArray()
+    ])
+
+    return  x.toArray()
 }
 
 async function get_image_tags_by_id(image_id: number) {
@@ -219,7 +221,7 @@ async function save_password_recovery_token(token: string, user_id: string): Pro
 }
 
 async function find_user_id_by_password_recovery_token(token: string) {
-    const user: Promise<PasswordRecoveryObject | null> = PASSWORD_RECOVERY_COLLECTION.find({ token: token }).limit(1).project({ _id: 0 }).next()
+    const user: Promise<PasswordRecoveryObject | null> = PASSWORD_RECOVERY_COLLECTION.find({ token: token }).limit(1).project<PasswordRecoveryObject>({ _id: 0 }).next()
     return user
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,17 +237,17 @@ async function check_if_user_exists_by_email(email: string) {
 
 
 async function find_user_by_email(email: string) {
-    const user: Promise<User | null> = USERS_COLLECTION.find({ email: email }).limit(1).project({ _id: 0 }).next()
+    const user: Promise<User | null> = USERS_COLLECTION.find({ email: email }).limit(1).project<User>({ _id: 0 }).next()
     return user
 }
 
 async function find_user_by_oauth_id(oauth_id: string) {
-    const user: Promise<User | null> = USERS_COLLECTION.find({ oauth_id: oauth_id }).limit(1).project({ _id: 0 }).next()
+    const user: Promise<User | null> = USERS_COLLECTION.find({ oauth_id: oauth_id }).limit(1).project<User>({ _id: 0 }).next()
     return user
 }
 
 async function find_user_by_id(id: string) {
-    const user: Promise<User | null> = USERS_COLLECTION.find({ id: id }).limit(1).project({ _id: 0 }).next()
+    const user: Promise<User | null> = USERS_COLLECTION.find({ id: id }).limit(1).project<User>({ _id: 0 }).next()
     return user
 }
 
@@ -289,7 +291,7 @@ async function create_new_user_activated_google(oauth_id: string, email: string)
 
 ////////////////////////////////////////////////////////////////NOT ACTIVATED USER
 async function find_not_activated_user_by_token(token: string) {
-    const user: Promise<NotActivatedUser | null> = NOT_ACTIVATED_USERS_COLLECTION.find({ token: token }).limit(1).project({ _id: 0 }).next()
+    const user: Promise<NotActivatedUser | null> = NOT_ACTIVATED_USERS_COLLECTION.find({ token: token }).limit(1).project<NotActivatedUser>({ _id: 0 }).next()
     return user
 }
 
