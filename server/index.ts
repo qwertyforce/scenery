@@ -1,4 +1,4 @@
-import fastify from 'fastify'
+import fastify, { FastifyInstance } from 'fastify'
 import formBodyPlugin from 'fastify-formbody'
 import fastifyCookie from 'fastify-cookie'
 import config from "./../config/config"
@@ -47,6 +47,8 @@ import delete_image from './routes/delete_image'
 import reverse_search from './routes/reverse_search'
 import proxy_get_image from './routes/proxy_get_image'
 import import_image from './routes/import_image'
+
+import get_image_info from './routes/public_api/get_image_info'
 /////////////////////////////////////////////////////////////////////
 
 
@@ -98,6 +100,16 @@ function main() {
     recaptcha_secret_key: config.recaptcha_secret_key,
     reply: true
   })
+
+  ///////////////////////////////////////////////////////////////PUBLIC_API
+  async function public_api_plugin(app: FastifyInstance) {
+    app.get('/get_image_info/:id', get_image_info)
+  }
+
+  server.register(public_api_plugin, {
+    prefix: '/public_api'
+  })
+  ///////////////////////////////////////////////////////////////
 
 
   //////////////////////////////////////////////////////////////AUTH AND PROFILE ACTIONS

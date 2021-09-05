@@ -25,8 +25,8 @@ export default function Api() {
         </Typography>
           <Paper className={classes.api_route}>
             <h3>Get image info</h3>
-            <h4>{`Get all images - GET ${process.env.api_domain}/image/{IMAGE_ID}`}</h4>
-            <h4>Returns json with information about an images</h4>
+            <h4>{`Get image info - GET ${process.env.api_domain}/get_image_info/{IMAGE_ID}`}</h4>
+            <h4>Returns json with information about an image</h4>
           </Paper>
         </Box>
       </Container>
