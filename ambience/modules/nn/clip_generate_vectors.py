@@ -5,11 +5,13 @@ import numpy as np
 from PIL import Image
 import sqlite3
 import io
+from tqdm import tqdm
+
 conn = sqlite3.connect('NN_features.db')
 IMAGE_PATH="./../../../public/images"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32")
+model, preprocess = clip.load("ViT-B/16")
 
 def create_table():
 	cursor = conn.cursor()
@@ -93,13 +95,12 @@ def calc_nn_features(file_name):
         return None
     image_features=get_features(query_image) 
     image_features_bin=adapt_array(image_features)
-    print(file_name)
     return (file_id,image_features_bin)
 
 new_images=[new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
 for batch in new_images:
     batch_features=[]
-    for file_name in batch:
+    for file_name in tqdm(batch):
         batch_features.append(calc_nn_features(file_name))
     batch_features= [i for i in batch_features if i] #remove None's
     print("pushing data to db")

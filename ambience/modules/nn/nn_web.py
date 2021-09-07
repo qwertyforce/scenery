@@ -12,12 +12,11 @@ import torch
 from pydantic import BaseModel
 from fastapi import FastAPI, File,Form, HTTPException
 import clip
-
 import numpy as np
 from PIL import Image
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32")
+model, preprocess = clip.load("ViT-B/16")
 IMAGE_PATH="./../../../public/images"
 
 import sqlite3
@@ -27,7 +26,7 @@ conn = sqlite3.connect('NN_features.db')
 import hnswlib
 dim=512
 index = hnswlib.Index(space='l2', dim=dim)
-index.init_index(max_elements=5000, ef_construction=200, M=32)
+index.init_index(max_elements=50000, ef_construction=200, M=32)
 
 def init_index():
     image_data=get_all_data()

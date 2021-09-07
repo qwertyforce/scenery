@@ -187,5 +187,6 @@ def tag(img):
         img = Image.open(io.BytesIO(img)).convert("RGB")
     tags1=wideresnet18_tag(img)
     tags2=resnet50_tag(img)
+    img.close()
     all_tags=list(set(tags1 + tags2))
     return all_tags
