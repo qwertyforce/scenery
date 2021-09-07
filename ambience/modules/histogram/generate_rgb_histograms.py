@@ -2,7 +2,6 @@ import cv2
 from os import listdir
 import numpy as np
 from joblib import Parallel, delayed
-
 import sqlite3
 import io
 conn = sqlite3.connect('rgb_histograms.db')
@@ -92,7 +91,6 @@ def calc_hist(file_name):
         query_image = cv2.cvtColor(query_image, cv2.COLOR_BGR2RGB)
     image_features = get_features(query_image)
     image_features_bin = adapt_array(image_features)
-    print(file_name)
     return (file_id, image_features_bin)
 
 
@@ -108,7 +106,7 @@ for file_name in file_names:
 
 new_images = [new_images[i:i + 5000] for i in range(0, len(new_images), 5000)]
 for batch in new_images:
-    hists = Parallel(n_jobs=-1)(delayed(calc_hist)(file_name) for file_name in batch)
+    hists = Parallel(n_jobs=-1,verbose=1)(delayed(calc_hist)(file_name) for file_name in batch)
     hists = [i for i in hists if i]  # remove None's
     print("pushing data to db")
     conn.executemany('''INSERT INTO rgb_hists(id, rgb_histogram) VALUES (?,?)''', hists)
