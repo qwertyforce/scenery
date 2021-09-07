@@ -105,7 +105,7 @@ def dedup():
 
     print("Index is ready")
     deleted = []
-    for x in all_data:
+    for x in tqdm(all_data):
         filename = x[0]
         if filename in deleted:
             continue

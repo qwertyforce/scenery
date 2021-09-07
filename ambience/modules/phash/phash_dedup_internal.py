@@ -5,7 +5,7 @@ import numpy as np
 import imagesize
 import sqlite3
 import io
-
+from tqdm import tqdm
 conn = sqlite3.connect('import_phashes.db')
 index = None
 file_id_to_file_name_map = {}
@@ -91,12 +91,13 @@ def dedup():
         file_id_to_file_name_map[i] = all_data[i][0]
     phashes = np.array([x[1] for x in all_data])
     index.add_with_ids(phashes, image_ids)
-
     print("Index is ready")
+
     deleted = []
-    for x in all_data:
+    for x in tqdm(all_data):
         if x[0] in deleted:
             continue
+        
         res = phash_reverse_search(x[1])
         if len(res) != 0 and (not (len(res) == 1 and file_id_to_file_name_map[res[0]] == x[0])):
             images_id_res = []

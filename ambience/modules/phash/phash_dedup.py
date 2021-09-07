@@ -4,7 +4,7 @@ from os import remove
 import numpy as np
 import sqlite3
 import io
-
+from tqdm import tqdm
 conn_import = sqlite3.connect('import_phashes.db')
 conn = sqlite3.connect('phashes.db')
 
@@ -81,7 +81,7 @@ def dedup():
     if len(import_all_data) == 0:
         print("import_all_data no images. exit()")
         exit()
-    for x in import_all_data:
+    for x in tqdm(import_all_data):
         filename = x[0]
         features = x[1]
         res = phash_reverse_search(features)

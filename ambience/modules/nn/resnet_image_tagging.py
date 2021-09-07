@@ -15,7 +15,7 @@ PUBLIC_IMAGE_PATH="./../../../public/images"
 
 if TAG_ONLY_IMPORT and path.exists("./../../import_filename_to_img_id.txt"):
     IMAGE_PATH=IMPORT_IMAGE_PATH
-    with open("./../../import_filename_to_img_id.txt") as jsonFile:
+    with open("./../../import_filename_to_img_id.txt", encoding="utf-8") as jsonFile:
         import_filename_to_img_id = json.load(jsonFile)
         jsonFile.close()
     for file_name in tqdm(import_filename_to_img_id):
@@ -30,4 +30,4 @@ else:
         ID_TAGS_ARR.append({"id":file_id,"tags":all_tags})
 
 with open('./../../id_tags.txt', 'w') as outfile:
-    json.dump(ID_TAGS_ARR, outfile)
+    json.dump(ID_TAGS_ARR, outfile,ensure_ascii=False)

@@ -27,7 +27,7 @@ def get_all_data():
 
 create_table()
 try:
-    with open('./../../import_filename_to_img_id.txt') as json_file:
+    with open('./../../import_filename_to_img_id.txt', encoding="utf-8") as json_file:
         filename_to_img_id_map = json.load(json_file)
 except:
     print("import_filename_to_img_id.txt not found")
