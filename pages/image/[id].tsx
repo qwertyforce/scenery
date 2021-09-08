@@ -1,4 +1,5 @@
 import AppBar from '../../components/AppBar'
+import { DataContext } from "../../components/DataContext"
 import { makeStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Grid from '@material-ui/core/Grid'
@@ -10,6 +11,7 @@ import { GetServerSideProps } from 'next'
 import db_ops from '../../server/helpers/db_ops'
 import CreateIcon from '@material-ui/icons/Create'
 import Chip from '@material-ui/core/Chip'
+import { useContext, useEffect, useState } from 'react'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,7 +55,17 @@ interface ImageProps {
 }
 export default function Image(props: ImageProps) {
   const classes = useStyles()
-
+  const dataContext = useContext(DataContext)
+  const [photoSrc, setPhotoSrc] = useState("")
+  useEffect(() => {
+    if (props.filename) {
+      if (dataContext?.useIPFS) {
+        setPhotoSrc(`http://127.0.0.1:8080/ipns/${process.env.ipns}/images/${props.filename}`)
+      } else {
+        setPhotoSrc(`/images/${props.filename}`)
+      }
+    }
+  }, [dataContext])
   const Tags = props.tags.map((tag: string) => <Chip label={tag} key={tag} className={classes.chip} component="a" href={`/search?q=${tag}&semantic=0`} clickable />)
   return (
     <div className={classes.root}>
@@ -62,8 +74,8 @@ export default function Image(props: ImageProps) {
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Paper className={classes.paper}>
-              <a href={`/images/${props.filename}`} target="_blank" rel="noreferrer">
-                <img className={classes.responsive} src={`/images/${props.filename}`} />
+              <a href={photoSrc} target="_blank" rel="noreferrer">
+                <img className={classes.responsive} src={photoSrc} />
               </a>
             </Paper>
           </Grid>

@@ -31,7 +31,7 @@ export default function GalleryWrapper(props: { photos: PhotoInterface[] }) {
     <Fragment>
       <div style={{ display: (showLoading) ? "flex" : "none", justifyContent: "center" }}> <CircularProgress /> </div>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <Gallery targetRowHeight={250} photos={photos} renderImage={(Photo as any)} />
+      <Gallery targetRowHeight={225} photos={photos} renderImage={(Photo as any)} />
     </Fragment>
   )
 }
