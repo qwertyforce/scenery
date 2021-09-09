@@ -185,7 +185,7 @@ export default function Import(props: { err: boolean, all_tags: string[] }) {
         setUrl("")
         return
       }
-    } catch (err) {
+    } catch (err:any) {
       console.log(err)
       if (!err.response) {
         grecaptcha.ready(function () {

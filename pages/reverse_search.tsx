@@ -117,7 +117,7 @@ export default function ReverseSearch() {
         setUrl("")
         return
       }
-    } catch (err) {
+    } catch (err:any) {
       console.log(err)
       if (!err.response) {
         grecaptcha.ready(function () {

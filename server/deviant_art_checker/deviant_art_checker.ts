@@ -62,7 +62,7 @@ async function deviant_art_checker() {
                     await db_ops.image_ops.update_image_data_by_id(image.id,{width:res.data.width,height:res.data.height,size:res.data.filesize,tags:tags})
                     console.log(res.data)
                 }
-            } catch (e) {
+            } catch (e:any) {
                 console.log(`img_id ${image.id} ${e.response?.status}`)
                 if(e.response?.status===401){
                     access_token = await get_token()
