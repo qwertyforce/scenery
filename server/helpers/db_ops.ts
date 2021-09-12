@@ -10,7 +10,7 @@ client.connect(function (err) {
     } else {
         console.log("Connected successfully to db server")
     }
-});
+})
 //////////////////////////////////////////////////////////////////////////////////////////////////
 interface User {
     id: string,
@@ -68,7 +68,7 @@ async function generate_id() {
     const id: Promise<string> = new Promise((resolve, reject) => {
         crypto.randomBytes(32, async function (ex, buffer) {
             if (ex) {
-                reject("error");
+                reject("error")
             }
             const id = buffer.toString("base64").replace(/\/|=|[+]/g, '')
             const user = await find_user_by_id(id) //check if id exists
@@ -78,9 +78,9 @@ async function generate_id() {
                 const id_1 = await generate_id()
                 resolve(id_1)
             }
-        });
-    });
-    return id;
+        })
+    })
+    return id
 }
 
 /////////////////////////////////////////////////////////////////////////////////////IMAGES OPS
@@ -198,7 +198,7 @@ async function get_images_with_similar_tags(image_id: number, limit: number) {
         { $group: { _id: { id: "$id", height: "$height", width: "$width" }, count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: limit }
-    ]);
+    ])
     return x.toArray()
 }
 /////////////////////////////////////////////////////////////////////////////////////////
