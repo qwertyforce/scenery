@@ -161,7 +161,6 @@ def calc_features(file_name):
     if descs is None:
         return None
     descs_bin = adapt_array(descs)
-    print(file_name)
     return (file_name, descs_bin)
 
 
