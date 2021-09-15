@@ -3,7 +3,7 @@ if __name__ == '__main__':
     uvicorn.run('rgb_histogram_web:app', host='127.0.0.1', port=33335, log_level="info")
 
 from pydantic import BaseModel
-from fastapi import FastAPI, File, Form, HTTPException,  Response, status
+from fastapi import FastAPI, File, Form, HTTPException, Response, status
 import faiss
 from os import listdir
 import numpy as np
@@ -46,6 +46,7 @@ def get_features(image_buffer):
     query_image = cv2.cvtColor(cv2.imdecode(read_img_file(image_buffer), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
     query_hist_combined = cv2.calcHist([query_image], [0, 1, 2], None, [16, 16, 16], [0, 256, 0, 256, 0, 256])
     query_hist_combined = query_hist_combined.flatten()
+    query_hist_combined = query_hist_combined*10000000
     query_hist_combined = np.divide(query_hist_combined, query_image.shape[0]*query_image.shape[1], dtype=np.float32)
     return query_hist_combined
 
