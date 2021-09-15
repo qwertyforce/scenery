@@ -56,7 +56,11 @@ export default function ReverseSearch() {
     }).then((resp) => {
       setOpen(false)
       console.log(resp.data.ids)
-      router.push("/show?ids=" + resp.data.ids)
+      if(resp.data.ids===""){
+        alert("No images found")
+      }else{
+        router.push("/show?ids=" + resp.data.ids)
+      }
     }).catch((err) => {
       setOpen(false)
       console.log(err)
