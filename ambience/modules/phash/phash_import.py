@@ -29,10 +29,10 @@ def get_all_data():
 
 create_table()
 try:
-    with open('./../../import_filename_to_img_id.txt', encoding="utf-8") as json_file:
+    with open('./../../import_file_name_to_scenery_img_data.txt', encoding="utf-8") as json_file:
         filename_to_img_id_map = json.load(json_file)
 except:
-    print("import_filename_to_img_id.txt not found")
+    print("import_file_name_to_scenery_img_data.txt not found")
     exit()
 
 phash_data_import = get_all_data()
@@ -41,7 +41,7 @@ for phash_data in phash_data_import:
     filename = phash_data[0]
     phash = phash_data[1]
     if filename in filename_to_img_id_map:
-        img_id = filename_to_img_id_map[filename]
+        img_id = filename_to_img_id_map[filename]["image_id"]
         img_id_phash.append((img_id, phash))
 
 conn.executemany('''INSERT INTO phashes(id, phash) VALUES (?,?)''', img_id_phash)

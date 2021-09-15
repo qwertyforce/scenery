@@ -10,17 +10,17 @@ chdir(old_cwd)
 
 ID_TAGS_ARR=[]
 TAG_ONLY_IMPORT=True
-IMPORT_IMAGE_PATH="./../../../import/images"
 PUBLIC_IMAGE_PATH="./../../../public/images"
 
-if TAG_ONLY_IMPORT and path.exists("./../../import_filename_to_img_id.txt"):
-    IMAGE_PATH=IMPORT_IMAGE_PATH
-    with open("./../../import_filename_to_img_id.txt", encoding="utf-8") as jsonFile:
-        import_filename_to_img_id = json.load(jsonFile)
-        jsonFile.close()
-    for file_name in tqdm(import_filename_to_img_id):
-        all_tags=tag(f"{IMAGE_PATH}/{file_name}")
-        ID_TAGS_ARR.append({"id":import_filename_to_img_id[file_name],"tags":all_tags})
+if TAG_ONLY_IMPORT and path.exists("./../../import_file_name_to_scenery_img_data.txt"):
+    IMAGE_PATH=PUBLIC_IMAGE_PATH
+    with open("./../../import_file_name_to_scenery_img_data.txt", encoding="utf-8") as jsonFile:
+        import_file_name_to_scenery_img_data = json.load(jsonFile)
+        scenery_img_data=list(import_file_name_to_scenery_img_data.values())
+
+    for img_data in tqdm(scenery_img_data):
+        all_tags=tag(f"{IMAGE_PATH}/{img_data['new_file_name']}")
+        ID_TAGS_ARR.append({"id":img_data["image_id"],"tags":all_tags})
 else:
     IMAGE_PATH=PUBLIC_IMAGE_PATH
     file_names=listdir(IMAGE_PATH)
