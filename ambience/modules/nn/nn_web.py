@@ -10,7 +10,7 @@ chdir(old_cwd)
 
 import torch
 from pydantic import BaseModel
-from fastapi import FastAPI, File,Form, HTTPException
+from fastapi import FastAPI, File,Form, HTTPException, Response, status
 import clip
 import numpy as np
 from PIL import Image
@@ -139,7 +139,7 @@ async def calculate_NN_features_handler(image: bytes = File(...),image_id: str =
     features=get_features(image)
     add_descriptor(int(image_id),adapt_array(features))
     index.add_items(features,[int(image_id)])
-    return {"status":"200"}
+    return Response(status_code=status.HTTP_200_OK)
 
 class Item_image_id(BaseModel):
     image_id: int
@@ -151,7 +151,7 @@ async def delete_nn_features_handler(item:Item_image_id):
     	index.mark_deleted(item.image_id)
     except RuntimeError:
     	print(f"err: no image with id {item.image_id}")
-    return {"status":"200"}
+    return Response(status_code=status.HTTP_200_OK)
 
 @app.post("/nn_get_similar_images_by_id")
 async def get_similar_images_by_id_handler(item: Item_image_id):
