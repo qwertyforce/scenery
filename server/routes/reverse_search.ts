@@ -1,4 +1,5 @@
 import image_ops from '../helpers/image_ops'
+import sharp from 'sharp'
 import { FastifyRequest, FastifyReply } from "fastify"
 
 const body_schema_reverse_search = {
@@ -17,6 +18,12 @@ async function reverse_search(req: FastifyRequest, res: FastifyReply) {
     } catch (err) {
         return res.send({ ids: '' })
     }
+
+    const metadata = await sharp(image_buffer).metadata()
+    if (metadata.orientation) {  //rotate according to EXIF
+      image_buffer = await sharp(image_buffer).rotate().toBuffer()
+    }
+    
     const ids = await image_ops.reverse_search(image_buffer)
     // console.log(ids)
     res.send({ ids: ids.join(',') })

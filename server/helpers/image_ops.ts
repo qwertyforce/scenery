@@ -15,7 +15,7 @@ const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
 const PATH_TO_THUMBNAILS = path.join(config.root_path, 'public', 'thumbnails')
 const PATH_TO_TEMP = path.join(config.root_path, 'temp')
 const JPEGTRAN_PATH = process.platform === 'win32' ? path.join(config.root_path, "bin", "jpegtran.exe") : "jpegtran"
-const OXIPNG_PATH = process.platform === 'win32' ? path.join(config.root_path, "bin", "oxipng.exe") : path.join(__dirname, "..", "bin", "oxipng")
+const OXIPNG_PATH = process.platform === 'win32' ? path.join(config.root_path, "bin", "oxipng.exe") : path.join(config.root_path, "bin", "oxipng")
 
 async function optimize_image(extension: string, image: Buffer) {
   try {
@@ -146,18 +146,14 @@ async function upload_data_to_backup_server(full_paths: string[], file_buffers: 
   for (const file_buffer of file_buffers) {
     form.append('images', file_buffer, { filename: 'document' }) //hack to make nodejs buffer work with form-data
   }
-  try {
-    const res = await axios.post(`${config.backup_file_server_url}/upload_files`, form.getBuffer(), {
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-      headers: {
-        ...form.getHeaders()
-      }
-    })
-    return res.data
-  } catch (err) {
-    console.log(err)
-  }
+  const res = await axios.post(`${config.backup_file_server_url}/upload_files`, form.getBuffer(), {
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    headers: {
+      ...form.getHeaders()
+    }
+  })
+  return res.data
 }
 
 async function delete_all_image_features(image_id: number) {
@@ -214,16 +210,20 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       default:
         return "Not supported mime type"
     }
+    let metadata = await sharp(image_buffer).metadata()
+    if (metadata.orientation) {  //rotate according to EXIF
+      image_buffer = await sharp(image_buffer).rotate().toBuffer()
+      metadata = await sharp(image_buffer).metadata()
+    }
+    const size = metadata.size || 10
+    const height = metadata.height || 10
+    const width = metadata.width || 10
+    const orientation = get_orientation(height, width)
 
     if (config.optimize_images) {
       image_buffer = await optimize_image(file_ext, image_buffer)
     }
 
-    const metadata = await sharp(image_buffer).metadata()
-    const size = metadata.size || 10
-    const height = metadata.height || 10
-    const width = metadata.width || 10
-    const orientation = get_orientation(height, width)
     tags.push(orientation)
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
@@ -281,16 +281,21 @@ async function import_image_without_check(image_buffer: Buffer, tags: string[] =
         file_ext = "jpg"
         break
     }
-
-    if (config.optimize_images) {
-      image_buffer = await optimize_image(file_ext, image_buffer)
+    let metadata = await sharp(image_buffer).metadata()
+    if (metadata.orientation) {  //rotate according to EXIF
+      image_buffer = await sharp(image_buffer).rotate().toBuffer()
+      metadata = await sharp(image_buffer).metadata()
     }
-
-    const metadata = await sharp(image_buffer).metadata()
     const size = metadata.size || 10
     const height = metadata.height || 10
     const width = metadata.width || 10
     const orientation = get_orientation(height, width)
+
+
+    if (config.optimize_images) {
+      image_buffer = await optimize_image(file_ext, image_buffer)
+    }
+    
     tags.push(orientation)
 
     const new_image_id = (await db_ops.image_ops.get_max_image_id()) + 1
@@ -302,8 +307,8 @@ async function import_image_without_check(image_buffer: Buffer, tags: string[] =
       return "Can't generate thumbnail"
     }
     await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
-    console.log(`OK. New image_id: ${new_image_id}`)
-    return new_image_id
+    // console.log(`OK. New image_id: ${new_image_id}`)
+    return {image_id:new_image_id, new_file_name:`${new_image_id}.${file_ext}`}
   } catch (error) {
     console.error(error);
   }
