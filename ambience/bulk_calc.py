@@ -27,8 +27,8 @@ for file_name in tqdm(file_names):
 
 
 print("=========AUTOROTATE JPEG (EXIF)=========")
-subprocess.call(["exiftran", "-ai", "*.jpg"],shell=True,cwd="../import/images/")
-subprocess.call(["exiftran", "-ai", "*.jpeg"],shell=True,cwd="../import/images/")
+subprocess.call("exiftran -ai *.jpg",shell=True,cwd="../import/images/")
+subprocess.call("exiftran -ai *.jpeg",shell=True,cwd="../import/images/")
 
 
 print("=========DEDUP SHA256=========")
