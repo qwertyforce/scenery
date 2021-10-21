@@ -2,7 +2,7 @@
 a photo gallery with advanced search capabilities <br>
 https://scenery.cx <br>
 Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
-
+How it works: https://habr.com/ru/post/578254/ [RU] <br>
 ## scenery
 Node.js + MongoDB + TypeScript + Next.js + Fastify + Material UI <br>
 
