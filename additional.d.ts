@@ -12,7 +12,7 @@ declare global {
 
 declare module 'http' {
     interface IncomingMessage {
-        session: any
+        session?: any
     }
 }
 

@@ -3,7 +3,11 @@
     "target": "esnext",
     "module": "esnext",
     "jsx": "preserve",
-    "lib": ["dom", "es2020","ESNext.String"],
+    "lib": [
+      "dom",
+      "esnext",
+      "ESNext.String"
+    ],
     "baseUrl": ".",
     "moduleResolution": "node",
     "strict": true,
@@ -19,8 +23,20 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "incremental": true
   },
-  "exclude": ["dist", ".next", "out", "next.config.js","ambience"],
-  "include": ["next-env.d.ts","additional.d.ts", "**/*.ts", "**/*.tsx"]
+  "exclude": [
+    "dist",
+    ".next",
+    "out",
+    "next.config.js",
+    "ambience"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "additional.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }
