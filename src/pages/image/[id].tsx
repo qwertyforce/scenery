@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid'
 import LabelIcon from '@mui/icons-material/Label'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import AspectRatioIcon from '@mui/icons-material/AspectRatio'
+import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import { GetServerSideProps } from 'next'
 import db_ops from '../../server/helpers/db_ops'
@@ -51,6 +52,7 @@ interface ImageProps {
   similar_by_tags_link: string,
   similar_by_color_link: string,
   visually_similar_link: string,
+  caption: string
   // upscaled: string,
 }
 export default function Image(props: ImageProps) {
@@ -75,7 +77,7 @@ export default function Image(props: ImageProps) {
           <Grid item xs={12} md={8}>
             <Paper className={classes.paper}>
               <a href={photoSrc} target="_blank" rel="noreferrer">
-                <img className={classes.responsive} src={photoSrc} />
+                <img className={classes.responsive} src={photoSrc} alt={props.caption} title={props.caption}/>
               </a>
             </Paper>
           </Grid>
@@ -107,7 +109,7 @@ export default function Image(props: ImageProps) {
               </div>
               <div className={classes.icon_container}>
                 <LinkIcon />
-              &nbsp;<a href={props.visually_similar_link} target="_blank" rel="noreferrer">Visually similar (Beta)</a>
+              &nbsp;<a href={props.visually_similar_link} target="_blank" rel="noreferrer">Visually similar</a>
               </div>
               {/* {((props.upscaled) ? (
                 <div className={classes.icon_container}>
@@ -119,6 +121,10 @@ export default function Image(props: ImageProps) {
                 <LabelIcon />
                 <p>&nbsp;Tags:</p>
                 {Tags}
+              </div>
+              <div className={classes.icon_container}>
+                <DescriptionIcon />
+                <p>&nbsp;Description: {props.caption}</p>
               </div>
             </Paper>
           </Grid>
@@ -149,6 +155,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           similar_by_tags_link: `/similar_by_tags/${img.id}`,
           similar_by_color_link: `/similar_by_color/${img.id}`,
           visually_similar_link: `/visually_similar/${img.id}`,
+          caption: img.caption
           // upscaled: upscaled
         }
       }

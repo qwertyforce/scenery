@@ -37,7 +37,7 @@ interface PasswordRecoveryObject {
 interface Image {
     id: number,
     created_at: Date,
-    description: string
+    caption: string
     source_url: string,
     file_ext: string,
     width: number,
@@ -89,7 +89,7 @@ async function get_number_of_images_returned_by_search_query(query: Record<strin
 }
 
 async function batch_find_images(query: Record<string, unknown>, skip: number, limit: number) {
-    const data: Promise<Image[]> = IMAGES_COLLECTION.find(query).sort({ "$natural": -1 }).skip(skip).limit(limit).project<Image>({ _id: 0 }).toArray()
+    const data: Promise<Image[]> = IMAGES_COLLECTION.find(query).sort({ "id": -1 }).skip(skip).limit(limit).project<Image>({ _id: 0 }).toArray()
     return data
 }
 
@@ -105,6 +105,10 @@ async function add_tags_to_image_by_id(id: number, tags: string[]) {
     await IMAGES_COLLECTION.updateOne({ id: id }, { $addToSet: { tags: { $each: tags } } })
 }
 
+async function set_caption_to_image_by_id(id: number, caption: string) {
+    await IMAGES_COLLECTION.updateOne({ id: id },  { $set: { caption: caption } })
+}
+
 async function update_image_data_by_id(id: number, update: Record<string, unknown>) {
     return IMAGES_COLLECTION.updateOne({ id: id }, { $set: update })
 }
@@ -115,8 +119,8 @@ async function get_all_images() {
 }
 
 async function get_image_file_extension_by_id(id: number) {
-    const img = IMAGES_COLLECTION.find({ id: id }).project({ file_ext: 1, _id: 0 }).next()
-    return img
+    const img = await IMAGES_COLLECTION.find({ id: id }).project({ file_ext: 1, _id: 0 }).next()
+    return img?.file_ext
 }
 
 
@@ -145,13 +149,13 @@ async function add_image(img: Image) {
         width: img.width,
         height: img.height,
         author: img.author,
-        description: img.description,
+        caption: img.caption,
         size: img.size,
         sha256: img.sha256,
         tags: img.tags,
         source_url: img.source_url
     }
-    IMAGES_COLLECTION.insertOne(image)
+    return IMAGES_COLLECTION.insertOne(image)
 }
 async function add_image_by_object(image: Record<string, unknown>) {
     return IMAGES_COLLECTION.insertOne(image)
@@ -195,7 +199,7 @@ async function get_images_with_similar_tags(image_id: number, limit: number) {
     const x = IMAGES_COLLECTION.aggregate([
         { $unwind: "$tags" },
         { $match: { tags: { $in: target_tags } } },
-        { $group: { _id: { id: "$id", height: "$height", width: "$width" }, count: { $sum: 1 } } },
+        { $group: { _id: { id: "$id", height: "$height", width: "$width",caption: "$caption" }, count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: limit }
     ])
@@ -334,6 +338,7 @@ export default {
         check_if_image_exists_by_id,
         update_image_data_by_id,
         add_tags_to_image_by_id,
+        set_caption_to_image_by_id
     },
     password_recovery: {
         update_user_password_by_id,

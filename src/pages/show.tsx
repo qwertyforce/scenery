@@ -21,13 +21,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       const img_data = await db_ops.image_ops.find_image_by_id(parseInt(id))
       if (img_data) { images.push(img_data) }
     }
-    const photos: PhotoInterface[] = []
+    const photos = []
     for (const image of images) {
       photos.push({
         src: `/thumbnails/${image.id}.jpg`,
         key: `/image/${image.id}`,
         width: image.width as number,
-        height: image.height as number
+        height: image.height as number,
+        title:image.caption
       })
     }
     if (photos.length !== 0) {

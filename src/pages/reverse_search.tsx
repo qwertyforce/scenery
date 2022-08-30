@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import Box from '@mui/material/Box'
 import AppBar from '../components/AppBar'
 import { DropzoneAreaBase } from 'mui-file-dropzone'
 import Button from '@mui/material/Button'
 import axios from "axios"
-import { useRouter } from 'next/router'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { makeStyles } from 'tss-react/mui';
+import { makeStyles } from 'tss-react/mui'
 import TextField from '@mui/material/TextField'
 
 const useStyles = makeStyles()(() => ({
@@ -24,8 +23,47 @@ const useStyles = makeStyles()(() => ({
   url_text_field: {
     width: "300px",
     marginRight: "10px"
+  },
+  imgg: {
+    objectFit: "contain",
+    width: "150px",
+    height: "150px"
+  },
+  result_wrapper: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    justifyContent: "space-around",
+    borderStyle: "dotted",
+    marginTop: "10px",
+    marginBottom: "10px"
+  },
+  result_wrapper_text: {
+    position: "relative",
+    marginTop: "0.3em",
+    marginLeft: "0.5em",
+    display: "inline",
+    width: "100%"
+  },
+  result_element_figure: {
+    marginLeft: "10px",
+    marginRight: "10px",
+    width: "min-content",
+    display: "flex",
+    flexWrap: "nowrap",
+    flexDirection: "column",
+    alignContent: "center",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  result_element_caption: {
+    fontFamily: "monospace",
+    fontSize: "medium",
+    textAlign: "center",
+    overflowWrap: "anywhere"
   }
-}));
+}))
 function isValidURL(url: string) {
   const RegExp = /^(?:(?:(?:https?):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
   if (RegExp.test(url)) {
@@ -35,18 +73,73 @@ function isValidURL(url: string) {
   }
 }
 
+
+function ResultElement({ result }: any) {
+  const { classes } = useStyles()
+  return (
+    <figure className={classes.result_element_figure}>
+      <a target="_blank" rel="noreferrer" href={`/image/${result["image_id"]}`}>
+        <img src={`/images/${result["image_id"]}.${result["ext"]}`} className={classes.imgg} />
+      </a>
+      <figcaption className={classes.result_element_caption}>
+        <div style={{display:"flex",flexDirection:"row",flexWrap:"wrap",justifyContent:"space-evenly"}}>
+          {JSON.stringify(result)}
+        </div>
+      </figcaption>
+    </figure>
+  )
+}
+
+function DisplayResults({searchResults}: any) {
+  const { classes } = useStyles()
+  let _key = 0
+  console.log(searchResults)
+  const elements = []
+  // searchResults = {"test":searchResults}
+  const keys_of_searchResults = []
+  if(Object.keys(searchResults).includes("unified_res")){
+    keys_of_searchResults.push("unified_res")
+  }
+  for(const key of Object.keys(searchResults)){
+    if(key!=="unified_res"){
+      keys_of_searchResults.push(key)
+    }
+  }
+  for (const key of keys_of_searchResults) {
+    const children = []
+    for (const child of searchResults[key]) {
+        children.push(<ResultElement key={_key++} result={child} />)
+      }
+    console.log(children)
+    elements.push(
+      <div key={_key++} className={classes.result_wrapper}>
+        <div className={classes.result_wrapper_text}>{key}</div>
+        {children}
+      </div>)
+  }
+  console.log(elements)
+  console.log(elements.length)
+  return (<Fragment>
+    {elements}
+  </Fragment>)
+}
+
 export default function ReverseSearch() {
   const { classes } = useStyles()
-  const router = useRouter()
   const [URL, setUrl] = useState("")
   const [fileObjects, setFileObjects] = useState([])
   const [open, setOpen] = useState(false)
-  const send_image = (token: string) => {
-    setOpen(true)
+  const [searchResults, setSearchResults] = useState<any>({})
+
+  
+  const send_image = (token:string) => {
     const formData = new FormData()
     formData.append("image", (fileObjects[0] as any).file)
     formData.append("g-recaptcha-response", token)
-    axios(`${process.env.reverse_search_url}/reverse_search`, {
+    const search_url = "/reverse_search"
+    
+    setOpen(true)
+    axios(search_url, {
       method: "post",
       data: formData,
       headers: {
@@ -55,22 +148,18 @@ export default function ReverseSearch() {
       timeout: 5 * 60000   //5min
     }).then((resp) => {
       setOpen(false)
-      console.log(resp.data.ids)
-      if(resp.data.ids===""){
-        alert("No images found")
-      }else{
-        router.push("/show?ids=" + resp.data.ids)
-      }
+      setSearchResults(resp.data)
+      console.log(resp.data)
     }).catch((err) => {
       setOpen(false)
       console.log(err)
     })
   }
   const proxy_get_image = (token: string, url: string) => {
-    const login_data = { image_url: url, 'g-recaptcha-response': token }
+    const get_image_data = { image_url: url,'g-recaptcha-response': token }
     axios(`/proxy_get_image`, {
       method: "post",
-      data: login_data,
+      data: get_image_data,
       responseType: "blob"
     }).then((resp) => {
       const file = new File([resp.data], "image.png", { type: "image/png" })
@@ -96,11 +185,12 @@ export default function ReverseSearch() {
   }
   const _send_image = () => {
     /*global grecaptcha*/ // defined in pages/_document.tsx
-    grecaptcha.ready(function () {
-      grecaptcha.execute(process.env.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
-        send_image(token)
-      })
-    })
+     grecaptcha.ready(function () {
+       grecaptcha.execute(process.env.recaptcha_site_key, { action: 'reverse_search' }).then(function (token) {
+         send_image(token)
+       })
+     })
+    // send_image()
   }
   const get_image_by_url = async () => {
     if (!isValidURL(URL)) {
@@ -121,7 +211,7 @@ export default function ReverseSearch() {
         setUrl("")
         return
       }
-    } catch (err:any) {
+    } catch (err: any) {
       console.log(err)
       if (!err.response) {
         grecaptcha.ready(function () {
@@ -129,9 +219,10 @@ export default function ReverseSearch() {
             proxy_get_image(token, URL)
           })
         })
+        // proxy_get_image(URL)
       }
 
-      // alert("error")
+      alert("error")
     }
   }
 
@@ -143,7 +234,7 @@ export default function ReverseSearch() {
       </Backdrop>
       <Box my={4}>
         <div className={classes.url_div}>
-          <TextField onChange={(e:any) => setUrl(e.target.value)} value={URL}
+          <TextField onChange={(e) => setUrl(e.target.value)} value={URL}
             className={classes.url_text_field} label="url"
             placeholder="https://somesite.com/image.png" variant="outlined" size="small" />
           <Button onClick={get_image_by_url} size="small" variant="outlined">Fetch</Button>
@@ -167,7 +258,8 @@ export default function ReverseSearch() {
           maxFileSize={49000000}
         />
       </Box>
-      <Button onClick={() => { _send_image() }} variant="contained" color="primary">Reverse Search</Button>
+        <Button onClick={() => { _send_image() }} variant="contained" color="primary">Reverse Search</Button>
+      <DisplayResults searchResults={searchResults}/>
     </div>
   )
 }

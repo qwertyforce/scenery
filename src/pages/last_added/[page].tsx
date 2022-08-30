@@ -77,7 +77,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
           src: `/thumbnails/${image.id}.jpg`,
           key: `/image/${image.id}`,
           width: image.width,
-          height: image.height
+          height: image.height,
+          title:image.caption
         })
       }
     }

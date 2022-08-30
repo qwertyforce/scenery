@@ -1,7 +1,6 @@
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import AppBar from '../../components/AppBar'
 import { makeStyles } from 'tss-react/mui';
 import Paper from '@mui/material/Paper'
 
@@ -17,7 +16,6 @@ export default function Api() {
   const { classes } = useStyles()
   return (
     <div>
-      <AppBar />
       <Container maxWidth="md">
         <Box my={4}>
           <Typography variant="h4" component="h1" gutterBottom>

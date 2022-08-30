@@ -147,7 +147,7 @@ function MobileMenu(props: any) {
         <div className={classes.switch}>
           <span>tags</span>
           <Switch color="secondary" checked={props.semanticModeChecked} onChange={props.toggleSemanticModeChecked} />
-          <span>semantic<sub className={classes.sub}>beta</sub></span>
+          <span>semantic</span>
         </div>
       </MenuItem>
       <MenuItem className={classes.sectionMobile} component={Link} color="inherit" aria-label="reverse_search" href={`${process.env.domain}/reverse_search`}>
@@ -199,7 +199,7 @@ export default function DenseAppBar() {
             <div className={classes.switch}>
               <span>tags</span>
               <Switch color="secondary" checked={semanticModeChecked} onChange={toggleSemanticModeChecked} />
-              <span>semantic<sub className={classes.sub}>beta</sub></span>
+              <span>semantic</span>
             </div>
             <IconButton
               component={Link}

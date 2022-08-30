@@ -1,6 +1,7 @@
 import image_ops from '../helpers/image_ops'
 import sharp from 'sharp'
 import { FastifyRequest, FastifyReply } from "fastify"
+import db_ops from '../helpers/db_ops';
 
 const body_schema_reverse_search = {
     type: 'object',
@@ -28,7 +29,7 @@ async function reverse_search(req: FastifyRequest, res: FastifyReply) {
             throw "not a buffer"
         }
     } catch (err) {
-        return res.send({ ids: '' })
+        return res.send({})
     }
 
     const metadata = await sharp(image_buffer).metadata()
@@ -36,9 +37,14 @@ async function reverse_search(req: FastifyRequest, res: FastifyReply) {
       image_buffer = await sharp(image_buffer).rotate().toBuffer()
     }
     
-    const ids = await image_ops.reverse_search(image_buffer)
-    // console.log(ids)
-    res.send({ ids: ids.join(',') })
+    const data = await image_ops.reverse_search(image_buffer)
+    for (const key in data) {
+        for (let i = 0; i < data[key].length; i++) {
+            const ext = await db_ops.image_ops.get_image_file_extension_by_id(data[key][i]["image_id"])
+            data[key][i].ext = ext
+        }
+    }
+    res.send(data)
 }
 
 export default {

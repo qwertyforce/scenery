@@ -16,7 +16,7 @@ export default function GalleryWrapper(props: { photos: PhotoInterface[] }) {
         console.log(`typeof window !== "undefined" ${typeof window !== "undefined"}`)
         const _photos = []
         for (const photo of props.photos) {//"https://ipfs.io/ipns/ipns.scenery.cx"
-          const new_photo = { src: `http://127.0.0.1:8080/ipns/${process.env.ipns}${photo.src}`, key: photo.key, width: photo.width, height: photo.height }
+          const new_photo = { src: `http://127.0.0.1:8080/ipns/${process.env.ipns}${photo.src}`, key: photo.key, width: photo.width, height: photo.height,title:photo.title }
           _photos.push(new_photo)
         }
         setPhotos(_photos)

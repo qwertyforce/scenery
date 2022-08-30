@@ -25,7 +25,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return {
         id: el["_id"].id,
         width: el["_id"].width,
-        height: el["_id"].height
+        height: el["_id"].height,
+        caption: el["_id"].caption,
       }
     })
     for (const image of similar_images) {
@@ -33,7 +34,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         src: `/thumbnails/${image.id}.jpg`,
         key: `/image/${image.id}`,
         width: image.width,
-        height: image.height
+        height: image.height,
+        title:image.caption
       })
     }
     return {
