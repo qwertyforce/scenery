@@ -2,7 +2,9 @@
 a photo gallery with advanced search capabilities <br>
 https://scenery.cx <br>
 Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
-```python
+
+How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/blob/master/how_it_works_scenery.md)
+```python 
 #OLD: How it works: https://habr.com/ru/post/578254/ [RU]
 ```
 ## Current stack:
