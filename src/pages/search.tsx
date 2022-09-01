@@ -76,7 +76,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (context.query.q.length > 100) {
       return ERROR
     }
-    const found_images = []
+    const found_images: PhotoInterface[] = []
     const image_ids = await image_ops.image_text_features_get_similar_images_by_text(context.query.q)
     if (!image_ids) {
       return {
@@ -98,7 +98,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         src: `/thumbnails/${image.id}.jpg`,
         key: `/image/${image.id}`,
         width: image.width,
-        height: image.height
+        height: image.height,
+        title: image.caption
       })
     }
     return {

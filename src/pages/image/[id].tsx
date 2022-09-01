@@ -124,7 +124,8 @@ export default function Image(props: ImageProps) {
               </div>
               <div className={classes.icon_container}>
                 <DescriptionIcon />
-                <p>&nbsp;Description: {props.caption}</p>
+                <p>&nbsp;Description:</p>
+                {props.caption}
               </div>
             </Paper>
           </Grid>
