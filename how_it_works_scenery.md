@@ -101,7 +101,7 @@ You can find images with similar color palette, visuals/semantics, and similar t
 IPFS (Inter Planetary File system) is a content-addressable p2p file sharing network. We can use it for decentralized storage/distribution of images.
 We will make a toggle switch, when activated, all links to images and thumbnails will be converted to ipfs links.  
 ![image info](./images_md/0b0d9fa0c54e2237651ef083f6c383aa.png)  
-Usually, links to files look like this: /ipfs/[CID], where CID is the Content Identifier (hash). This means that we need to store CID's of images in the db and share these CID's with the client. 
+Usually, links to files look like this: /ipfs/[CID], where CID is the Content Identifier (hash). This means that we need to store CIDs of images in the db and share these CIDs with the client. 
 It is not very convenient. This problem can be elegantly solved using IPNS. IPNS (InterPlanetary Name System) is a decentralized version of dns for ipfs. It allows you to use an address that points to the hash of a file (folder). You can change the hash referenced by the address without changing the address. With this trick, we turned content-based addressing into address-based. 
 IPNS is quite difficult to remember /ipns/k51qzi5uqu5dhlil169t1my3wmb5zzwugvtjcq6duc2bhgcbjsbc77wmdqwbsh, so we use dnslink – ipfs can pull the ipns address from the domain's TXT record.  
 <img src="./images_md/104305721710f441aa98013a7408affb.jpg" width=70% height=70%>
