@@ -44,7 +44,7 @@ Sharp options: ```{ quality: 80, mozjpeg: true }```. Thumbnails are saved as jpe
 
 # Search
 Image search functionality is provided by [ambience](https://github.com/qwertyforce/ambience).
-Here's a [link](https://github.com/qwertyforce/ambience/how_it_works.md) to a document, that briefly explains what it does and how it works.    
+Here's a [link](https://github.com/qwertyforce/ambience/blob/main/how_it_works_search.md) to a document, that briefly explains what it does and how it works.    
 Search bar provides you with two different types of search: tag-based search and semantic search.  
 ![image info](./images_md/search_bar.png)  
 
