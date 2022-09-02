@@ -25,3 +25,11 @@ How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/b
 - Image anti-duplication mechanism <br>
 - Automatic tagging and captioning
 - IPFS support (using [additional microservice](https://github.com/qwertyforce/crud_file_server))
+
+## Installation  
+1. Clone the repository
+2. ```npm install```
+3. ```npm run bootstrap```
+4. install [ambience](https://github.com/qwertyforce/ambience)
+
+## Docs
