@@ -16,21 +16,6 @@ declare module "fastify" {
   }
 }
 
-////////////////////////////////////////////////////////INIT DEFAULT FOLDERS
-import fs from 'fs'
-import path from "path"
-const root_path = path.join(__dirname, "..", "..")
-const dirs = ["public", "temp", "import", path.join("import", "images"), path.join("public", "thumbnails"), path.join("public", "images")]
-
-for (const dir of dirs) {
-  const dir_path = path.join(root_path, dir)
-  if (!fs.existsSync(dir_path)) {
-    fs.mkdirSync(dir_path);
-  }
-}
-////////////////////////////////////////////////////////
-
-
 ////////////////////////////////////////////////////////
 const dev = process.env.NODE_ENV !== 'production'
 const port = parseInt(process.env.NODE_PORT || config.server_port)

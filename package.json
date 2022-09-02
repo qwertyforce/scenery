@@ -2,6 +2,7 @@
   "name": "scenery",
   "version": "2.0.0",
   "scripts": {
+    "bootstrap": "node ./src/bootstrap/bootstrap.js",
     "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider nodemon",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider next build && tsc --project tsconfig.server.json",
     "build_pages": "next build",
