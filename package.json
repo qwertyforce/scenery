@@ -10,6 +10,7 @@
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production node dist/server/index.js",
     "start_dev": "cross-env NODE_ENV=development node dist/server/index.js",
     "import_without_check": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_images_without_check.js",
+    "import_with_check": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_images_with_check.js",
     "import_tags": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_tags.js",
     "import_captions": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_captions.js"
   },
