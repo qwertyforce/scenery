@@ -11,9 +11,7 @@
     "start_dev": "cross-env NODE_ENV=development node dist/server/index.js",
     "import_without_check": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_images_without_check.js",
     "import_tags": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_tags.js",
-    "import_captions": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_captions.js",
-    "pm2_start_ms": "pm2 start ./ambience/microservices.config.js",
-    "pm2_start": "pm2 start ./ambience/microservices.config.js && pm2 start"
+    "import_captions": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_captions.js"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.1",
