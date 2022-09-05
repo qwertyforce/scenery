@@ -1,5 +1,5 @@
 # scenery
-a photo gallery with advanced search capabilities <br>
+a photo gallery with extended search capabilities <br>
 https://scenery.cx <br>
 Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
 
