@@ -265,10 +265,10 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       if (!res) {
         return "Can't calculate_all_image_features"
       }
-      console.log(`Akaze calc=${res[0].status}`)
-      console.log(`NN calc=${res[1].status}`)
-      console.log(`HIST calc=${res[2].status}`)
-      console.log(`VP calc=${res[3].status}`)
+      // console.log(`Akaze calc=${res[0].status}`)
+      // console.log(`NN calc=${res[1].status}`)
+      // console.log(`HIST calc=${res[2].status}`)
+      // console.log(`VP calc=${res[3].status}`)
       if (config.use_backup_file_server) {
         try {
           await upload_data_to_backup_server([`images/${new_image_id}.${file_ext}`, `thumbnails/${new_image_id}.jpg`], [image_buffer, thumbnail_buffer])
@@ -297,10 +297,10 @@ async function delete_image(id: number) {
     if (!res) {
       return "Can't delete all_image_features"
     }
-    console.log(`Akaze del=${res[0].status}`)
-    console.log(`NN del=${res[1].status}`)
-    console.log(`HIST del=${res[2].status}`)
-    console.log(`VP del=${res[3].status}`)
+    // console.log(`Akaze del=${res[0].status}`)
+    // console.log(`NN del=${res[1].status}`)
+    // console.log(`HIST del=${res[2].status}`)
+    // console.log(`VP del=${res[3].status}`)
 
     console.log(`OK. Deleted image_id: ${id}`)
     db_ops.image_ops.delete_image_by_id(id)
