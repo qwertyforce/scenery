@@ -206,7 +206,7 @@ function parse_author(tags: string[]) { //tags like "artist:shishkin"
   return "???"
 }
 
-async function import_image(image_buffer: Buffer, tags: string[] = [], source_url = "", bypass_checks = false, img_id=-1,move_path="") {
+async function import_image(image_buffer: Buffer, tags: string[] = [], source_url = "", bypass_checks = false, img_id=-1) {
   try {
     const sha256_hash = crypto_ops.image_buffer_sha256_hash(image_buffer)
     const found_img = await db_ops.image_ops.find_image_by_sha256(sha256_hash)
@@ -258,11 +258,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     
     const new_image_id = img_id === -1 ? (await db_ops.image_ops.get_max_image_id()) + 1 : img_id
     await db_ops.image_ops.add_image({ id: new_image_id, caption, source_url, file_ext, width, height, author, size, tags: [...new Set(tags)], sha256: sha256_hash, created_at: new Date() })
-    if (move_path){
-      await fs.rename(move_path, `${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`)
-    }else{
-      await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
-    }
+    await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
     await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
     if(!bypass_checks){
       const res = await calculate_all_image_features(new_image_id, image_buffer)

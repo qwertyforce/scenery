@@ -12,8 +12,6 @@ console.log(process.argv.slice(2))
 for (const arg of process.argv.slice(2)){
     if(arg === "--use_filename_id"){
         myArgs["use_filename_id"]=true
-    }else if(arg === "--move"){
-        myArgs["move"]=true
     }else if (arg.startsWith("--path=")){
         PATH_TO_IMAGE_IMPORT=path.resolve(arg.slice(arg.indexOf("--path=")+7))
         console.log(PATH_TO_IMAGE_IMPORT)
@@ -38,7 +36,7 @@ async function import_images() {
             console.log(`id: ${img_id} is already in db`)
             break
         }
-        const img_data = await image_ops.import_image(img_buffer, [], "",  myArgs["bypass_ambience"], img_id, myArgs["move"]?img_path:"")
+        const img_data = await image_ops.import_image(img_buffer, [], "",  myArgs["bypass_ambience"], img_id)
         console.log(img_data)
         // fsPromises.unlink(img_path)
     }
