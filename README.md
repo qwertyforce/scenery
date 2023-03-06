@@ -43,5 +43,4 @@ How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/b
 args:  
 --path=/path/to/image_folder  -> imports images from the path, if not specified, default path - /import/images/  
 --use_filename_id -> parses image id from file (file name must be an unique number > 0), if not specified, uses sequential id  
---move -> move files instead of copying  
 --bypass_ambience -> do not perform calculation of tags,captions, ambience features and duplicate check  
