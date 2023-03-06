@@ -1,7 +1,9 @@
 import db_ops from './../helpers/db_ops'
 import image_ops from './../helpers/image_ops'
 import { FastifyRequest, FastifyReply } from "fastify"
-import { FromSchema } from "json-schema-to-ts";
+import { FromSchema } from "json-schema-to-ts"
+import config from "./../../config/config"
+
 const body_schema_import_image = {
     type: 'object',
     properties: {
@@ -21,6 +23,12 @@ const body_schema_import_image = {
             }
         },
         tags: {
+            type: "object",
+            properties: {
+                value: { type: "string" }
+            }
+        },
+        import_images_bot_password: {
             type: "object",
             properties: {
                 value: { type: "string" }
@@ -67,7 +75,14 @@ async function import_image(req: FastifyRequest<{ Body: FromSchema<typeof body_s
         }
     }
 
-    if (req.session?.user_id) {
+    if (config.import_images_bot_password !== "" && config.import_images_bot_password === req.body?.import_images_bot_password?.value) { //refactor later
+        const results = await image_ops.import_image(image_buffer, tags, source_url)
+        if (results) {
+            res.send({ message: results })
+        } else {
+            res.send({ message: "fail" })
+        }
+    } else if (req.session?.user_id) {
         const user = await db_ops.activated_user.find_user_by_id(req.session.user_id)
         if (user && user.isAdmin) {
             const results = await image_ops.import_image(image_buffer, tags, source_url)

@@ -18,5 +18,6 @@ const server_config = {
   use_backup_file_server: false,
   backup_file_server_url: "http://127.0.0.1:8787",
   optimize_images: true,
+  import_images_bot_password: ""   //if "" then deactivated
 }
 export default server_config

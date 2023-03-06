@@ -206,14 +206,14 @@ function parse_author(tags: string[]) { //tags like "artist:shishkin"
   return "???"
 }
 
-async function import_image(image_buffer: Buffer, tags: string[] = [], source_url = "", local_add = false, img_id=-1) {
+async function import_image(image_buffer: Buffer, tags: string[] = [], source_url = "", bypass_checks = false, img_id=-1,move_path="") {
   try {
     const sha256_hash = crypto_ops.image_buffer_sha256_hash(image_buffer)
     const found_img = await db_ops.image_ops.find_image_by_sha256(sha256_hash)
     if (found_img) {
       return `Image with the same sha256 is already in the db. Image id = ${found_img.id} `
     }
-    if (!local_add && !tags.includes("bypass_dup_check")) {
+    if (!bypass_checks && !tags.includes("bypass_dup_check")) {
       const res = await reverse_search(image_buffer,true)
       if (res["local_features_res"] !== undefined) {
         return `Similar image is already in the db. Image ids = ${JSON.stringify(res["local_features_res"])} `
@@ -251,16 +251,20 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     const author = parse_author(tags)
     let generated_tags = []
     let caption = ""
-    if(!local_add){
+    if(!bypass_checks){
       [generated_tags, caption] = (await Promise.allSettled([get_image_tags(image_buffer), get_image_caption(image_buffer)])).map((promise: any) => promise.value)
       tags.push(...generated_tags)
     }
     
     const new_image_id = img_id === -1 ? (await db_ops.image_ops.get_max_image_id()) + 1 : img_id
     await db_ops.image_ops.add_image({ id: new_image_id, caption, source_url, file_ext, width, height, author, size, tags: [...new Set(tags)], sha256: sha256_hash, created_at: new Date() })
-    await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
+    if (move_path){
+      await fs.rename(move_path, `${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`)
+    }else{
+      await fs.writeFile(`${PATH_TO_IMAGES}/${new_image_id}.${file_ext}`, image_buffer, 'binary')
+    }
     await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
-    if(!local_add){
+    if(!bypass_checks){
       const res = await calculate_all_image_features(new_image_id, image_buffer)
       if (!res) {
         return "Can't calculate_all_image_features"
@@ -279,7 +283,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
         }
       }
     }
-    console.log(`OK. New image_id: ${new_image_id}. local_add = ${local_add}`)
+    console.log(`OK. New image_id: ${new_image_id}. bypass_checks = ${bypass_checks}`)
     return `Success! Image id = ${new_image_id}`
   } catch (error) {
     console.error(error);
