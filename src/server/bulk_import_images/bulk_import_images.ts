@@ -26,7 +26,7 @@ const fsPromises = fs.promises;
 
 function splitToChunks(array:string[], parts:number) {
     const new_array = [...array]
-    let result:any = []
+    const result:any = []
     for (let i = parts; i > 0; i--) {
         const res = new_array.splice(0, Math.ceil(new_array.length / i))
         if (res.length===0){
