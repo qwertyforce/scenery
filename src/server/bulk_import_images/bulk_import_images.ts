@@ -84,7 +84,7 @@ async function import_images() {
 }
 
 if (cluster.isPrimary){
-    setInterval(() => {}, 1000) // prevent master from exiting
+    setInterval(() => undefined, 5000) // prevent master from exiting
 }else{
     import_images()
 }
