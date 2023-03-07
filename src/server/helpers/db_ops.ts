@@ -109,6 +109,10 @@ async function set_caption_to_image_by_id(id: number, caption: string) {
     await IMAGES_COLLECTION.updateOne({ id: id },  { $set: { caption: caption } })
 }
 
+async function set_source_url_to_image_by_id(id: number, source_url: string) {
+    await IMAGES_COLLECTION.updateOne({ id: id },  { $set: { source_url: source_url } })
+}
+
 async function update_image_data_by_id(id: number, update: Record<string, unknown>) {
     return IMAGES_COLLECTION.updateOne({ id: id }, { $set: update })
 }
@@ -338,7 +342,8 @@ export default {
         check_if_image_exists_by_id,
         update_image_data_by_id,
         add_tags_to_image_by_id,
-        set_caption_to_image_by_id
+        set_caption_to_image_by_id,
+        set_source_url_to_image_by_id
     },
     password_recovery: {
         update_user_password_by_id,
