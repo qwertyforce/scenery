@@ -20,7 +20,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const photos = []
   if (typeof context.params?.id === "string") {
     const image_id = context.params.id
-    const x = await db_ops.image_ops.get_images_with_similar_tags(parseInt(image_id), 30)
+    const x = await db_ops.image_ops.get_images_with_similar_tags(parseInt(image_id), 100)
     const similar_images = x.map((el) => {
       return {
         id: el["_id"].id,

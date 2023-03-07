@@ -81,7 +81,7 @@ async function reverse_search(image: Buffer,find_duplicate =  false) {
 
 async function image_text_features_get_similar_images_by_id(image_id: number) {
   try {
-    const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_id`, { image_id: image_id,k:20 })
+    const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_id`, { image_id: image_id,k:100 })
     return res.data.map((el:any)=>el["image_id"])
   } catch (err) {
     console.log(err)
@@ -90,7 +90,7 @@ async function image_text_features_get_similar_images_by_id(image_id: number) {
 
 async function image_text_features_get_similar_images_by_text(query: string) {
   try {
-    const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_text`, { text: query,k:20 })
+    const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_text`, { text: query, k:100 })
     return res.data.map((el:any)=>el["image_id"])
   } catch (err) {
     console.log(err)
@@ -99,7 +99,7 @@ async function image_text_features_get_similar_images_by_text(query: string) {
 
 async function color_get_similar_images_by_id(image_id: number) {
   try {
-    const res = await axios.post(`${config.ambience_microservice_url}/color_get_similar_images_by_id`, { image_id: image_id,k:20 })
+    const res = await axios.post(`${config.ambience_microservice_url}/color_get_similar_images_by_id`, { image_id: image_id, k:100 })
     return res.data.map((el:any)=>el["image_id"])
   } catch (err) {
     console.log(err)
@@ -215,8 +215,8 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     }
     if (!bypass_checks && !tags.includes("bypass_dup_check")) {
       const res = await reverse_search(image_buffer,true)
-      if (res["local_features_res"] !== undefined) {
-        return `Similar image is already in the db. Image ids = ${JSON.stringify(res["local_features_res"])} `
+      if (res["duplicate"] !== undefined) {
+        return `Similar image is already in the db. Image ids = ${JSON.stringify(res["duplicate"])} `
       }
     }
     const mime_type = (await fromBuffer(image_buffer))?.mime

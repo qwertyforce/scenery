@@ -11,7 +11,7 @@ import ErrorPage from 'next/error'
 import PaginationItem from '@mui/material/PaginationItem'
 import PhotoInterface from '../../types/photo'
 
-
+const IMAGES_ON_PAGE = 100
 const useStyles = makeStyles()(() => ({
   flex_center: {
     display: "flex",
@@ -65,13 +65,12 @@ export default function LastAddedPage(props: LastAddedPageProps) {
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const images_on_page = 30
   const photos = []
   if (typeof context.params?.page === "string") {
     const page = parseInt(context.params.page)
     const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
-    if (page >= 1 && page <= Math.ceil(total_num_of_images / images_on_page)) {
-      const images = await db_ops.image_ops.batch_find_images({}, images_on_page * (page - 1), images_on_page)
+    if (page >= 1 && page <= Math.ceil(total_num_of_images / IMAGES_ON_PAGE)) {
+      const images = await db_ops.image_ops.batch_find_images({}, IMAGES_ON_PAGE * (page - 1), IMAGES_ON_PAGE)
       for (const image of images) {
         photos.push({
           src: `/thumbnails/${image.id}.jpg`,
@@ -86,7 +85,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       props: {
         photos: photos,
         current_page: page,
-        max_page: Math.ceil(total_num_of_images / images_on_page)
+        max_page: Math.ceil(total_num_of_images / IMAGES_ON_PAGE)
       },
       revalidate: 1 * 60 //1 min
     }
@@ -100,9 +99,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
-  const images_on_page = 30
   const paths = []
-  for (let i = 1; i <= Math.ceil(total_num_of_images / images_on_page); i++) {
+  for (let i = 1; i <= Math.ceil(total_num_of_images / IMAGES_ON_PAGE); i++) {
     paths.push({ params: { page: i.toString() } })
   }
   return {
