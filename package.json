@@ -9,10 +9,11 @@
     "build_server": "tsc --project tsconfig.server.json",
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production node dist/server/index.js",
     "start_dev": "cross-env NODE_ENV=development node dist/server/index.js",
-    "import_images": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_images.js",
-    "import_tags": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_tags.js",
-    "import_captions": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_captions.js",
-    "import_source_urls": "cross-env NODE_ENV=development node dist/server/bulk_import_images/bulk_import_source_urls.js"
+    "import_images": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_import_images.js",
+    "import_tags": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_import_tags.js",
+    "import_captions": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_import_captions.js",
+    "import_source_urls": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_import_source_urls.js", 
+    "delete_images": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_delete_images.js"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.1",
