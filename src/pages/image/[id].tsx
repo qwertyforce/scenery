@@ -75,11 +75,9 @@ export default function Image(props: ImageProps) {
       <div className={classes.grid_container}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Paper className={classes.paper}>
               <a href={photoSrc} target="_blank" rel="noreferrer">
                 <img className={classes.responsive} src={photoSrc} alt={props.caption} title={props.caption}/>
               </a>
-            </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper className={classes.paper}>
