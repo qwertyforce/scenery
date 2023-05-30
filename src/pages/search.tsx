@@ -71,7 +71,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const photos: PhotoInterface[] = []
-  console.log([context.query.q, context.query.semantic])
+  // console.log([context.query.q, context.query.semantic])
   if (context.query.semantic === "1") {
     if (context.query.q.length > 100) {
       return ERROR

@@ -153,7 +153,7 @@ function split(str: string) {
       arr[i] = ")";
     }
   }
-  console.log(arr);
+  // console.log(arr);
   return arr;
 }
 
