@@ -119,8 +119,9 @@ async function calculate_all_image_features(image_id: number, image_buffer: Buff
       }
     })
     return similar.data
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err.response.data)
+    console.log("can't calculate_all_image_features")
     return []
   }
 }
@@ -137,8 +138,9 @@ async function get_image_tags(image_buffer: Buffer): Promise<string[]> {
       }
     })
     return similar.data
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err.response.data)
+    console.log("can't get image tags")
     return []
   }
 }
@@ -155,8 +157,9 @@ async function get_image_caption(image_buffer: Buffer): Promise<string> {
       }
     })
     return resp.data
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err.response.data)
+    console.log("can't get image caption")
     return ""
   }
 }
