@@ -10,3 +10,7 @@ for (const dir of dirs) {
     fs.mkdirSync(dir_path);
   }
 }
+
+if (process.platform !== 'win32'){
+  fs.chmodSync(`${root_path}/src/bin/oxipng`, "755")
+}
