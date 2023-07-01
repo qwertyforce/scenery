@@ -2,7 +2,7 @@ import { makeStyles } from 'tss-react/mui';
 import AppBar from '../../components/AppBar'
 import db_ops from '../../server/helpers/db_ops'
 import Pagination from '@mui/material/Pagination'
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import Link from '../../components/Link'
 import Footer from '../../components/Footer'
@@ -64,7 +64,7 @@ export default function LastAddedPage(props: LastAddedPageProps) {
   )
 }
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const photos = []
   if (typeof context.params?.page === "string") {
     const page = parseInt(context.params.page)
@@ -87,25 +87,25 @@ export const getStaticProps: GetStaticProps = async (context) => {
         current_page: page,
         max_page: Math.ceil(total_num_of_images / IMAGES_ON_PAGE)
       },
-      revalidate: 1 * 60 //1 min
+      // revalidate: 1 * 60 //1 min
     }
   } else {
     return {
       props: { err: true },
-      revalidate: 1 * 60 //1 min
+      // revalidate: 1 * 60 //1 min
     }
   }
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
-  const paths = []
-  for (let i = 1; i <= Math.ceil(total_num_of_images / IMAGES_ON_PAGE); i++) {
-    paths.push({ params: { page: i.toString() } })
-  }
-  return {
-    paths: paths,
-    fallback: true
-  }
-}
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const total_num_of_images = await db_ops.image_ops.get_number_of_images_returned_by_search_query({})
+//   const paths = []
+//   for (let i = 1; i <= Math.ceil(total_num_of_images / IMAGES_ON_PAGE); i++) {
+//     paths.push({ params: { page: i.toString() } })
+//   }
+//   return {
+//     paths: paths,
+//     fallback: true
+//   }
+// }
 
