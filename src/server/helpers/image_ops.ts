@@ -8,7 +8,7 @@ import { promises as fs } from 'fs'
 import { unlink as fs_unlink_callback } from 'fs'
 import { promisify } from 'util'
 import { exec } from 'child_process'
-const exec_async = promisify(exec);
+const exec_async = promisify(exec)
 import { fromBuffer } from 'file-type'
 import path from "path"
 const PATH_TO_IMAGES = path.join(config.root_path, 'public', 'images')
@@ -73,8 +73,9 @@ async function reverse_search(image: Buffer,find_duplicate =  false) {
       }
     })
     return res.data
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err?.response?.data||err.code)
+    console.log("can't reverse_search")
     return {}
   }
 }
@@ -83,8 +84,9 @@ async function image_text_features_get_similar_images_by_id(image_id: number) {
   try {
     const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_id`, { image_id: image_id,k:100 })
     return res.data.map((el:any)=>el["image_id"])
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err?.response?.data||err.code)
+    console.log("can't image_text_features_get_similar_images_by_id")
   }
 }
 
@@ -92,8 +94,9 @@ async function image_text_features_get_similar_images_by_text(query: string) {
   try {
     const res = await axios.post(`${config.ambience_microservice_url}/image_text_features_get_similar_images_by_text`, { text: query, k:100 })
     return res.data.map((el:any)=>el["image_id"])
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err?.response?.data||err.code)
+    console.log("can't image_text_features_get_similar_images_by_text")
   }
 }
 
@@ -101,8 +104,9 @@ async function color_get_similar_images_by_id(image_id: number) {
   try {
     const res = await axios.post(`${config.ambience_microservice_url}/color_get_similar_images_by_id`, { image_id: image_id, k:100 })
     return res.data.map((el:any)=>el["image_id"])
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err?.response?.data||err.code)
+    console.log("can't color_get_similar_images_by_id")
   }
 }
 
@@ -120,7 +124,7 @@ async function calculate_all_image_features(image_id: number, image_buffer: Buff
     })
     return similar.data
   } catch (err:any) {
-    console.log(err.response.data)
+    console.log(err?.response?.data||err.code)
     console.log("can't calculate_all_image_features")
     return []
   }
@@ -139,7 +143,7 @@ async function get_image_tags(image_buffer: Buffer): Promise<string[]> {
     })
     return similar.data
   } catch (err:any) {
-    console.log(err.response.data)
+    console.log(err?.response?.data||err.code)
     console.log("can't get image tags")
     return []
   }
@@ -158,7 +162,7 @@ async function get_image_caption(image_buffer: Buffer): Promise<string> {
     })
     return resp.data
   } catch (err:any) {
-    console.log(err.response.data)
+    console.log(err?.response?.data||err.code)
     console.log("can't get image caption")
     return ""
   }
@@ -184,8 +188,8 @@ async function delete_all_image_features(image_id: number) {
   try {
     const res = await axios.post(`${config.ambience_microservice_url}/delete_all_image_features`, { image_id: image_id })
     return res.data
-  } catch (err) {
-    console.log(err)
+  } catch (err:any) {
+    console.log(err?.response?.data||err.code)
   }
 }
 
@@ -268,17 +272,14 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
       if (!res) {
         return "Can't calculate_all_image_features"
       }
-      // console.log(`Akaze calc=${res[0].status}`)
-      // console.log(`NN calc=${res[1].status}`)
-      // console.log(`HIST calc=${res[2].status}`)
-      // console.log(`VP calc=${res[3].status}`)
+      console.log(res)
       if (config.use_backup_file_server) {
         try {
           await upload_data_to_backup_server([`images/${new_image_id}.${file_ext}`, `thumbnails/${new_image_id}.jpg`], [image_buffer, thumbnail_buffer])
           console.log("uploaded to backup server")
-        } catch (err) {
+        } catch (err:any) {
           console.log("backup_error")
-          console.log(err)
+          console.log(err?.response?.data||err.code)
         }
       }
     }
@@ -291,7 +292,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
 
 async function delete_image(id: number) {
   try {
-    const file_ext = await db_ops.image_ops.get_image_file_extension_by_id(id) // this information is needed to delete image files
+    const file_ext = await db_ops.image_ops.get_image_file_extension_by_id(id) // this information is needed to delete image files, because filename=image_id+ext
     if (!file_ext) {
       console.log("image_not_found")
       return "not_found"
@@ -300,10 +301,7 @@ async function delete_image(id: number) {
     if (!res) {
       return "Can't delete all_image_features"
     }
-    // console.log(`Akaze del=${res[0].status}`)
-    // console.log(`NN del=${res[1].status}`)
-    // console.log(`HIST del=${res[2].status}`)
-    // console.log(`VP del=${res[3].status}`)
+    console.log(res)
 
     console.log(`OK. Deleted image_id: ${id}`)
     db_ops.image_ops.delete_image_by_id(id)
@@ -327,9 +325,9 @@ async function delete_image(id: number) {
             `images/${id}.${file_ext}`, `thumbnails/${id}.jpg`]
         })
         console.log("deleted from backup server")
-      } catch (err) {
+      } catch (err:any) {
         console.log("backup_error")
-        console.log(err)
+        console.log(err?.response?.data||err.code)
       }
     }
 
