@@ -27,10 +27,7 @@ How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/b
 - sharp
 
 ## Installation  
-1. Clone the repository
-2. ```npm install```
-3. ```npm run bootstrap```
-4. install [ambience](https://github.com/qwertyforce/ambience)
+[./installation_guide.md](./installation_guide.md)
 
 ## Docs
 ```npm run build``` -> build everything  
@@ -42,5 +39,5 @@ How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/b
 ```npm run import_images``` -> import images  
 args:  
 --path=/path/to/image_folder  -> imports images from the path, if not specified, default path - /import/images/  
---use_filename_id -> parses image id from file (file name must be an unique number > 0), if not specified, uses sequential id  
+--use_filename_id -> parses image id from file (file name must be an unique number > 0), if not specified, uses sequential ids  
 --bypass_ambience -> do not perform calculation of tags,captions, ambience features and duplicate check  
