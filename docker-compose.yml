@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  mongodb_server:
+    image: mongo:6.0
+    restart: unless-stopped
+    ports:
+      - 44096:27017
+    volumes:
+      - scenery_db:/data/db
+    networks:
+      - scenery_net
+
+  scenery:
+    depends_on:
+      - mongodb_server
+    build:
+      context: ./
+      network: host
+
+    volumes:
+      - type: bind
+        source: ./public
+        target: /app/public
+
+    restart: unless-stopped
+    ports:
+      - 7395:80
+    networks:
+      - ambience_net
+      - scenery_net
+
+volumes:
+  scenery_db:
+
+networks:
+  scenery_net:
+  ambience_net:
+    external: true

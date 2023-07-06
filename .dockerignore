@@ -1,0 +1,11 @@
+.git
+__pycache__
+.gitignore
+Dockerfile
+README.md
+public
+import
+images_md
+node_modules
+_next
+dist

@@ -20,7 +20,7 @@ module.exports = {
     recaptcha_site_key: "6LcqV9QUAAAAAEybBVr0FWnUnFQmOVxGoQ_Muhtb",
     api_domain: "http://localhost/public_api",
     domain: "http://localhost",
-    ipns: "ipns.scenery.cx"
+    ipns: "ipns.scenery.cx" //example, put your own domain here
   },
   distDir: '_next'
 }

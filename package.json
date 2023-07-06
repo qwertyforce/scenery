@@ -7,6 +7,7 @@
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider next build && tsc --project tsconfig.server.json",
     "build_pages": "next build",
     "build_server": "tsc --project tsconfig.server.json",
+    "build_and_start": "cross-env NODE_OPTIONS=--openssl-legacy-provider next build && tsc --project tsconfig.server.json && cross-env NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production node dist/server/index.js",
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production node dist/server/index.js",
     "start_dev": "cross-env NODE_ENV=development node dist/server/index.js",
     "import_images": "cross-env NODE_ENV=development node dist/server/bulk_ops/bulk_import_images.js",
