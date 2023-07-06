@@ -10,12 +10,13 @@ How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/b
 ## Features <br>
 
 - Search by tags (supports logical expressions, https://scenery.cx/search_syntax)
-- Semantic text search  
+- Semantic text search (find images by text description)    
 - You can find images with similar tags, color pallete or visuals/semantics <br>
-- Reverse image search <br>
+- Reverse image search (find images by image)  
 - Image anti-duplication mechanism <br>
-- Automatic tagging and captioning
+- Automatic image tagging and captioning
 - IPFS support (using [additional microservice](https://github.com/qwertyforce/crud_file_server))
+- Automatic image mining ([anti_sus](https://github.com/qwertyforce/anti_sus))
 
 ## Current stack:
 - Node.js + TypeScript
