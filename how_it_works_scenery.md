@@ -88,7 +88,7 @@ build_ast("forest&&height>=1920&&width>=1080")
 ```
 Semantic search uses ambience (image_text_features_web).  
 
-Reverse Search uses color_web, image_text_features_web and local_features_web:  
+Reverse Search uses color_web, image_text_features_web and phash_web:  
 <img src="./images_md/scenery.cx_reverse_search.png" width=70% height=70%>
 
 You can find images with similar color palette, visuals/semantics, and similar tags.  
@@ -116,10 +116,10 @@ Snap back to the reality: this will probably never work as well as it sounds bec
 # What happens when you import an image?
 Lots of stuff  
 1. check if the image is in the db by sha256
-2. use ambience(local_features_web) to find duplicates
+2. use ambience(phash_web) to find duplicates
 3. if everything is good, optimize the image, generate a thumbnail
 4. generate tags (ambience, places365_tagger_web) and caption (ambience, image_caption_web)
-5. generating features of ambience(color_web, local_features_web and image_text_features_web)
+5. generating features of ambience(color_web, phash_web and image_text_features_web)
 
 # Image mining
 scenery.cx consist of images from [/r/EarthPorn](https://www.reddit.com/r/EarthPorn/)  and [/r/LandscapePhotography](https://www.reddit.com/r/LandscapePhotography/). I didn't save links to original posts while parsing, that's why currently all source links link to nowhere.     <sup><sub>it's just a demo who cares.</sub></sup>
