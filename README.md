@@ -4,9 +4,7 @@ https://scenery.cx <br>
 Consists of [scenery](https://github.com/qwertyforce/scenery/) (photo gallery engine) and [ambience](https://github.com/qwertyforce/ambience/) (Reverse image search/similarity search engine) <br>
 
 How it works: [how_it_works_scenery.md](https://github.com/qwertyforce/scenery/blob/master/how_it_works_scenery.md)
-```python 
-#OLD: How it works: https://habr.com/ru/post/578254/ [RU]
-```
+
 ## Features <br>
 
 - Search by tags (supports logical expressions, https://scenery.cx/search_syntax)
