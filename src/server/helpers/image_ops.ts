@@ -269,7 +269,7 @@ async function import_image(image_buffer: Buffer, tags: string[] = [], source_ur
     await fs.writeFile(`${PATH_TO_THUMBNAILS}/${new_image_id}.jpg`, thumbnail_buffer, 'binary')
     if(!bypass_checks){
       const res = await calculate_all_image_features(new_image_id, image_buffer)
-      if (!res) {
+      if (res.length===0) {
         return "Can't calculate_all_image_features"
       }
       console.log(res)
