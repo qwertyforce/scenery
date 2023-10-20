@@ -150,7 +150,7 @@ function main() {
     reply.hijack()
   })
 
-  server.listen({port:port, host:config.host}, function (err, address) {
+  server.listen({port:port, host:config.host_ip}, function (err, address) {
     if (err) {
       console.error(err)
       process.exit(1)
